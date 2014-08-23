@@ -1,2 +1,0 @@
-global-include *.tac *.cfg *.nginx *.in
-graft scripts
