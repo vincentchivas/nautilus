@@ -1,0 +1,25 @@
+<!-- 
+ author:kunli
+ date:2011-03-30
+ email:kunli@bainainfo.com-->
+<uwsgi>
+    <socket>%(#dolphinop_service.ip)s:%(#dolphinop_service.http_port)s</socket>
+    <env>DJANGO_SETTINGS_MODULE=dolphinop.settings</env>
+    <module>django.core.handlers.wsgi:WSGIHandler()</module>
+    <processes>8</processes>
+    <master/>
+    <master-as-root />
+    <enable-threads />
+    <!-- request timeout -->
+    <harakiri>10</harakiri>
+    <spooler>/var/app/data/dolphinop-service/spool</spooler>
+    <signal-bufsize>524288</signal-bufsize>
+    <buffer-size>32768</buffer-size>
+    <post-buffering>32768</post-buffering>
+    <daemonize>%(log_dir_base)s/dolphinop-service/uwsgi.log</daemonize>
+    <listen>20000</listen>
+    <import>dolphinop.spider.cronjobs</import>
+    <socket-timeout>4</socket-timeout>
+    <disable-logging />
+    <stats>127.0.0.1:18085</stats>
+</uwsgi>

@@ -1,0 +1,744 @@
+{% extends "base_generic.html" %}
+{% load compress %}
+{% load i18n %}
+
+{% block title %}{% trans 'Hot Apps' %}{% endblock %}
+
+{% block body %}
+	<div id='border'>
+		<div id='header'>
+			<ul id='tabs'>
+				<li class='first'><a>&nbsp;</a></li>
+				{% ifequal language 'zh_CN' %}
+				<li id='trending_tab' class='active'>
+					<a href='#trending'>{% trans 'Limit free' %}</a>
+				</li>
+				<li id='featured_tab'>
+				{% else %}
+				<li id='trending_tab' style='display:none;'>
+					<a href='#trending'>{% trans 'Limit free' %}</a>
+				</li>
+				<li id='featured_tab' class='active'>
+				{% endifequal %}
+					<a href='#featured'>{% trans 'Featured' %}</a>
+				</li>
+			
+				<li id='games_tab'>
+					<a href='#games'>{% trans 'Games' %}</a>
+				</li>
+				<li id='applications_tab'>
+					<a href='#applications'>{% trans 'Applications' %}</a>
+				</li>
+				<li class='last'><a>&nbsp;</a></li>
+			</ul>
+			<div id='search'>
+				{% if search_template %}
+					{% include search_template %}
+				{% endif %}
+			</div>
+			<div class='clear'></div>
+		</div>
+		<div id='container'>
+			<div id='scrollarea' style='-webkit-transform:translate3d(0, 0, 0);'>
+				<div id='promotions' {% ifequal language 'zh_CN' %} style='display:none;'{% endifequal %}>
+					{% include 'hotapps/scrollview_ipad.html' %}
+				</div>
+				<div id='ads'></div>
+				<div id='contents'>
+					<div id='trending_wrap' 
+					{% ifnotequal language 'zh_CN' %} style='display:none;'{% endifnotequal %}>
+						<div id='trending_content'><iframe  src="http://dolphin.ipad.shiwan.com/" class="iframewrap" id="trending_iframe" style="overflow-y:scroll;-webkit-overflow-scrolling: touch;"></iframe></div>
+					</div>
+					<div id='featured_wrap'
+					{% ifequal language 'zh_CN' %} style='display:none;'{% endifequal %} >
+						<div id='featured_content'>
+							{% include 'hotapps/applist_ipad.html' %}
+						</div>
+					</div>
+					<div id='games_wrap' style='display:none;'>
+						<div id='games_content' class='app_icons'></div>
+					</div>
+					<div id='applications_wrap' style='display:none;'>
+						<div id='applications_content' class='app_icons'></div>
+					</div>
+					<div id='page_load' class='loading' style='visibility:hidden;'>
+					</div>
+				</div>
+				<div style='clear:both;'></div>
+			</div>
+		</div>
+	</div>
+	<div id='details_wrap' style='display:none;'>
+		<div id='popup'>
+			<a class='close' href='javascript:void(0)' onclick='hideDetails();'></a>
+			<div id='details_content'></div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block style %}
+	<style>
+	body
+	{
+		margin:0;
+		font-family:Helvetica;
+		color:#9c9c9c;
+	}
+	
+	ul, h2
+	{
+		margin:0;
+		padding:0;
+	}
+	
+	li
+	{
+		list-style-type:none;
+	}
+	
+	a
+	{
+		text-decoration:none;
+		color:#777;
+		display:block;
+	}
+	
+	strong
+	{
+		color:#000;
+	}
+	   .iframewrap
+        {
+             width:100%;
+              height:100%;
+                 margin:0px;
+             padding:0px;
+              border:none;
+        }
+	#border
+	{
+		padding:10px;
+		background:url('{{ STATIC_URL }}image/pages/hotapps/ipad-bg.png') repeat;
+	}
+	
+	#header
+	{
+		border:1px solid #9f9f9f;
+		border-radius:5px;
+		background:-webkit-gradient(linear, 0 0, 0 100%, from(#e0edd2), to(#92ac7e));
+		margin-bottom:5px;
+		padding-right:160px;
+	}
+	
+	#tabs
+	{
+		margin:0;
+		padding:0;
+		text-align:center;
+		width:100%;
+		float:left;
+		max-width:748px;
+	}
+	
+	#tabs li
+	{
+		display:inline-block;
+		border-left:1px solid #879c77;
+		border-right:1px solid #e3ecda;
+	}
+	
+	#tabs li.first
+	{
+		border-left:none;
+	}
+	
+	#tabs li.last
+	{
+		border-right:none;
+	}
+	
+	#tabs a
+	{
+		padding:0 20px;
+		line-height:45px;
+		color:#5b5f58;
+		font-size:14px;
+		font-weight:bold;
+		text-shadow:0 1px 2px #eee;
+	}
+	
+	#tabs .active
+	{
+		background:-webkit-gradient(linear, 0 0, 0 100%, from(#4db800), to(#398402));
+		-webkit-box-shadow:0 0 10px 0 #777 inset;
+	}
+	
+	#tabs .active a
+	{
+		color:#fff;	
+		text-shadow:0 1px 2px #222;
+	}
+	
+	#tabs li.first a,
+	#tabs li.last a
+	{
+		padding:0;
+	}
+	
+	#search
+	{
+		width:140px;
+		margin:10px -150px 10px 10px;
+		display:inline-block;
+		height:25px;
+		float:right;
+	}
+	
+	#search form
+	{
+		padding: 0 4px;
+		background: -webkit-gradient(linear, 0 0, 0 100%, from(#4DB800), to(#398402));
+		border-radius: 15px;
+		-webkit-box-shadow: 0 1px 2px 1px #666 inset;
+		border-bottom: 1px solid #dfe8d9;
+		height:25px;
+		overflow:hidden;
+	}
+	
+	#search_submit
+	{
+		float:left;
+	}
+	
+	#submit
+	{
+		float:right;
+		margin:5px 4px;
+		background:url('{{ STATIC_URL }}image/pages/hotapps/ipad.png') no-repeat; 
+		width:18px;
+		height:18px;	
+		background-position: -171px 0; 
+		border:none;
+	}
+
+	#keyword
+	{
+		border:none;
+		width:105px;
+		background:transparent;
+		-webkit-tap-highlight-color: rgba(0,0,0,0);
+		outline:none;
+		color:#eee;
+		font-size:16px;
+		-webkit-appearance:caret;
+		padding:0;
+	}
+	
+	#keyword::-webkit-input-placeholder 
+	{ 
+		color:#eee;
+	}
+	
+	#container
+	{
+		overflow:hidden;
+		margin:0 -15px;
+		padding:5px 15px 0;
+	}
+	
+	#promotions,
+	#ads,
+	#contents
+	{
+		border-radius:5px;
+		-webkit-box-shadow:0 0 8px #bbb;
+	}
+	
+	#promotions
+	{
+		height:300px;
+		width:748px;
+		float:left;
+		overflow:hidden;
+		background-color:#f7f7f7;
+		margin:0 10px 10px 0;
+	}
+	
+	.showbox
+	{
+		padding-right:187px;
+	}
+	
+	.showarea img
+	{
+		width:561px;
+		height:300px;
+	}
+	
+	.showarea
+	{
+		float:left;
+		width:100%;
+	}
+	
+	.showarea .front
+	{
+		position:absolute;
+	}
+	
+	.front img
+	{
+		-webkit-transition:opacity 0.5s;
+		-webkit-transform:translate3d(0,0,0);
+	}
+	
+	.back
+	{
+		width:100%;
+		height:100%;
+		background:url({{ STATIC_URL }}image/pages/hotapps/ipadsc-bg.jpg) center no-repeat #ccc;
+	}
+	
+	.showcontrol
+	{
+		float:left;
+		margin-right:-187px;
+		width:187px;
+	}
+	
+	.showcontrol img
+	{
+		width:187px;
+		height:100px;
+	}
+	
+	#ads
+	{
+		width:216px;
+		min-height:600px;
+		float:right;
+		padding:15px;
+		background-color:#f7f7f7;
+	}
+	
+	#recommend
+	{
+		border-bottom:1px solid #fff;
+	}
+	
+	#recommend h2
+	{
+		font-size:14px;
+		color:#459303;
+		margin-bottom:20px;
+	}
+	
+	#recommend span
+	{
+		float:left;
+		display:inline-block;
+		width:8px;
+		height:18px;
+		background-color:#459303;
+		margin:0 10px 0 -15px;
+	}
+	
+	#recommend .clear
+	{
+		padding-bottom:20px;		
+	}
+	
+	#recommend img
+	{
+		float:left;
+		margin-bottom:10px;
+		width:72px;
+		height:72px;
+		border-radius:10px;
+	}
+	
+	#sponsors
+	{
+		padding-top:20px;
+		border-top:1px solid #dcdde2;
+	}
+	
+	#sponsors li
+	{
+		margin-bottom:10px;
+		border:1px solid #dcdcdc;
+	}
+	
+	#sponsors img
+	{
+		width:216px;
+		height:200px;
+	}
+	
+	#contents
+	{
+		clear:left;
+		background-color:#f7f7f7;
+		width:748px;
+		margin-right:10px;
+		min-height:845px;
+		overflow:hidden;
+	}
+	
+	#contents.withads
+	{
+		width:492px;
+	}
+	#contents.withifr
+	{
+         width:100%;
+	}
+
+	.app
+	{
+		width:50%;
+		display:inline-block;
+		border-top:1px solid #fff;
+		border-bottom:1px solid #d8d8d8;
+		height:100px;
+		overflow:hidden;
+	}
+
+	.withads .app
+	{
+		width:100%;
+	}	
+	
+	.one, .two,
+	.withads .three
+	{
+		background-color:#f7f7f7;
+	}
+	
+	.three, .four,
+	.withads .two
+	{
+		background-color:#ededed;
+	}
+	
+	.app .layout
+	{
+		padding:13px 90px;
+		font-size:14px;
+		height:100%;
+		border-left:1px solid #fff;
+		border-right:1px solid #dfe0df;
+	}
+	
+	.app li,
+	.prices li
+	{
+		margin-bottom:5px;
+	}
+	
+	.app .icon
+	{
+		float:left;
+		margin-left:-75px;
+	}
+	
+	.icon img
+	{
+		width:72px;
+		height:72px;
+		display:block;
+		border-radius:10px;
+	}
+	
+	.icon .mark
+	{
+		width:60px;
+		height:18px;
+		position:relative;
+		background:url('{{ STATIC_URL }}image/pages/hotapps/ipad.png') no-repeat;
+		background-position: -34px 0;
+		text-align:right;
+		padding:11px 10px 0 0;
+		margin:-25px 0 0 4px;
+		color:#fff;
+		display:block;
+	}
+		
+	.details
+	{
+		float:left;
+		width:100%;
+	}
+	
+	.details li
+	{
+		margin-left:15px;
+	}
+	
+	.title, h2
+	{
+		color:#000;
+		font-size:16px;
+		font-weight:bold;
+		font-family:Helvetica;
+		white-space:nowrap;
+		overflow:hidden;
+		text-overflow:ellipsis;
+	}
+	
+	.app .desp
+	{
+		max-height:3.5em;
+		overflow:hidden;
+		line-height:1.2em;
+	}
+	
+	.app .prices
+	{
+		float:left;
+		margin:5px -75px 0 15px;
+		text-align:center;
+	}
+	
+	.price
+	{
+		background:-webkit-gradient(linear, 0 0, 0 100%, from(#4db800), to(#398402));
+		-webkit-box-shadow:0 0 4px #666 inset;
+		color:#fff;
+		padding:3px 0;
+		border-radius:3px;
+		width:60px;
+		margin-top:26px;
+	}
+	
+	.now
+	{
+		margin:0;
+	}
+	
+	.prices .mark
+	{
+		width:46px;
+		height:21px;
+		position:relative;
+		margin:-25px 0 10px 7px;
+		background:url('{{ STATIC_URL }}image/pages/hotapps/ipad.png') no-repeat;
+		background-position: -115px 0;
+	}
+	
+	.app_icons
+	{
+		padding:24px;
+	}
+	
+	.app_icon
+	{
+		width:110px;
+		margin:10px 15px;
+		text-align:center;
+		float:left;
+	}
+	
+	.app_icon .icon
+	{
+		float:none;
+		margin:0;
+	}
+	
+	.app_icon img
+	{
+		margin:0 19px 5px;
+	}
+	
+	.app_icon .title
+	{
+		font-size:14px;
+		color:#454545;
+		overflow:hidden;
+		text-overflow:ellipsis;
+		white-space:nowrap;
+	}
+	
+	#details_wrap
+	{
+		position:absolute;
+		width:100%;
+		height:100%;
+		top:0;
+		left:0;
+		background:rgba(100, 100, 100, 0.4);
+	}
+	
+	#popup
+	{
+		width:530px;
+		min-height:400px;
+		background:#fff;
+		top:50%;
+		left:50%;
+		position:relative;
+		margin:-340px 0 0 -275px;
+		-webkit-box-shadow:0 0 25px #333;
+	}
+	
+	#popup.landscape
+	{
+		width:580px;
+		margin:-305px 0 0 -290px;
+	}
+	
+	.close
+	{
+		width: 24px;
+		height: 24px;
+		background: url('{{ STATIC_URL }}image/pages/hotapps/ipad.png') no-repeat;
+		background-position: 0 0;
+		position: absolute;
+		right: -12px;
+		top: -12px;
+	}
+	
+	#details_content
+	{
+		overflow:hidden;
+		padding:40px 30px 30px;
+		font-size:14px;
+	}
+	
+	#details_content .icon
+	{
+		float:left;
+	}
+	
+	.summary
+	{
+		padding-left:87px;
+	}
+	
+	.summary li
+	{
+		margin-bottom: 0.3em;
+	}
+	
+	.summary .desp
+	{
+		line-height:1.6em;
+		max-height: 6.4em;
+		overflow:hidden;
+	}
+	
+	.landscape .desp
+	{
+		max-height:4.8em;
+	}
+	
+	#details_content .prices
+	{
+		float:right;
+		text-align:center;
+	}
+	
+	.screenshots
+	{
+		overflow:hidden;
+	}
+	
+	.screenshots .scrollview
+	{
+		margin:0 15px;
+		overflow:hidden;
+	}
+	
+	.screenshots .scroll
+	{
+		margin:0 -10px;
+	}
+	
+	.screenshots img
+	{
+		max-height:280px;
+		max-width:280px;
+		min-height:210px;
+		min-width:210px;
+		margin:10px;
+	}
+	
+	.screenshots .slice
+	{
+		display:table-cell;
+		vertical-align:middle;
+		text-align:center;
+	}
+	
+	.clear
+	{
+		clear:left;
+	}
+	
+	#contents .loading
+	{
+		height:180px;
+		clear:both;
+		background: url('{{ STATIC_URL }}image/pages/hotapps/loading.gif') no-repeat center;
+	}
+	
+	</style>
+{% endblock %}
+
+{% block script %}
+
+{% compress js %}
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/zepto.min.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/touch.js"></script>	
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/lazyload.js"></script>	
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/template.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/hotapps_ipad.js"></script>
+{% endcompress %}
+
+	<script type="text/javascript">
+		var product = 'hotapps';
+		var version = '1.0';
+		var platform = '{{ platform }}'; 
+		var lang = '{{ language }}';
+		var staticPath = '{{ STATIC_URL }}';
+		var keyword = '{{ keyword }}';
+		var touchSupport = {{ touch_support }};
+		var trendApi = {{ trend_api }};
+	</script>
+	<script>
+		
+		window.addEventListener('message',onmessage,false);
+		window.addEventListener('orientationchange',orient, false);
+		function orient() {
+			if (window.orientation == 0 || window.orientation == 180) {
+				var point = 'v';
+			}else if (window.orientation == 90 || window.orientation == -90) {
+				var point = 'h';
+			}  
+			window.parent.frames[0].postMessage(point,'*');
+		}
+		function onmessage(e)
+		{
+			if(e.data=='end'){
+			orient();
+			}
+		} 
+	</script>
+{% endblock %}
+
+{% block tracking %}
+	<script type="text/javascript">
+	 
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', '{{ ga_account }}']);
+		_gaq.push(['_trackPageview']);
+		_gaq.push(['_trackPageLoadTime']);
+	
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = '{{ STATIC_URL }}scripts/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	 
+	</script>
+{% endblock %}

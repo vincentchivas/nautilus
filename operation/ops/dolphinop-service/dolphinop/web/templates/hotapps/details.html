@@ -1,0 +1,95 @@
+{% extends "base_generic.html" %}
+{% load i18n %}
+
+{% block title %}{% trans 'Hot Apps' %}{% endblock %}
+
+{% block body %}
+<div id='body'>
+	<div id='border'>
+		<div id='header'>
+			<div id='logo'>{% trans 'Hot Apps' %}</div>
+		</div>
+		<div id='container'>
+			<div class='background'>
+				<div class='summary'>
+					<img class='icon' src='{{ app_details.icon}}' />
+					<ul>
+						<li class='title'>{{ app_details.title }}</li>
+						<li><a class='download' href='{{ app_details.download_url }}' onclick="track(this, '{{ app_details.title|addslashes }}', '{{ app_details.download_url }}');">
+							<span></span>{% trans 'Download' %}
+						</a></li>
+						<li>{% trans 'Version:' %} {{ app_details.app_version }}</li>
+						<li>{% trans 'Category:' %} {{ app_details.category }}</li>
+						<li>{% trans 'Size:' %} {{ app_details.app_size }}</li>
+						<li>{% trans 'Developer:' %} {{ app_details.app_developer }}</li>
+					</ul>
+				</div>
+				<div class='screenshots'>
+					<h2>{% trans 'Screenshots' %}</h2>
+					<div class='scrollview'>
+						<div class='scroll' style='left:0;'>
+							{% for screenshot in app_details.screenshots %}
+								<div class='slice'>
+									<div class='margin'>
+										<img class='lazy' alt='{{ screenshot.title }}' src='{{ STATIC_URL }}image/pages/hotapps/screen-bg.jpg' data-original='{{ screenshot.pic_url }}' />
+									</div>
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+					<div class='scrollbar'>
+						{% for screenshot in app_details.screenshots %}
+							{% if forloop.counter0|divisibleby:'2' %}
+								<img src='{{ STATIC_URL }}image/pages/hotapps/wpoint.png' />
+							{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+				<div class='details'>
+					<div class='wrapper'>
+						<h2>{% trans 'Description:' %}</h2>
+						<div class='content'>{{ app_details.detail_description }}</div>
+					</div>
+					<a class='more' href='javascript:void(0)'>{% trans 'show details' %}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block style %}
+	<style>{% include 'hotapps/style/details.css' %}</style>
+{% endblock %}
+
+{% block script %}
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/zepto.min.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/touch_c.js"></script>	
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/lazyload.js"></script>	
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/hotapps_details.js"></script>	
+
+	<script type='text/javascript'>
+		var product = 'hotapps_details';
+		var version = '1.0';
+		var platform = '{{ platform }}'; 
+		var lang = '{{ language }}';
+		var staticPath = '{{ STATIC_URL }}';	
+		var toggleStrings = ["{% trans 'show details' %}", "{% trans 'hide details' %}"];
+	</script>
+{% endblock %}
+
+{% block tracking %}
+	<script type="text/javascript">
+	 
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', '{{ ga_account }}']);
+		_gaq.push(['_trackPageview']);
+	 
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = '{{ STATIC_URL }}scripts/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	 
+	</script>
+{% endblock %}

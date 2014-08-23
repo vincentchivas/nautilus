@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html manifest="app.manifest">
+	<head>
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta http-equiv="Cache-Control" content="no-transform" />
+
+		<title>Web Store</title>
+		<meta name="description" content="" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+		<style>
+body{min-width:320px;margin:0;padding:0;border:none;list-style:none;font-family:Roboto Light,Helvetica;-webkit-text-size-adjust:none;-webkit-tap-highlight-color:rgba(0,0,0,0);background:#fafafa;color:#000;font-size:16px;-ms-touch-action:none;-webkit-font-smoothing:antialiased;}
+ul{display:block;margin:0;padding:0;list-style:none;-webkit-padding-start:0;}
+a{text-decoration:none;color:black;}
+p{margin: 0;}
+
+section{background-color:#FAFAFA;}
+#top_head{height:42px;position:relative;z-index:5;background:#389d00;}
+#title{line-height:42px;font-size:18px;float:left;color:#fdfdfd;background:url("images/btn.png") no-repeat -4px -8px;-webkit-background-size:150px auto;padding-left:29px;margin-left:10px;}
+#title:active{color:#c3c3c3;background:url('./images/btn.png') no-repeat -116px -279px;-webkit-background-size:150px auto;}
+#addBtn{float:right;margin:7px;font-size:14px;width:80px;height:28px;background:#318601;border:none;margin-right:10px;color:#fff;line-height:28px;text-align:center;}
+#addBtn:active{background:#2b7600;}
+
+#nav{position:relative;background-color:#ededed;-webkit-box-shadow:0 1px 3px #b4b4b4;z-index:5;line-height:0;}
+#nav ul{font-size:0;color:#474747;padding-right:50px;}
+#nav li{display:inline-block;text-align:center;font-size:17px;width:33.3%;line-height:45px;}
+.z-t-bar-i:active{color:#389d00}
+#nav li.search_tab{width:50px;position:absolute;text-align:left;}
+li.active .tab_item{display:inline-block;border-bottom:2px solid #119c06;padding-left: 5px;padding-right: 5px;}
+#search{display:inline-block;width:50px;position:absolute;top:0;right:0;height:43px;}
+
+.highlight {height:3px;}
+.highlight li{height:3px;float:left;width:25%;}
+
+.z-t-c-i{display:none;}
+.z-t-c-i.active{display:block;}
+
+#category_bar{font-size:18px;line-height:47px;height:47px;text-align:center;background:#F1F1F1;z-index:1;position:relative;-webkit-box-shadow:0 1px 3px #b4b4b4;}
+
+#banner{font-size:0;position:relative;overflow:hidden;border-bottom:1px solid #FFFDFB;}
+.z-c-w{display:-webkit-box;width:100%;height:100%;}
+.z-c-w.transitionable{-webkit-transition:-webkit-transform 0.25s ease;}
+.z-c-i{display:block;width:100%;}
+.z-c-p{position:absolute;margin-top:-18px;/*z-index:5;*/left:50%;margin-left:-30px;}
+.z-c-p span{display:inline-block;width:6px;height:6px;margin:0 4px;border-radius:6px;background-color:#666;}
+.z-c-p span.active{background-color:#e6e6e6;}
+.img_wrapper{background: #eee url('images/dolphin_w.png') no-repeat center center;-webkit-background-size:25px auto;}
+.img_wrapper img{width:100%;display:block;}
+
+#subtitle{margin:0 5px;border-bottom:2px solid #C6C7C2;color:#333333;height:38px;line-height:38px;font-size:15px;}
+#subtitle span{display:inline-block;width:5px;height:10px;margin:0 7px;background-color:#369D00;border-radius:3px;}
+
+.name {font-size:18px;color:#474747;margin:-2px 0 2px 0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
+.cate, .desp{color:#bfbfbf;line-height:15px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.catDesp{white-space:nowrap;height:40px;font-size:12px;line-height:13px;}
+.action{position:absolute;right:0;top:0;text-align:center;width:70px;height:100%;}
+.btn{display:inline-block;width:32px;height:32px;vertical-align:middle;background:url('./images/btn.png') no-repeat -5px -177px;-webkit-background-size:150px auto;position:absolute;top:50%;margin-top:-16px;left:50%;margin-left:-16px;}
+.btn:active{background:url('./images/btn.png') no-repeat -5px -230px;-webkit-background-size:150px auto;}
+.btn.open{background:url('./images/btn.png') no-repeat -111px -119px;-webkit-background-size:150px auto;}
+.more_btn{padding:5px 8px;border:1px solid lightgray;border-radius:3px;background-image:-webkit-gradient(linear, left top, left bottom, from(#F8F8F8), to(#E6E6E6));}
+.more_btn:active{background-image:-webkit-gradient(linear, left top, left bottom, from(#E3E3E3), to(#F3F3F3));}
+
+#backBtn{background:url('./images/btn.png') no-repeat 8px -270px;-webkit-background-size:150px auto;position:absolute;top:0px;left:0px;padding:10px;width:30px;height:30px;}
+#backBtn:active{background:url('./images/btn.png') no-repeat 8px -316px;-webkit-background-size:150px auto;}
+
+.app_item{height:60px;padding:13px 75px 11px 73px;position:relative;overflow:hidden;border-bottom:1px solid #e9e9e9;border-top:1px solid #FDFDFD;background: #fafafa;}
+.app_item.active{background:#ededed;}
+.app_item .img_wrapper{position:absolute;left:9px;width:57px;height:57px;border-radius:10px;}
+.app_item .cate{margin-bottom:1px;}
+.app_item .name{margin-top:0px;line-height:22px;}
+
+#categoryapps_page .cate{display:none;}
+#categoryapps_page .name{margin:4px 0;}
+
+.cate_item{width:50%;float:left;overflow:hidden;border-bottom:1px solid #e9e9e9;border-top:1px solid #FDFDFD;}
+.cate_item.active{background:#ededed;}
+.cate_item .inner{padding:4px 0 0 80px;margin:9px 0;height:60px;margin-right:14px;}
+.cate_item:nth-child(2n){border-left:1px solid #FDFDFD;margin-left:-2px;}
+.cate_item:nth-child(2n+1){border-right:1px solid #e9e9e9;}
+.cate_item .img_wrapper{float:left;margin-left:-66px;width:58px;height:58px;border-radius:10px;}
+.cate_item .name{margin-top:-1px;font-size:16px;}
+
+.subject_item{position:relative;margin-bottom:15px;border:1px solid #fff;background-color:#fff;-webkit-box-shadow:0 1px 3px #ddd;}
+.subject_item .img_wrapper{width:100%;}
+.subject_item .name{margin:5px 8px 8px;}
+.subject_item .desp{margin:0 9px 9px;}
+.subject_list{padding:14px;}
+
+form{margin-left:40px;margin-right:40px;}
+#results_page{display:none;}
+#results_page .app_list{min-height:250px;}
+.searchIcon{float:left;width:38px;height:24px;background:url('./images/btn.png') no-repeat 3px -71px;-webkit-background-size:150px auto;border-right:1px solid #aaa;margin-top:6px;}
+#search_bar{background-color:#e0e0e0;padding:7px 82px 7px 12px;font-size:16px;position:relative;height:37px;-webkit-box-shadow:0 1px 3px #b4b4b4;z-index:1;}
+#search_btn{position:absolute;right:6px;top:8px;width:66px;height:37px;border-radius:5px;border:none;background:none;color:#4d4d4d;font-size:16px;}
+#search_btn:active{color:#389d00;}
+#search_bar input{font-size:15px;border:none;height:17px;line-height:17px;width:95%;display:block;margin-top:8px;padding-left:8px;outline:none;-webkit-appearance:none;}
+.search_wrap{-webkit-box-shadow:0 0 3px #888 inset;border-radius:4px;background-color:#fff;height:36px;padding-top:1px;}
+#clear_btn{display:inline-block;width:40px;height:36px;float:right;background:url('./images/btn.png') no-repeat -116px -10px;-webkit-background-size:150px auto;}
+#clear_btn:active{background:url('./images/btn.png') no-repeat -116px -64px;-webkit-background-size:150px auto;}
+#result_msg{font-size:18px;color:#474747;margin-top:6px;text-align:left;border-bottom:1px solid #e9e9e9;padding:13px;display:none;line-height:25px;padding-right:0;}
+#search_box{/*color:#ccc;*/}
+#tab_search{background:url('./images/btn.png') no-repeat 5px -59px;-webkit-background-size:150px auto;display:inline-block;width:50px;height:45px;}
+#tab_search:active{background:url('./images/btn.png') no-repeat -2px -111px;-webkit-background-size:150px auto;}
+#search_key{font-weight:bold;}
+.res_suggest{margin-top:16px;margin-bottom:2px;}
+.sug_text{line-height:26px;color:#bfbfbf;font-size:16px;}
+
+footer{font-size:14px;text-align:center;}
+.more{margin:10px 0;display:none;}
+.loading{margin:8px 0;width:32px;height:32px;display:none;background:url('./images/loading.gif') no-repeat center;-webkit-background-size:21px auto;}
+
+#main_page{overflow:hidden;}
+#loading{position:absolute;top:0;left:0;z-index:9;width:100px;height:40px;background:url('./images/loading.gif') no-repeat 0 center;font-size:17px;line-height:42px;color:#ACACAC;padding-left:30px;-webkit-background-size:21px auto;display:none;}
+#toast{padding:10px 15px;background-color:rgba(0,0,0,0.85);z-index:9;position:fixed;top:0px;left:0px;font-size:14px;color:#EEE;border-radius:2px;text-align:center;-webkit-transition:opacity 1s ease;transition:opacity 1s ease;opacity:0;}
+.clear{clear:both;}
+.new, .hot{width:30px;height:30px;position:absolute;right:0;top:0;}
+.new{background:url('./images/new.png') no-repeat center;-webkit-background-size:30px auto;}
+.hot{background:url('./images/hot.png') no-repeat center;-webkit-background-size:30px auto;}
+.unknow{display:none;}
+		</style>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			ga('create', 'UA-41990920-1', 'dolphin.com');
+			ga('send', 'pageview');
+
+			window.onerror = function (msg, url, line) {
+				var errorDetail = '"' + msg + '" from ' + url + ':' + line;
+				ga('send', 'event', 'error', navigator.userAgent, errorDetail);
+				console.log('Caught error: ' + errorDetail);
+			};
+		</script>
+	</head>
+
+	<body>
+		<div id="loading">Loading...</div>
+		<div>
+			<div id="top_head">
+				<div id="title">Web Store</div>
+				<span id="addBtn">Add URL</span>
+			</div>
+			<div id="category_bar" style="display:none;">
+				<span id="backBtn"></span>
+				<span id="category_name"></span>
+			</div>
+			<div id="nav">
+				<ul class="z-t-bar">
+					<li class="z-t-bar-i">
+						<div class="tab_item">Popular</div>
+					</li><li class="z-t-bar-i">
+						<div class="tab_item cat_tab">Categories</div>
+					</li><li class="z-t-bar-i">
+						<div class="tab_item">Featured</div>
+					</li><li id="search_tab" class="search_tab">
+						<div class="tab_item" id="tab_search"></div>
+					</li>
+				</ul>
+			</div>
+			<section id="main_page" class="z-t-c">
+				<section id="recommends_page" class="z-t-c-i">
+					<div id="banner" class="z-c" style="display:none;">
+						<ul class="z-c-w"></ul>
+					</div>
+					<div class="app_list"></div>
+					<footer>
+						<div class="more_btn more" data-type="recommends">Load more</div>
+						<div class="loading"></div>
+					</footer>
+				</section>
+				<section id="categories_page" class="z-t-c-i">
+					<div class="cate_list"></div>
+					<div class="clear"></div>
+				</section>
+				<section id="subjects_page" class="z-t-c-i">
+					<div class="subject_list"></div>
+				</section>
+			</section>
+			<section id="results_page">
+				<div id="search_bar">
+					<div class="search_wrap">
+						<span class="searchIcon"></span>
+						<span id="clear_btn"></span>
+						<form action="" id="search_form">
+							<input id="search_box" type="text" default="true" placeholder="Find web apps...">
+						</form>
+					</div>
+					<button id="search_btn" type="button">Search</button>
+				</div>
+				<div id="result_msg">
+					<p>We couldn't find anything for your search - <span id="search_key"></span></p>
+					<p class="res_suggest">Suggestions:</p>
+					<p class="sug_text">
+						- Make sure all words are spelled correctly.<br />
+						- Try different keywords.<br />
+						- Try more general keywords.<br />
+					</p>
+				</div>
+				<div class="app_list"></div>
+				<footer>
+					<div class="more_btn more">Load More</div>
+					<div class="loading"></div>
+				</footer>
+			</section>
+			<section id="categoryapps_page" style="display:none;">
+				<div class="app_list"></div>
+				<footer>
+					<div class="more_btn more" data-type="cateapps">Load More</div>
+					<div class="loading"></div>
+				</footer>
+			</section>
+			<div id="toast"></div>
+		</div>
+		<script src="./scripts/baina.js"></script>
+		<script src="./scripts/zepto.min.js"></script>
+		<script src="./scripts/tab.js"></script>
+		<script src="./scripts/list.js"></script>
+		<script src="./scripts/listdataadapter.js"></script>
+		<script src="./scripts/carousel.js"></script>
+		<script>
+			var dolphinAPI = {
+				showNativeAddPage : function(){
+					window.location = "dolphin://jsreq/dolphin/showNativeAddPage";
+				},
+				addToHome : function(id, name, url, icon){
+					var context = {
+						action : "addToHome",
+						id : id
+					};
+
+					var paras = [
+						"name=" + encodeURIComponent(name),
+						"url=" + encodeURIComponent(url),
+						"icon=" + encodeURIComponent(icon),
+						"ctx=" + encodeURIComponent(JSON.stringify(context)),
+						"callback=dolphinAPI.callback"
+					];
+					window.location = "dolphin://jsreq/dolphin/addToHome?" + paras.join('&');
+				},
+				setPreviewInfo : function(pageUrl, title, iconUrl, cat, desc){
+					var paras = [
+						"pageUrl=" + encodeURIComponent(pageUrl),
+						"title=" + encodeURIComponent(title),
+						"iconUrl=" + encodeURIComponent(iconUrl),
+						"cat=" + encodeURIComponent(cat),
+						"desc=" + encodeURIComponent(desc)
+					];
+					window.location = "dolphin://jsreq/dolphin/setPreviewInfo?" + paras.join('&');
+				},
+				addedUrl : {},
+				addedUrlCount : 0,
+				addedUrlLength : 0,
+				isHomeAddedReady : true,
+				isHomeAddedPrepare : function(appList){
+					var tempThis = this;
+					var length = appList.length || 0;
+					this.addedUrlCount = 0;
+					this.addedUrlLength = length;
+					this.isHomeAddedReady = false;
+
+					var i = 0;
+					var timer = setInterval(function(){
+						if(i<length){
+							var webApp = appList[i++]
+							tempThis.isHomeAddedHelper(webApp.url);
+						}else{
+							clearInterval(timer);
+						}
+					}, 50);
+				},
+				isHomeAdded : function(url){
+					return url in this.addedUrl;
+				},
+				isHomeAddedHelper : function(url){
+					var context = {
+						action : "isHomeAdded",
+						url : url
+					};
+
+					var paras = [
+						"url=" + encodeURIComponent(url),
+						"ctx=" + encodeURIComponent(JSON.stringify(context)),
+						"callback=dolphinAPI.callback"
+					];
+					window.location = "dolphin://jsreq/dolphin/isHomeAdded?" + paras.join('&');
+				},
+				callback : function(ctx, data){
+					var tempThis = this;
+
+					switch(ctx.action){
+						case "addToHome": (function(id, data){
+							switch (data){
+								case 1:
+									var actions = $(".app" + id);
+									actions.children(".btn").removeClass("add").addClass("open");
+									app.showToast("Successfully added to speed dial");
+									break;
+								case -1:
+									app.showToast("No more space in speed dial");
+									break;
+								default:
+									app.showToast("Add failed, please try later");
+							}
+						})(ctx.id, data);
+						break;
+						case "isHomeAdded": (function(url, data){
+							tempThis.addedUrlCount += 1;
+							if(data){
+								tempThis.addedUrl[url] = true;
+							}
+							if(tempThis.addedUrlCount == tempThis.addedUrlLength){
+								tempThis.isHomeAddedReady = true;
+							}
+						})(ctx.url, data);
+					}
+				}
+			};
+
+			function WebApps(opt){
+				this.init(opt);
+			};
+
+			WebApps.prototype = {
+
+				init : function(opt){
+					this.platform = opt.platform;
+					this.appsAPI = opt.appsAPI;
+					this.categoriesAPI = opt.categoriesAPI;
+					this.subjectsAPI = opt.subjectsAPI;
+
+					this.recommendsPage = 0;
+					this.cateAppsPage = 0;
+
+					this.tabBar = $(".z-t-bar");
+					this.categoryBar = $("#category_bar");
+					this.searchBar = $("#search_bar");
+					this.searchBox = $("#search_box");
+					this.searchBtn = $("#search_btn");
+					this.clearBtn = $("#clear_btn");
+					this.mainPage = $("#main_page");
+					this.categoryAppsPage = $("#categoryapps_page");
+					this.backBtn = $("#backBtn");
+					this.topHead = $("#top_head");
+					this.categoryName = $("#category_name");
+					this.loading = $("#loading");
+					this.toast = $("#toast");
+					this.addBtn = $("#addBtn");
+					this.nav = $("#nav");
+					this.title = $("#title");
+					this.searchTab = $("#search_tab");
+					this.resultsPage = $("#results_page");
+					this.resultMsg = $("#result_msg");
+					this.searchKey = $("#search_key");
+					this.searchForm = $("#search_form");
+					this.tab = null;
+					this.body = $("body")[0];
+
+					this.recommendsMoreBtn = $("#recommends_page .more");
+					this.recommendsLoading = $("#recommends_page .loading");
+					this.cateAppsMoreBtn = $("#categoryapps_page .more");
+					this.cateAppsLoading = $("#categoryapps_page .loading");
+
+					this.recommendBannerList = $("#banner ul");
+					this.recommendAppList = $("#recommends_page .app_list");
+					this.categoryList = $("#categories_page .cate_list");
+					this.subjectList = $("#subjects_page .subject_list");
+					this.resultAppList = $("#results_page .app_list");
+					this.categoryAppList = $("#categoryapps_page .app_list");
+					this.viewData = baina.viewData();
+
+					this.initUI();
+					this.bindEvent();
+
+					//强制一个hashchange，完成状态初始化
+					var event = document.createEvent("Events");
+					event.initEvent("hashchange", true, false);
+					window.dispatchEvent(event);
+
+				},
+				initUI : function(){
+					var tempThis = this;
+
+					this.loading.css("left", (this.viewData.viewWidth - 130)/2 + "px");
+					this.loading.css("top", (this.viewData.viewHeight - 40)/2 + "px");
+					this.tab = $("body").tab({
+						animate : false,
+						tabChange : function(index){
+							switch(index){
+							case 0:
+								if(tempThis.recommendAppList.html() == ""){
+									tempThis.initRecommends();
+									setTimeout(function(){window.scrollTo(0, 1);},500);//延时强制调整一下，android垃圾...
+								}
+								ga('send', 'event', 'tab', 'display', 'popular');
+								break;
+							case 1:
+								if(tempThis.categoryList.html() == ""){
+									tempThis.initCategories();
+									setTimeout(function(){window.scrollTo(0, 1);},500);//延时强制调整一下，android垃圾...
+								}
+								ga('send', 'event', 'tab', 'display', 'category');
+								break;
+							case 2:
+								if(tempThis.subjectList.html() == ""){
+									tempThis.initSubjects();
+									setTimeout(function(){window.scrollTo(0, 1);},500);//延时强制调整一下，android垃圾...
+								}
+								ga('send', 'event', 'tab', 'display', 'feature');
+								break;
+							}
+							tempThis.adjustPos();
+						}
+					});
+				},
+				bindEvent : function(){
+					var tempThis = this;
+					baina.addEvent(window,"load",function(){
+						setTimeout(function(){
+							tempThis.adjustPos();
+							window.scrollTo(0, 1);
+						},300);//延时强制调整一下，android垃圾...
+					});
+					baina.addEvent(window,"hashchange",function(){tempThis.swapStatus();});
+					baina.addEvent(window,"resize",function(){
+						//延迟调用，以免因浏览器尚未完成页面调整而得到错误的页面布局
+						setTimeout(function(){tempThis.adjustPos();}, 300);
+					});
+					baina.addEvent(window,"orientationchange",function(){
+						//延迟调用，以免因浏览器尚未完成页面旋转而得到错误的页面布局
+						setTimeout(function(){tempThis.adjustPos();}, 1500);
+					});
+
+					this.resultAppList.bind("click",function(){
+						tempThis.searchBox.blur();
+					});
+
+					this.searchBox.bind("click",function(){
+						setTimeout(function(){window.scrollTo(0, 1);},500);
+					})
+
+					this.searchForm.bind("submit",function(){
+						tempThis.keyword = tempThis.searchBox.val();
+						ga('send', 'event', 'search', 'search', tempThis.keyword);
+						tempThis.loadResultApps(0);
+						return false;
+					});
+
+					this.backBtn.bind("click", function(){
+						//主要针对用户在地址栏直接输入url，再点击back的行为
+						history.back();
+					});
+
+					this.title.bind("click",function(){
+						var tHash = baina.lhash();
+						if(tHash != ""){
+							history.back();
+						}
+					});
+
+					this.addBtn.bind("click", function(){
+						ga('send', 'event', 'add url', 'click');
+						if(window.dolphin && window.dolphin.showNativeAddPage){
+							window.dolphin.showNativeAddPage();
+						}else if(window.dolphinmeta){
+							dolphinAPI.showNativeAddPage();
+						}
+					});
+
+					this.searchTab.bind("click",function(){
+						ga('send', 'event', 'tab', 'display', 'search');
+						window.location.href = "#search";
+					});
+
+					// this.searchBox.bind("keydown",function(){
+					// 	if(tempThis.searchTime){
+					// 		//再次触发事件时还没有发送请求，则清除上一次的定时请求
+					// 		clearTimeout(tempThis.searchTime);
+					// 	}
+					// 	tempThis.searchTime = setTimeout(function(){
+					// 		tempThis.keyword = tempThis.searchBox.val();
+					// 		tempThis.loadResultApps(0);
+					// 		clearTimeout(tempThis.searchTime);
+					// 	},500);
+					// });
+
+					this.clearBtn.bind("click", function(){
+						tempThis.searchBox[0].value = "";
+						tempThis.searchBox.blur();
+						tempThis.resultMsg.hide();
+						if(tempThis.resultAppList.reset){
+							tempThis.resultAppList.reset();
+						}
+					});
+
+					this.searchBtn.bind("click", function(){
+						tempThis.keyword = tempThis.searchBox.val();
+						ga('send', 'event', 'search', 'search', tempThis.keyword);
+						tempThis.loadResultApps(0);
+						//tempThis.searchBox.focus();
+					});
+
+					$(".more").bind("click", function(){
+						var target = $(this);
+
+						if(target.hasClass("disabled")){
+							return;
+						}
+
+						var loading = $(".loading", this.parentElement);
+
+						target.hide();
+						loading.css("display", "inline-block");
+
+						var type = target.data("type") || "";
+						switch(type){
+							case "recommends":
+								tempThis.loadRecommends(tempThis.recommendsPage+1);
+								ga('send', 'event', 'popular', 'more', tempThis.categoryName.html());
+								break;
+							case "cateapps":
+								tempThis.loadCategoryApps(tempThis.cateAppsPage+1);
+								if(tempThis.listType == 'category'){
+									ga('send', 'event', 'category', 'more', tempThis.categoryName.html());
+								}else{
+									ga('send', 'event', 'feature', 'more', tempThis.categoryName.html());
+								}
+								break;
+						}
+					});
+				},
+				swapStatus : function(){
+					var tempThis = this;
+					var tHash = baina.lhash();
+					if(tHash.match(/^cate\d+$/i)){
+						var listType = "category";
+						var listId = tHash.slice(4);
+						if(this.listType != listType || this.listId != listId){
+							this.categoryAppList.html("");
+							this.loading.show();
+							this.cateAppsMoreBtn.hide();
+							this.cateAppsMoreBtn.html("Load more");
+							this.cateAppsMoreBtn.removeClass("disabled");
+							this.listType = listType;
+							this.listId = listId;
+							this.loadCategoryApps(0);
+						}
+						this.showCategoryAppsPage();
+					}else if(tHash.match(/^subject\d+$/i)){
+						var listType = "subject";
+						var listId = tHash.slice(7);
+
+						if(this.listType != listType || this.listId != listId){
+							this.categoryAppList.html("");
+							this.loading.show();
+							this.cateAppsMoreBtn.hide();
+							this.cateAppsMoreBtn.html("Load More");
+							this.cateAppsMoreBtn.removeClass("disabled");
+							this.listType = listType;
+							this.listId = listId;
+							this.loadCategoryApps(0);
+						}
+						this.showCategoryAppsPage();
+					}else if(tHash.match(/search/i)){
+						this.showResultsPage();
+						//setTimeout(function(){tempThis.searchBox.focus();}, 500);
+					}else{
+						this.showMainPage();
+						if(tempThis.recommendAppList.html() == ""){
+							this.initRecommends();
+						}
+					}
+					setTimeout(function(){window.scrollTo(0, 1);},500);//延时强制调整一下，android垃圾...
+				},
+				adjustPos : function(){
+					this.viewData = baina.viewData();
+
+					var width = this.viewData.viewWidth;
+					var height = this.viewData.viewHeight;
+
+					//保证页面宽度不小于320px
+					if(width < 320){
+						width = 320;
+					}
+
+					this.loading.css("left", (width - 130)/2 + "px");
+					this.loading.css("top", (height - 40)/2 + "px");
+					this.body.style["min-height"] = height + 100 + "px";
+				},
+				showMainPage : function(){
+					this.categoryBar.hide();
+					this.categoryAppsPage.hide();
+					this.resultsPage.hide();
+					this.topHead.show();
+					this.tabBar.show();
+					this.mainPage.show();
+				},
+				showCategoryAppsPage : function(){
+					this.tabBar.hide();
+					this.mainPage.hide();
+					this.resultsPage.hide();
+					this.categoryBar.show();
+					this.categoryAppsPage.show();
+				},
+				showResultsPage : function(){
+					this.tabBar.hide();
+					this.mainPage.hide();
+					this.categoryAppsPage.hide();
+					this.resultsPage.show();
+				},
+				createAppDOM : function(data){
+					var div = document.createElement("div");
+					div.className = "app_item";
+					div.innerHTML = 
+						"<div class='img_wrapper'>" +
+							"<img src='" + data.icon +"' onerror='baina.errorPic(this);' onload='app.loadPic(this);'>" +
+						"</div>" +
+						"<div class='name'>" + data.name + "</div>" +
+						"<p class='cate'>" + data.cat_name + "</p>" +
+						"<p class='desp'>" + data.desp + "</p>" +
+						"<div class='action app"+ data.id +"'>" +
+							"<div class='btn"+ (data.added ? ' open' : ' add') + "'></div>" +
+						"</div>"+
+						"<div class='"+data.tag+"'></div>";
+						
+					return div;
+				},
+				createBannerDOM : function(data){
+					var li = document.createElement("li");
+					li.className="z-c-i";
+					li.innerHTML = 
+						"<a href='#subject" + data.id + "' onclick='app.bannerClickTrack(\""+data.name+"\")';>" +
+							"<div class='img_wrapper'>" +
+								"<img src='" + data.icon +"' onerror='baina.errorPic(this);'>" +
+							"</div>" +
+						"</a>";
+					return li;
+				},
+				bannerClickTrack : function(name){
+					ga('send', 'event', 'popular', 'banner_click', name);
+				},
+				createCategoryDOM : function(data){
+					var div = document.createElement("div");
+					div.className = "cate_item";
+					div.innerHTML = 
+						"<div class='inner'>" +
+							"<div class='img_wrapper'>" +
+								"<img src='" + data.icon + "' onerror='baina.errorPic(this);' onload='app.loadPic(this);'>" +
+							"</div>" +
+							"<div class='name catName'>" + data.name + "</div>" +
+							"<p class='desp catDesp'>" + data.desp.trim().replace(/\,/g,'<br>') + "</p>" +
+						"</div>";
+					return div;
+				},
+				createSubjectDOM : function(data){
+					var div = document.createElement("div");
+					div.className = "subject_item";
+					div.innerHTML = 
+							"<div class='img_wrapper'>" +
+								"<img src='" + data.icon + "' onerror='baina.errorPic(this);' onload='app.loadPic(this);'>" +
+							"</div>" +
+							"<div class='name'>" + data.name + "</div>" +
+							"<p class='desp'>" + data.desp + "</p>"+
+							"<div class='"+data.tag+"'></div>";
+					return div;
+				},
+				initRecommends : function(){
+					this.loading.show();
+					var tData = baina.getLocal("en_webapps_recommends") || [];
+					var recommendsBanner = baina.getLocal("en_recommends_banner") || [];//推荐应用的banner
+					if(typeof tData == "string"){
+						tData = JSON.parse(tData) || [];
+						if(tData.apps && tData.apps.length){
+							this.renderRecommends(tData, 0);
+						}
+					}
+					if(typeof recommendsBanner == "string"){
+						recommendsBanner = JSON.parse(recommendsBanner) || [];
+						if(recommendsBanner && recommendsBanner.length){
+							this.renderBanners(recommendsBanner);
+						}
+					}
+					this.loadRecommendsBanner();
+					this.loadRecommends(0);
+				},
+				initCategories : function(){
+					this.loading.show();
+					var tData = baina.getLocal("en_webapps_categories") || [];
+					if(typeof tData == "string"){
+						tData = JSON.parse(tData) || [];
+						if(tData.categories && tData.categories.length){
+							this.renderCategories(tData);
+						}
+					}
+					this.loadCategories();
+				},
+				initSubjects : function(){
+					this.loading.show();
+					var tData = baina.getLocal("en_webapps_subjects") || [];
+					if(typeof tData == "string"){
+						tData = JSON.parse(tData) || [];
+						if(tData.subjects && tData.subjects.length){
+							this.renderSubjects(tData, 0);
+						}
+					}
+					this.loadSubjects(0);
+				},
+				renderRecommends : function(data, page){
+					var appList = data.apps || [];
+					this.renderAppList(this.recommendAppList, appList, page, 'popular');
+
+					this.loading.hide();
+					this.recommendsLoading.hide();
+					this.recommendsMoreBtn.css("display","inline-block");
+				},
+				renderResultApps : function(data, page){
+					var appList = data.apps || [];
+					if(appList.length==0){
+						ga('send', 'event', 'search', 'no_results', this.keyword);
+						this.resultMsg.show();
+						this.searchKey[0].innerHTML = this.keyword;
+					}else{
+						this.resultMsg.hide();
+					}
+					this.renderAppList(this.resultAppList, appList, page, 'search');
+					setTimeout(function(){window.scrollTo(0, 1);},500);//延时强制调整一下，android垃圾...
+				},
+				renderCategoryApps : function(data, page){
+					var name = data.name || "Featured";
+					this.categoryName.html(name);
+					var appList = data.apps || [];
+					var type = (this.listType == "category") ? "category" : "feature";
+					this.renderAppList(this.categoryAppList, appList, page, type);
+
+					this.loading.hide();
+					this.cateAppsLoading.hide();
+					this.cateAppsMoreBtn.css("display","inline-block");
+				},
+				renderAppList : function(container, appList, page, category){
+					var tempThis = this;
+					if(window.dolphinmeta){
+						if (!dolphinAPI.isHomeAddedReady){
+							setTimeout(function(){
+								tempThis.renderAppList(container, appList, page, category);
+							}, 200); //等待上一个isHomeAdded完成
+							return;
+						}
+						dolphinAPI.isHomeAddedPrepare(appList);
+						this.renderAppListHelper(container, appList, page, category);
+					}else{
+						this.renderAppList2(container, appList, page, category);
+					}
+				},
+				renderAppListHelper : function(container, appList, page, category){
+					if(dolphinAPI.isHomeAddedReady){
+						this.renderAppList2(container, appList, page, category);
+					}else{
+						var tempThis = this;
+						setTimeout(function(){
+							tempThis.renderAppListHelper(container, appList, page, category);
+						}, 200); //等待当前的isHomeAdded完成
+					}
+				},
+				renderAppList2 : function(container, appList, page, category){
+					var tempThis = this;
+					this.updateAppStatus(appList);
+
+					var dataSource = {
+								data : appList,
+								adapter : {
+									type : "object",
+									property : "name",
+								}
+						};
+					var listOpt = {
+							type : "plain",
+							dataSource : dataSource,
+							delegate : {
+								rowDOM : function(indexPath, data){
+									return tempThis.createAppDOM(data);
+								},
+								clickOnRow : function(indexPath, data, e){
+									var target = $(e.target);
+									if(!data.added){
+										var action = target.hasClass('action') ? target : target.closest('.action');
+										if(action.length && action.find(".add").length){ //确认点击范围
+											//app add track
+											switch(category){
+												case "category":
+													ga('send', 'event', category, 'app_add', data.cat_name+'|'+data.name);
+													break;
+												case "feature":
+													ga('send', 'event', category, 'app_add', tempThis.categoryName.html()+'|'+data.name);
+													break;
+												default :
+													ga('send', 'event', category, 'app_add', data.name+'|'+data.cat_name);
+											}
+
+											if(window.dolphin && window.dolphin.addToHome){
+												var result = window.dolphin.addToHome(data.name, data.url, data.icon);
+												switch (result){
+													case 1:
+														var actions = $(".app" + data.id);
+														actions.children(".btn").removeClass("add").addClass("open");
+														tempThis.showToast("Successfully added to speed dial");
+														data.added = true;
+														break;
+													case -1:
+														tempThis.showToast("No more space in speed dial");
+														break;
+													default:
+														tempThis.showToast("Add failed, please try later");
+												}
+											}else if(window.dolphinmeta){
+												dolphinAPI.addToHome(data.id, data.name, data.url, data.icon);
+											}else{
+												tempThis.showToast("Add failed, please try later");
+											}
+											return;
+										}
+									}
+									//app click track
+									switch(category){
+										case "category":
+											ga('send', 'event', category, 'app_click', data.cat_name+'|'+data.name);
+											break;
+										case "feature":
+											ga('send', 'event', category, 'app_click', tempThis.categoryName.html()+'|'+data.name);
+											break;
+										default :
+											ga('send', 'event', category, 'app_click', data.name+'|'+data.cat_name);
+									}
+
+									//添加点击效果
+									var item = target.hasClass('app_item') ? target : target.closest('.app_item');
+									item.addClass("active");
+									setTimeout(function(){
+										item.removeClass("active");
+										var status = $(".app" + data.id).children(".btn").hasClass("add")
+										if(status){
+											//如果用户未添加到桌面
+											if(window.dolphin && window.dolphin.setPreviewInfo){
+												window.dolphin.setPreviewInfo(data.url, data.name, data.icon, data.cat_name, data.desp)
+											}else if(window.dolphinmeta){
+												dolphinAPI.setPreviewInfo(data.url, data.name, data.icon, data.cat_name, data.desp);
+											}
+										}
+										setTimeout(function(){
+											window.location.href = data.url;
+										}, 50);
+									}, 200);
+								}
+							}
+						};
+					if(page === 0){
+						if(container.reset){
+							container.reset(dataSource);
+						}else{
+							container.list(listOpt);
+						}
+					}else{
+						container.appendSection(appList);
+					}
+				},
+				renderBanners : function(banners){
+					var tempThis = this;
+					if(banners.length && this.recommendBannerList.html()){
+						this.recommendBannerList.html('');
+					}
+
+					if(banners.length){
+						for (var i=0; i<banners.length; ++i){
+							var banner = banners[i];
+							var item = this.createBannerDOM(banner);
+							this.recommendBannerList.append(item);
+						}
+	
+						$("#banner").show();
+						$("#banner").carousel({
+							showControl : true,
+							autoScroll : true
+						});
+					}
+				},
+				renderCategories : function(data){
+					var tempThis = this;
+					var categoreis = data.categories || [];
+					var dataSource = {
+								data : categoreis,
+								adapter : {
+									type : "object",
+									property : "name",
+								}
+						};
+					var listOpt = {
+							type : "plain",
+							dataSource : dataSource,
+							delegate : {
+								rowDOM : function(indexPath, data){
+									return tempThis.createCategoryDOM(data);
+								},
+								clickOnRow : function(indexPath, data,e){
+									var target = $(e.target);
+									ga('send', 'event', 'category' , 'category_click', data.name);
+									//添加点击效果
+									var item = target.hasClass('cate_item') ? target : target.closest('.cate_item');
+									item.addClass("active");
+									setTimeout(function(){
+										item.removeClass("active");
+										tempThis.categoryName.html(data.name);
+										window.location.href = "#cate" + data.id;
+									}, 200);
+								}
+							}
+						};
+					if(this.categoryList.html()){
+						this.categoryList.reset(dataSource);
+					}else{
+						this.categoryList.list(listOpt);
+					}
+
+					this.loading.hide();
+				},
+				renderSubjects : function(data, page){
+					var tempThis = this;
+					var subjects = data.subjects || [];
+					var dataSource = {
+								data : subjects,
+								adapter : {
+									type : "object",
+									property : "name",
+								}
+						};
+					var listOpt = {
+							type : "plain",
+							dataSource : dataSource,
+							delegate : {
+								rowDOM : function(indexPath, data){
+									return tempThis.createSubjectDOM(data);
+								},
+								clickOnRow : function(indexPath, data){
+									ga('send', 'event', 'feature' , 'feature_click', data.name);
+									tempThis.categoryName.html(data.name);
+									window.location.href = "#subject" + data.id;
+								}
+							}
+						};
+					if(page === 0 && this.subjectList.html()){
+						this.subjectList.reset(dataSource);
+					}else{
+						this.subjectList.list(listOpt);
+					}
+					this.loading.hide();
+				},
+				loadRecommends : function(page){
+					var tempThis = this;
+					var url = this.appsAPI + "?pn=" + this.platform + "&page=" + page + "&t=" + baina.refreshT();
+					baina.ajaxGet(encodeURI(url),
+						function(text){tempThis.manageRecommends(text, page);},
+						function(text){
+							tempThis.showToast("Load failed");
+							tempThis.loading.hide();
+							tempThis.recommendsLoading.hide();
+							if(page){
+								tempThis.recommendsMoreBtn.css("display", "inline-block");
+							}
+						}
+					);
+				},
+				loadRecommendsBanner : function(){
+					var tempThis = this;
+					var url = this.subjectsAPI + "?pn=" + this.platform + "&banner=true&t=" + baina.refreshT();
+					baina.ajaxGet(encodeURI(url),
+						function(text){
+							var tResponse;
+							if(text){
+								if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+									//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+								}else{
+									tResponse = JSON.parse(text);
+									var tData = tResponse.subjects || [];
+
+									if(tData && tData.length){
+										baina.setLocal("en_recommends_banner", JSON.stringify(tData));
+										tempThis.renderBanners(tData);
+									}else{
+										console.log("loading recommends banner failed!")
+									}
+								}
+							}
+						},
+						function(text){
+						}
+					);
+				},
+				loadCategories : function(){
+					var tempThis = this;
+					var url = this.categoriesAPI + "?pn=" + this.platform + "&t=" + baina.refreshT();
+					baina.ajaxGet(encodeURI(url),
+						function(text){tempThis.manageCategories(text);},
+						function(text){
+							tempThis.showToast("Load failed");
+							tempThis.loading.hide();
+						}
+					);
+				},
+				loadSubjects : function(page){
+					var tempThis = this;
+					var url = this.subjectsAPI + "?pn=" + this.platform + "&banner=false&page=" + page + "&t=" + baina.refreshT();
+					baina.ajaxGet(encodeURI(url),
+						function(text){tempThis.manageSubjects(text, page);},
+						function(text){
+							tempThis.showToast("Load failed");
+							tempThis.loading.hide();
+						}
+					);
+				},
+				loadResultApps : function(page){
+					var tempThis = this;
+					if(this.keyword){
+						this.loading.show();
+						var url = this.appsAPI + "?pn=" + this.platform + "&q=" + this.keyword + "&page=" + page;
+						baina.ajaxGet(encodeURI(url),
+							function(text){tempThis.manageResultApps(text, page);},
+							function(text){
+								tempThis.showToast("Load failed");
+								tempThis.loading.hide();
+							}
+						);
+					}else{
+						this.resultMsg.hide();
+						if(tempThis.resultAppList.reset){
+							tempThis.resultAppList.reset();
+						}
+					}
+				},
+				loadCategoryApps : function(page){
+					var tempThis = this;
+					var tempPara = this.listType=="category" ? "&cid=" : "&sid=";
+					var url = this.appsAPI + "?pn=" + this.platform + tempPara + this.listId + "&page=" + page + "&t=" + baina.refreshT();
+					//var url = this.appsAPI + "?pn=" + this.platform + "&type=" + this.listType + "&cid=" + this.listId + "&page=" + page + "&t=" + baina.refreshT();
+					baina.ajaxGet(encodeURI(url),
+						function(text){tempThis.manageCategoryApps(text, page);},
+						function(text){
+							tempThis.showToast("Load failed");
+							tempThis.loading.hide();
+							tempThis.cateAppsLoading.hide();
+							if(page){
+								tempThis.cateAppsMoreBtn.css("display", "inline-block");
+							}
+						}
+					);
+				},
+				manageRecommends : function(text, page){
+					var tResponse;
+					if(text){
+						if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+							//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+						}else{
+							tResponse = JSON.parse(text);
+							var tData = tResponse || [];
+
+							if(tData.apps && tData.apps.length){
+								if(page == 0){
+									baina.setLocal("en_webapps_recommends", JSON.stringify(tData));
+								}
+								this.recommendsPage = page;
+								this.renderRecommends(tData, page);
+							}else{
+								this.loading.hide();
+								this.recommendsMoreBtn.html("All Apps Loaded");
+								this.recommendsMoreBtn.addClass("disabled");
+								this.recommendsMoreBtn.css("display", "inline-block");
+								this.recommendsLoading.hide();
+							}
+						}
+					}
+				},
+				manageCategories : function(text){
+					var tResponse;
+					if(text){
+						if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+							//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+						}else{
+							tResponse = JSON.parse(text);
+							var tData = tResponse || [];
+
+							if(tData.categories && tData.categories.length){
+								baina.setLocal("en_webapps_categories", JSON.stringify(tData));
+								this.renderCategories(tData);
+							}
+						}
+					}
+				},
+				manageSubjects : function(text, page){
+					var tResponse;
+					if(text){
+						if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+							//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+						}else{
+							tResponse = JSON.parse(text);
+							var tData = tResponse || [];
+
+							if(tData.subjects && tData.subjects.length){
+								if(page == 0){
+									baina.setLocal("en_webapps_subjects", JSON.stringify(tData));
+								}
+								this.renderSubjects(tData, page);
+							}
+						}
+					}
+				},
+				manageResultApps : function(text, page){
+					var tResponse;
+					if(text){
+						if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+							//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+						}else{
+							this.loading.hide();
+							tResponse = JSON.parse(text);
+							var tData = tResponse || [];
+
+							this.renderResultApps(tData, page);
+						}
+					}
+				},
+				manageCategoryApps : function(text, page){
+					var tResponse;
+					if(text){
+						if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+							//数据返回错误的时候，常常返回一个html页面...所以只能这样判断
+						}else{
+							tResponse = JSON.parse(text);
+							var tData = tResponse || [];
+
+							if(tData.apps && tData.apps.length){
+								this.cateAppsPage = page;
+								this.renderCategoryApps(tData, page);
+							}else{
+								this.loading.hide();
+								this.cateAppsMoreBtn.html("All Apps Loaded");
+								this.cateAppsMoreBtn.addClass("disabled");
+								this.cateAppsMoreBtn.css("display", "inline-block");
+								this.cateAppsLoading.hide();
+							}
+						}
+					}
+				},
+				updateAppStatus : function(appList){
+					var helper = null;
+					if(window.dolphin && window.dolphin.isHomeAdded){
+						helper = window.dolphin;
+					}else if(window.dolphinmeta){
+						helper = dolphinAPI;
+					}
+
+					if(helper){
+						var length = appList.length || 0;
+						for(var i=0; i<length; ++i){
+							var webApp = appList[i];
+							if(helper.isHomeAdded(webApp.url)){
+								webApp.added = true;
+							} else{
+								webApp.added = false;
+							}
+						}
+					}
+				},
+				showToast : function(context){
+					this.toast.html(context);
+			
+					//调整toast的尺寸，首先显示出来才能方便获取高度
+					this.toast.show();
+					//30为confirm的高
+					this.toast.css("left", (this.viewData.viewWidth - this.toast.width())/2 + "px");
+					//减去底部菜单栏高度，底部边距，以及自身高度。
+					this.toast.css("top", this.viewData.viewHeight - 61 - this.toast.height() + "px");
+					//触发淡入动画
+					this.toast.css("opacity", 1);
+			
+					var tempThis = this;
+					setTimeout(function(){
+						//淡入动画需要1秒，再停留1秒
+						tempThis.toast.css("opacity", 0);
+					}, 1000);
+					setTimeout(function(){
+						//以免页面冗余，完全透明后还是隐藏。淡出动画需要1秒。
+						if(tempThis.toast.css("opacity") == "0"){
+							tempThis.toast.hide();
+						}
+					}, 2000);
+				},
+				loadPic: function(pic){
+					var pNode = pic.parentNode;
+					if(pNode){
+						pNode.style.background = "none";
+					}
+				}
+			};
+
+			var app = new WebApps({
+				appsAPI : "/api/1/webapps/apps.json",
+				categoriesAPI : "/api/1/webapps/cats.json",
+				subjectsAPI : "/api/1/webapps/subjects.json",
+				//appsAPI : "data/apps.json",
+				//categoriesAPI : "data/cats.json",
+				//subjectsAPI : "data/subjects.json",
+				platform: "mobi.mgeek.TunnyBrowser"
+				//subjectsAPI : "data/subjects.json",
+				//platform : "com.dolphin.browser.iphone.chinese"
+			});
+
+			baina.addEvent(window.applicationCache,"updateready",function(){
+				window.applicationCache.swapCache();
+				window.location.reload();
+			});
+		</script>
+	</body>
+</html>

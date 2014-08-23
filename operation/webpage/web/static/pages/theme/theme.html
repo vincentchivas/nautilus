@@ -1,0 +1,903 @@
+<!DOCTYPE HTML>
+<html manifest="theme.manifest">
+<head>
+<meta charset="UTF-8">
+<title>皮肤下载中心</title>
+<meta name="format-detection" content="telephone=no"/>
+<meta http-equiv="Cache-Control" content="no-transform"/> 
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<script>
+	//页面perf tracking
+	window.perf = {
+		startTime : {
+			launch : new Date().getTime()
+		},
+		trackNow : function(){
+			return this.trackEnd("launch");
+		},
+		trackStart : function(key){
+			this.startTime[key] = new Date().getTime();
+		},
+		trackEnd : function(key){
+			return new Date().getTime() - this.startTime[key];
+		}
+	};
+</script>
+<style>
+/*为了适配IE10，加了transition和transform，但发现在一些android机器上会导致-webkit-transition失效，所以统一把transition写在-webkit-transition的前面*/
+body{margin:0;padding:0;border:none;list-style:none;font-family:Arial;-webkit-text-size-adjust:none;-webkit-tap-highlight-color:rgba(0,0,0,0);background:#FFF;color:#000;font-size:16px;-ms-touch-action:none;-webkit-font-smoothing:antialiased;}
+
+.z-t-bar{z-index:100;background-image:none;display:-webkit-box;}
+.z-t-bar-i{-webkit-box-flex:1;text-align:center;font-size:15px;}
+.z-t .z-t-bar-i > span{color:#4a4a4a;}
+.z-t-c-i{width:100%;display:none;}
+.z-t-c-i.active{display:block;}
+
+.z-c{height:100%;overflow:hidden;position:relative;display:none;}
+.z-c-w{display:-webkit-box;width:100%;height:100%;-webkit-transform:translate3d(0, 0, 0);}
+.z-c-w.transitionable{-webkit-transition:-webkit-transform 0.25s ease;}
+.z-c-i{display:block;width:100%;}
+.z-c-p{position:absolute;bottom:0;background-color:rgba(0,0,0,.5);width:100%;text-align:center;z-index:10;}
+.z-c-p span{display:inline-block;width:5px;height:5px;margin:0 4px;border-radius:3px;background-color:#fcfcfc;}
+.z-c-p span.active{background-color:#2ca122;}
+
+#homeHead .z-t-bar{width:180px;float:right;margin-top:17px;margin-right:5px;}
+#homeHead{border-bottom:2px solid #58bb00;background:url('images/title_bar.jpg') no-repeat center center;-webkit-background-size:100% 45px;background-size:100% 45px;}
+#homeHead .z-t-bar-i{border-top-left-radius:5px;border-top-right-radius:5px;height:30px;line-height:30px;}
+#homeHead .z-t-bar-i.active{background-color:#58bb00;}
+#homeHead .z-t-bar-i.active > span{color:#fff;}
+#homeTitle{line-height:45px;color:#333;padding-left:10px;}
+.listWrap{display:inline-block;width:92px;height:104px;padding:7px 1px;border:1px solid rgba(187,187,187,.7);border-radius:4px;margin:8px 0;box-shadow:0 0 2px #b1b1b1;-webkit-box-shadow:0 0 2px #b1b1b1;font-size:14px;line-height:18px;}
+.listWrap:active{border:1px solid #379c00;box-shadow:0 0 2px #379c00;-webkit-box-shadow:0 0 2px #379c00;}
+.imgWrapper{background:#eee url('images/dolphin_w.png') no-repeat center center;-webkit-background-size:25px auto;background-size:25px auto;display:inline-block;}
+.z-l-r .imgWrapper{height:84px;width:81px;}
+.carouselImg{width:100%;}
+.carouselImg img{width:100%;}
+.iconImg{width:100%; height:100%;}
+#listWrap{overflow:hidden;}
+#listWrap .z-l-r{display:inline-block;width:33.3%;text-align:center;}
+.loadMore{display:none;text-align:center;height:50px;line-height:50px;}
+
+#detailHead{width:100%;height:35px;background-color:rgba(0,0,0,.5);position:absolute;top:0;left:0;z-index:1;color:#fff;font-size:17px;line-height:35px;text-align:center;transition: opacity .5s ease;-webkit-transition: opacity .5s ease;}
+.artWrap img{display:inline-block;max-width:100%;max-height:100%;}
+#detailFooter{position:absolute;bottom:8px;left:0;text-align:center;width:100%;height:94px;}
+.btnWrap{position:absolute;width:134px;left:50%;margin-left:-65px;border:1px solid #648155;height:37px;background-color:#6ebb00;border-radius:4px;}
+.btnWrap:active{background-color:#309100;}
+#downloadBtn{float:left;width:90px;height:27px;text-align:center;line-height:27px;color:#fff;text-decoration:none;font-size:20px;vertical-align:top;border-right:1px solid #9cef26;float:left;margin-top:5px;}
+.shareBtn{display:inline-block;width:40px;height:28px;border-left:1px solid #62a208;margin-top:5px;background:url("images/share.png") no-repeat center center;-webkit-background-size:19px auto;}
+.z-l-r .downloadBtn{width:66px;height:24px;font-size:16px;line-height:24px;border:1px solid #648155;background-color:#6ebb00;border-radius:4px;text-align:center;color:#fff;
+text-decoration:none;vertical-align:top;display:inline-block;}
+.infoWrap{position:absolute;left:50%;margin-left:-160px;bottom:10px;width:320px;height:30px;line-height:30px;text-align:center;background-color:rgba(0,0,0,.5);border-radius:134px;color:#fff;transition: opacity .5s ease;-webkit-transition: opacity .5s ease;}
+.infoSpan{display:inline-block;width:66px;padding-left:12px;margin-left:12px;}
+#downloads{background:url("images/icon_download.png") no-repeat left center;-webkit-background-size:14px auto;background-size:14px auto;}
+#size{background:url("images/icon_size.png") no-repeat left center;-webkit-background-size:14px auto;background-size:14px auto;}
+#updates{display:inline-block;width:112px;background:url("images/time.png") no-repeat left center;-webkit-background-size:15px auto;background-size:15px auto;margin-left:13px;padding-left:7px;}
+.clickBtn{display:inline-block;width:45px;height:45px;transition: opacity .5s ease;-webkit-transition: opacity .5s ease;}
+#preBtn{position:absolute;top:50%;margin-top:-23px;left:10px;background:url("images/left_btn.png");-webkit-background-size:45px auto;background-size:45px auto;}
+#preBtn:active{background:url("images/left_btn_pressed.png");-webkit-background-size:45px auto;background-size:45px auto;}
+#nextBtn{position:absolute;top:50%;margin-top:-23px;right:10px;background:url("images/right_btn.png");-webkit-background-size:45px auto;background-size:45px auto;}
+#nextBtn:active{background:url("images/right_btn_pressed.png");-webkit-background-size:45px auto;background-size:45px auto;}
+#detail{transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);position:absolute;top:0;left:0;background:#000;display:none;}
+#detailWrap{position:relative;overflow:hidden;}
+.artWrap{position:absolute;top:0;left:0;width:100%;height:100%;background:url("images/dolphin_w.png") no-repeat center center;-webkit-background-size:25px auto;background-size:25px auto;text-align:center;}
+.downloadNoti{display:none;position:absolute;width:140px;top:209px;left:50%;margin-left:-70px;}
+.notiText{text-align:center;color:#fff;margin-top:15px;line-height:24px;}
+.code{text-align:center;}
+.codeImg{display:inline-block;width:135px;height:auto;}
+.verticalLine{display:inline-block;width:1px;height:18px;background-color:#b1b1b1;vertical-align:middle;}
+
+#fontTab .listWrap{height:122px;}
+.uploader, #fontTab .listWrap .imgTitle{display:block;text-align:left;padding-left:4px;}
+.fontHead{line-height:50px;margin:0 8px;}
+.fontTitle{border-left:4px solid #58bb00;padding-left:8px;}
+.fontUpload{float:right;font-size:12px;}
+.fontUpload span{display:inline-block;height:40px;text-decoration:underline;color:#86b13d;margin-left:5px;background:url("images/dolphin.png") no-repeat center 6px;-webkit-background-size:18px auto;}
+
+@media screen and (orientation:landscape){
+	#listWrap .z-l-r{display:inline-block;width:25%;text-align:center;}
+
+	#loading{margin-top:80px;}
+}
+
+#loading{width:100%;height:90px;font-size:16px;color:#2d2d2d;text-align:center;margin-top:120px;}
+#loading div{height:54px;background:url("images/loading.png") no-repeat center center;-webkit-background-size:30px auto;background-size:30px auto;margin-bottom:10px;}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+
+</style>
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	ga('create', 'UA-41492209-3', 'dolphin-browser.com');
+	ga('send', 'pageview');
+
+	(function(){
+		var trackKey = "fastboot_tracking";
+		if(typeof(Storage) !== "undefined"){
+			var events = JSON.parse(sessionStorage.getItem(trackKey) || "[]");
+			for(var i=0; i<events.length; ++i){
+				ga.apply(window, events[i]);
+			}
+			sessionStorage.removeItem(trackKey);
+		}
+	})();
+
+</script>
+</head>
+<body>
+<div id="wrapView">
+	<section id="home">
+		<div id="headTab" class="z-t">
+			<header id="homeHead">
+				<div class="z-t-bar" style="display:none;">
+					<div class="z-t-bar-i">
+						<span>字体</span>
+					</div>
+					<div class="z-t-bar-i">
+						<span>皮肤</span>
+					</div>
+					<div class="z-t-bar-i">
+						<span>壁纸</span>
+					</div>
+				</div>
+				<div id="homeTitle">皮肤下载中心</div>
+			</header>
+			<div id="listWrap">
+				<div class="z-t-w">
+					<div class="z-t-c">
+						<div class="z-t-c-i">
+							<div id="fontCarousel" class="z-c carousel">
+								<div class="z-c-w">
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="fontTab">
+								<div class="fontHead">
+									<span class="fontTitle">字体列表</span>
+									<span class="fontUpload" onclick="theme.goToHaitunwai();">上传字体到<span>海豚湾</span></span>
+								</div>
+								<div class="z-l"></div>
+								<div class="loadMore">更多漂亮壁纸</div>
+							</div>
+						</div>
+						<div class="z-t-c-i">
+							<div id="themeCarousel" class="z-c carousel">
+								<div class="z-c-w">
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="themeTab">
+								<div class="z-l"></div>
+								<div class="loadMore">更多漂亮壁纸</div>
+							</div>
+						</div>
+						<div class="z-t-c-i">
+							<div id="paperCarousel" class="z-c carousel">
+								<div class="z-c-w">
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+									<div class="z-c-i">
+										<div class="imgWrapper carouselImg">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="paperTab">
+								<div class="z-l"></div>
+								<div class="loadMore">更多漂亮壁纸</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="detail">
+		<header id="detailHead">蓝色星光</header>
+		<div id="detailWrap"></div>
+		<span id="preBtn" class="clickBtn"></span><span id="nextBtn" class="clickBtn"></span>
+		<div id="downloadNoti" class="downloadNoti">
+			<div id="code" class="code"><img class="codeImg" src="images/code.jpg"></div>
+			<div id="notiText" class="notiText">下载海豚浏览器<br>即可拥有漂亮壁纸</div>
+		</div>
+		<footer id="detailFooter">
+			<div id="btnWrap" class="btnWrap"><a class="downloadBtn" id="downloadBtn">下载</a><span id="shareBtn" class="shareBtn" onClick="theme.shareToWeibo(this);"></span></div>
+			<div class="infoWrap">
+				<span class="infoSpan" id="downloads">1206次</span><span class="verticalLine"></span><span class="updates" id="updates">2013.05.03</span><span class="verticalLine"></span><span class="infoSpan" id="size">100.3k</span>
+			</div>
+		</footer>
+	</section>
+	<div id="loading">
+		<div></div>
+		<span>页面装扮中...</span>
+	</div>
+</div>
+</body>
+</html>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/zepto.min.js"></script>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/listdataadapter.min.js"></script>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/list.min.js"></script>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/tab.min.js"></script>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/carousel.min.js"></script>
+<script src="theme.js"></script>
+<script>
+var Theme = function(opt){
+	this.init(opt);
+};
+Theme.prototype = {
+	skinsAPI : "",
+	detailAPI : "",
+	pageNum : 12,
+	deadline : "2013-06-20 23:59:59",
+	displayID : null,
+	home : {
+		wrap : $("#home"),
+		mainWrap : $("#listWrap"),
+		main : $("#listWrap .z-t-w"),
+		tab : $("#homeHead .z-t-bar")
+	},
+	detail : {
+		wrap : $("#detail"),
+		mainWrap : $("#detailWrap"),
+		head : $("#detailHead"),
+		preBtn : $("#preBtn"),
+		nextBtn : $("#nextBtn"),
+		infoWrap : $(".infoWrap"),
+		btnWrap : $("#btnWrap"),
+		downloads : $("#downloads"),
+		size : $("#size"),
+		updates : $("#updates"),
+		downloadBtn : $("#detailFooter .downloadBtn"),
+		downloadNoti : $("#downloadNoti"),
+		shareBtn : $("#shareBtn"),
+		code : $("#code")
+	},
+	carousel: {
+		skin : $("#themeCarousel"),
+		wallpaper : $("#paperCarousel"),
+		font : $("#fontCarousel")
+	},
+	listObj : {
+		skin : $("#themeTab .z-l"),
+		wallpaper : $("#paperTab .z-l"),
+		font : $("#fontTab .z-l")
+	},
+	listOK : {
+		skin : false,
+		wallpaper : false,
+		font : false
+	},
+	page : {
+		skin : 1,
+		wallpaper : 1,
+		font : 1
+	},
+	load : {
+		skin : $("#themeTab .loadMore"),
+		wallpaper : $("#paperTab .loadMore"),
+		font : $("#fontTab .loadMore")
+	},
+	headTab : null,
+	isDetailShow : true,
+	curTab : "font",
+	loading : $("#loading"),
+	construction : $("#construction"),
+	curIndex : -1,  //当前主题、壁纸在list中的位置
+	curPicIndex : 0,   //当前效果图在某主题、壁纸中的位置
+	queryAry : null,
+	init : function(opt){
+		var self = this;
+		self.skinsAPI = opt.skinsAPI;
+		self.detailAPI = opt.detailAPI;
+		self.registerEvents();
+		self.initUI();
+
+		//判断当前显示哪个tab
+		self.queryAry = themeUtils.getMatchParams();
+		if(self.queryAry.v>97){
+			self.home.tab.css("display", "-webkit-box");
+			if(self.queryAry.type == "font"){
+				self.curTab = "font";
+			}else if(self.queryAry.type == "skin"){
+				self.curTab = "skin";
+				self.headTab.selectTab(1);
+			}else if(self.queryAry.type == "wallpaper"){
+				self.curTab = "wallpaper";
+				self.headTab.selectTab(2);
+			}
+		}
+
+		/* Force initial hash change for loading */
+		var event = document.createEvent("Events");
+		event.initEvent("hashchange", true, false);
+		window.dispatchEvent(event);
+	},
+	adjustPos : function(){
+		var self = this;
+		var vW = document.documentElement.clientWidth;
+		var vH = document.documentElement.clientHeight;
+		// //调整聊天页面的高度、宽度，为scroll做准备
+		self.home.mainWrap[0].style["width"] = vW + "px";
+		// self.home.mainWrap[0].style["height"] = vH - 47 + "px"; //footer为47，这里高度多加1，因为scrollTo(0,1)，底部会有1px的空隙；
+
+		self.detail.mainWrap[0].style["height"] = vH + "px";
+		self.detail.mainWrap[0].style["width"] = vW + "px";
+	},
+	initUI : function(){
+		var self = this;
+		self.headTab = $("#headTab").tab({
+			ui: "white",
+			animate: false,
+			index: 0,
+			tabChange: function(newIndex, oldIndex){
+				if(newIndex==0){
+					//home页中的tab切换到主题
+					self.curTab = "font";
+				}else if(newIndex==1){
+					//home页的tab切换到壁纸
+					self.curTab = "skin";
+				}else if(newIndex==2){
+					self.curTab = "wallpaper";
+				}
+
+				if(!self.listObj[self.curTab].reset){
+					//说明之前已经渲染过list了
+					self.renderList();
+					self.loadList(1);
+				}else{
+					self.hideLoading();
+				}
+			}
+		});
+	},
+	loadList : function(page){
+		var self = this;
+		if(!self.listObj[self.curTab].reset){
+			self.showLoading();
+		}
+		
+		//获取url里所传的参数
+		var queryAry = themeUtils.getMatchParams();
+		queryAry.vn = queryAry.v;
+		queryAry.page = page;
+		//用当前tab作为参数
+		queryAry.type = self.curTab;
+		queryAry.size = self.pageNum;
+		var url = self.skinsAPI;
+		self.load[self.curTab].html("装扮中...");
+		var trackStr = self.curTab+"_"+page;
+		window.perf && perf.trackStart(trackStr);
+		$.ajax({
+			type : "GET",
+			url : url,
+			data : queryAry,
+			success : function(text){
+				//home页面list数据的缓存
+				if(window.perf) {
+					ga('send', 'timing', 'data', trackStr, perf.trackEnd(trackStr));
+				}
+				if(page == 1){
+					themeUtils.setLocal(self.curTab, JSON.stringify(text));
+				}else{
+					//更新缓存
+					var local = themeUtils.getLocal(self.curTab);
+					local = JSON.parse(local);
+					local = local.concat(text);
+					themeUtils.setLocal(self.curTab,JSON.stringify(local));
+				}
+				self.page[self.curTab] = page;
+				self.renderList(text);
+			},
+			error : function(text){
+				console.log(self.curTab+" data is failed!");
+			}
+		});
+	},
+	renderList : function(text){
+		var self = this;
+		var listData = null;
+		if(text){
+			listData = text
+		}else{
+			listData = themeUtils.getLocal(self.curTab);
+			if(!listData){
+				return;
+			}
+			listData = JSON.parse(listData);
+		}
+
+		self.hideLoading();
+		if(listData){
+			self.listOK[self.curTab] = true;  //该tab的数据已经渲染过了
+			if(listData.length>0){
+				if(self.page[self.curTab]==1){
+					if(self.listObj[self.curTab].reset){
+						//这里会在更新缓存的时候重新渲染一次页面
+						self.listObj[self.curTab].reset({
+							data: listData,
+							adapter: {
+								type: "simple"
+							}
+						});
+					}else{
+						self.listObj[self.curTab].list({
+							type : "plain",
+							dataSource : {
+								data: listData,
+								adapter: {
+									type: "simple"
+								}
+							},
+							delegate: {
+								rowDOM: function (indexPath, data) {
+									return self.initListTemp(indexPath,data);
+								},
+								clickOnRow: function (indexPath, data, e) {
+									var item = data._text;
+									var target = e.target;
+									if(target.tagName.toLowerCase()=="a"){
+										window.location.href = item.download_url;
+									}else{
+										window.location.href = "#detail:"+item.id;
+									}
+								}
+							}
+						});
+					}
+					self.load[self.curTab].show();
+				}else{
+					for(i in listData){
+						self.listObj[self.curTab].insertAtIndexPath({ section: 0, row: $(".z-l-r",self.listObj[self.curTab]).length }, listData[i]);
+					}
+				}
+				if(listData.length<self.pageNum){
+					self.load[self.curTab].html("敬请期待更多...");
+					self.load[self.curTab].addClass("disabled");
+				}else{
+					self.load[self.curTab].html("更多漂亮壁纸");
+				}
+			}else{
+				self.load[self.curTab].html("敬请期待更多...");
+				self.load[self.curTab].addClass("disabled")
+			}
+
+			//判断是否显示banner
+			var banner = listData.banner;
+			if(banner && banner.length==3){
+				var imgWrapper = $(".carouselImg",self.carousel[self.curTab]);
+				for(var i=0; i<3; i++){
+					imgWrapper[i].innerHTML = "<img src='"+banner[i]+"' onerror='themeUtils.errorPic(this);'/>";
+				}
+
+				self.carousel[self.curTab].carousel({
+					showControl : true,
+					autoScroll : true
+				});
+			}
+		}
+	},
+	initListTemp : function(indexPath,data){
+		var self = this;
+		var item = data._text;
+		var uploaderHtml = "";
+		if(self.curTab == "font"){
+			var uploader = item.uploader || "服务器上传";
+			uploaderHtml = "<span class='uploader ellipsis'>"+uploader+"</span>";
+		}
+		var div = document.createElement("div");
+		var tempDOM = "";
+		tempDOM = "<div class='listWrap'>"+
+					"<div class='imgWrapper'>"+
+						"<img class='iconImg' src='"+item.icon+"' width=''>"+
+					"</div>"+
+					"<br />"+
+					"<span class='imgTitle ellipsis'>"+item.name+"</span>"+
+					uploaderHtml+
+				  "</div>"+
+				  "<br />"+
+				  "<a class='downloadBtn' href='"+item.download_url+"'>下载</a>";
+		div.innerHTML = tempDOM;
+		return div;
+	},
+	goToHaitunwai : function(){
+		location.href = "http://bbs.dolphin.com/forum-131-1.html";
+	},
+	initDetail : function(){
+		var self = this;
+		var tHash = themeUtils.lhash();
+		this.displayID = tHash.slice(7);
+		var localLists = themeUtils.getLocal(self.curTab);
+		var vW = document.documentElement.clientWidth;
+		var vH = document.documentElement.clientHeight;
+		self.detail.mainWrap[0].style["height"] = vH + "px";
+		self.detail.mainWrap[0].style["width"] = vW + "px";
+		self.curIndex = -1;
+		self.curPicIndex = 0;
+		if(localLists){
+			localLists = JSON.parse(localLists);
+			for(var i=0,l=localLists.length; i<l; i++){
+				var item = localLists[i];
+				if(item.id == this.displayID){
+					self.curIndex = i;  //当前的主题或壁纸位于lists的第几个
+					break;
+				}
+			}
+		}
+		self.curDetail();
+		var type = self.checkUserAgent();
+		if(type=="notdolphin"){
+			this.detail.downloadNoti.show();
+			this.detail.code.hide();
+		}else if(type=="pc"){
+			this.detail.downloadNoti.show();
+		}
+	},
+	curDetail : function(){
+		var self = this;
+		self.listLen = 0;  //当前tab下的主题或壁纸数量
+		self.curListLen = 0;  //当前主题或壁纸的图集数量
+		var curPic=null,prePic=null,nextPic=null;
+		var toBeDel = [];//要删除的DOM
+		var localLists = themeUtils.getLocal(self.curTab);
+		var vW = document.documentElement.clientWidth;
+		var vH = document.documentElement.clientHeight;
+		//先显示左右按钮
+		self.detail.preBtn.css("display", "inline-block");
+		self.detail.nextBtn.css("display", "inline-block");
+		if(localLists && self.curIndex>=0){
+			localLists = JSON.parse(localLists);
+			self.listLen = localLists.length;
+
+			curPic = localLists[self.curIndex];
+			self.curListLen = curPic.screenshots.length;
+
+			if(self.curIndex>0){
+				prePic = localLists[self.curIndex-1];
+			}
+			if(self.curIndex<self.listLen-1){
+				nextPic = localLists[self.curIndex+1];
+			}
+
+			if(self.curIndex>=0 && self.curIndex<=self.listLen){
+				var lArts = self.detail.mainWrap[0].getElementsByClassName("artWrap");
+				var hasPre=false,hasCur=false,hasNext=false;
+				for(var i=0,l=lArts.length;i<l;i++){
+					var tIndex = lArts[i].getAttribute("index");  //获取该图片位于list中的位置
+					var tPIndex =  lArts[i].getAttribute("pindex");  //获取图片位于图集的位置
+					if(tIndex==self.curIndex && tPIndex==self.curPicIndex){
+						hasCur = true;
+						self.curPicDiv = lArts[i];
+						themeUtils.setTransform(self.curPicDiv,0,0);  //设置当前的图片
+						self.detail.head[0].innerHTML = localLists[self.curIndex].name;
+						self.detail.downloads[0].innerHTML = localLists[self.curIndex].downloads+"次";
+						self.detail.size[0].innerHTML = localLists[self.curIndex].size;
+						self.detail.updates[0].innerHTML = localLists[self.curIndex].update_time.replace(/-/g,".");
+						self.detail.downloadBtn.attr("href",localLists[self.curIndex].download_url);
+						self.detail.shareBtn.attr("data",localLists[self.curIndex].description);
+					}else if((tIndex==self.curIndex && self.curPicIndex>0 && tPIndex==self.curPicIndex-1)||(tIndex==self.curIndex-1 && self.curPicIndex==0 && prePic && tPIndex==prePic.screenshots.length-1)){
+						hasPre = true;
+						self.prePicDiv = lArts[i];
+						themeUtils.setTransform(self.prePicDiv,-vW,0);
+					}else if((tIndex==self.curIndex && self.curPicIndex<self.curListLen-1 && tPIndex==self.curPicIndex+1)||(tIndex==self.curIndex+1 && self.curPicIndex==self.curListLen-1 && nextPic && tPIndex==0)){
+						hasNext = true;
+						self.nextPicDiv = lArts[i];
+						themeUtils.setTransform(self.nextPicDiv,vW,0);
+					}else{
+						lArts[i].style["display"] = "none";//隐藏不在范围内的DOM，节省资源
+						toBeDel.push(lArts[i]);//把不显示的放到一个数组里面，稍后删除（如果不删除，越来越多，for循环越来越长，之后会白屏，手机处理不过来）
+					}
+				}
+
+				if(!hasCur){
+					self.curPicDiv = self.detailDom(localLists,self.curIndex,self.curPicIndex);
+					themeUtils.setTransform(self.curPicDiv,0,0);
+					self.detail.mainWrap.append(self.curPicDiv);
+					self.detail.head[0].innerHTML = localLists[self.curIndex].name;
+					self.detail.downloads[0].innerHTML = localLists[self.curIndex].downloads+"次";
+					self.detail.size[0].innerHTML = localLists[self.curIndex].size;
+					self.detail.updates[0].innerHTML = localLists[self.curIndex].update_time.replace(/-/g,".");
+					self.detail.downloadBtn.attr("href",localLists[self.curIndex].download_url);
+					self.detail.shareBtn.attr("data",localLists[self.curIndex].description);
+				}
+
+				if(!hasPre){
+					if(self.curIndex>0 || self.curPicIndex>0){
+						if(self.curPicIndex>0){
+							self.prePicDiv = self.detailDom(localLists,self.curIndex,self.curPicIndex-1);
+							themeUtils.setTransform(self.prePicDiv,-vW,0);//设置为上一篇
+							self.detail.mainWrap.append(self.prePicDiv);
+						}else if(prePic){
+							var tPLen = prePic.screenshots.length;
+							self.prePicDiv = self.detailDom(localLists,self.curIndex-1,tPLen-1);
+							themeUtils.setTransform(self.prePicDiv,-vW,0);//设置为上一篇
+							self.detail.mainWrap.append(self.prePicDiv);
+						}else{
+							self.prePicDiv = null;
+							self.detail.preBtn.css("display", "none");
+						}
+					}else{
+						//到第一个图集的第一张图片了，把prePicDiv清理掉
+						self.prePicDiv = null;
+						self.detail.preBtn.css("display", "none");
+					}
+				}
+
+				if(!hasNext){
+					if(self.curIndex<self.listLen-1 || self.curPicIndex<self.curListLen-1){
+						if(self.curPicIndex<self.curListLen-1){
+							self.nextPicDiv = self.detailDom(localLists,self.curIndex,self.curPicIndex+1);
+							themeUtils.setTransform(self.nextPicDiv,vW,0);
+							self.detail.mainWrap.append(self.nextPicDiv);
+						}else if(nextPic){
+							self.nextPicDiv = self.detailDom(localLists,self.curIndex+1,0);
+							themeUtils.setTransform(self.nextPicDiv,vW,0);
+							self.detail.mainWrap.append(self.nextPicDiv);
+						}else{
+							self.nextPicDiv = null;
+							self.detail.nextBtn.css("display", "none");
+						}
+					}else{
+						self.nextPicDiv = null;
+				        	self.detail.nextBtn.css("display", "none");
+                                        }
+				}
+
+				//删除不需要的div，只留三个
+				for(var i=0,l=toBeDel.length;i<l;i++){
+					//删掉不需要的，这样最多就三个div
+					themeUtils.delNode(toBeDel[i]);
+				}
+			}
+		}else{
+			var id = themeUtils.lhash().slice(7);
+			var detailPara = {
+				id : id
+			};
+			var url = self.detailAPI;
+			self.load[self.curTab].html("装扮中...");
+			$.ajax({
+				type : "GET",
+				url : url,
+				data : detailPara,
+				success : function(text){
+					self.detail.preBtn.css("display", "none");
+					self.detail.nextBtn.css("display", "none");
+					var tText = text;
+					var tDiv = document.createElement("div");
+					tDiv.className = "artWrap";
+					if(tText.screenshots && tText.screenshots[0]){
+						tDiv.innerHTML = "<img src='" + tText.screenshots[0].url + "' onerror='themeUtils.errorPic(this)' style='display:inline-block;'/>";
+					}else{
+						tDiv.innerHTML = "没有效果图预览哦！";
+					}
+					
+					var lArts = this.detail.mainWrap.getElementsByClassName("artWrap");
+					for(var i=0,l=lArts.length;i<l;i++){
+						lArts[i].style["display"] = "none";
+						toBeDel.push(lArts[i]);
+					}
+					for(var i=toBeDel.length-1;i>=0;i--){
+						themeUtils.delNode(toBeDel[i]);//全部删掉
+					}
+					this.curPicDiv = tDiv;
+					themeUtils.setTransform(this.curPicDiv,0,0);//设置为当前的页面
+					self.detail.head[0].innerHTML = tText.name;
+					self.detail.downloads[0].innerHTML = tText.downloads+"次";
+					self.detail.size[0].innerHTML = tText.size;
+					self.detail.updates[0].innerHTML = tText.update_time.replace(/-/g,".");
+					self.detail.downloadBtn.attr("href",tText.download_url);
+					self.detail.shareBtn.attr("data",tText.description);
+					self.detail.mainWrap.append(this.curPicDiv);
+				},
+				error : function(text){
+				}
+			});
+		}
+	},
+	detailDom : function(ary,index,pindex){
+		var self = this;
+		var tDiv = document.createElement("div");
+		tDiv.className = "artWrap";
+		var item = null;
+		var vW = document.documentElement.clientWidth;
+		var vH = document.documentElement.clientHeight;
+		if(index!=undefined && pindex!=undefined){
+			tDiv.setAttribute("index",index);
+			tDiv.setAttribute("pindex",pindex);
+			item = ary[index];
+			var pic = item.screenshots[pindex];
+			if(pic){
+				tDiv.innerHTML = "<img src='" + pic.url + "' onerror='themeUtils.errorPic(this)' style='display:inline-block;'/>";
+			}else{
+				tDiv.innerHTML = "没有效果图预览哦！";
+			}
+		}
+		return tDiv;
+	},
+	checkUserAgent : function(){
+		if(window.dolphin){
+			return "dolphin"; //海豚浏览器
+		}else{
+			var mobile = (/iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+			if(mobile){
+				return "notdolphin";//非海豚浏览器
+			}else{
+				return "pc";//PC
+			}
+		}
+		
+	},
+	shareToWeibo : function(target){
+		//分享到微博
+		var tHash = themeUtils.lhash();
+		if(!tHash.match(/^(detail:)\S+$/i)){
+			//只有在detail页面，才能分享
+			return false;
+		}
+		var url = "http://weibo.cn/ext/share?wm=4124";
+		var desc = target.getAttribute("data");
+		var title=desc+" 清新靓丽，雅俗共赏，我在用海豚浏览器，个性皮肤壁纸任你选。";
+		var lca = location.href.slice(0,location.href.lastIndexOf(":")+1);
+		lca += this.displayID;
+		url += "&rt=" + encodeURIComponent(title);
+		url += "&ru=" + encodeURIComponent(lca);
+
+		if(window.dolphinShare && window.dolphinShare.share){
+			//海豚浏览器独有接口
+			window.dolphinShare.share(title, lca);
+		}else{
+			window.open(url,"皮肤下载中心");
+		}
+	},
+	toggleDetail : function(){
+		var self = this;
+		if(self.isDetailShow){
+			self.isDetailShow = false;
+			self.detail.head.css("opacity", 0);
+			self.detail.preBtn.css("opacity", 0);
+			self.detail.nextBtn.css("opacity", 0);
+			self.detail.infoWrap.css("opacity", 0);
+			self.detail.btnWrap.css("opacity", 0);
+			self.detail.downloadNoti.css("opacity", 0);
+		}else{
+			self.isDetailShow = true;
+			self.detail.head.css("opacity", 1);
+			self.detail.preBtn.css("opacity", 1);
+			self.detail.nextBtn.css("opacity", 1);
+			self.detail.infoWrap.css("opacity", 1);
+			self.detail.btnWrap.css("opacity", 1);
+			self.detail.downloadNoti.css("opacity", 1);
+		}
+	},
+	showLoading : function(){
+		//显示loading
+		this.loading.show();
+	},
+	hideLoading : function(){
+		//隐藏loading
+		this.loading.hide();
+	},
+	registerEvents: function() {
+		var self = this;
+
+		$(window).bind("resize",function(){
+			//延迟调用，以免因浏览器尚未完成页面调整而得到错误的页面布局
+			setTimeout(function(){self.adjustPos();}, 300);
+		});
+
+		$(window).bind("load",function(){
+			self.adjustPos();
+		});
+
+		$("#detailWrap").bind("click",function(){
+			self.toggleDetail();
+		});
+
+		self.detail.nextBtn.bind("click",function(){
+			if(self.curIndex<self.listLen-1 || self.curPicIndex<self.curListLen-1){
+				var localLists = themeUtils.getLocal(self.curTab);
+				localLists = JSON.parse(localLists);
+				if(self.curPicIndex<self.curListLen-1){
+					//当前图集还有下一张图可以展示
+					self.curPicIndex++;
+				}else{
+					//切换图集
+					var nexPic = localLists[self.curIndex+1];
+					if(nexPic){
+						self.curPicIndex = 0;
+						self.curIndex++;
+					}
+				}
+			}
+			self.curDetail();
+			self.displayID = localLists[self.curIndex].id;
+		});
+
+		self.detail.preBtn.bind("click",function(){
+			if(self.curIndex>0 || self.curPicIndex>0){
+				var localLists = themeUtils.getLocal(self.curTab);
+				localLists = JSON.parse(localLists);
+				if(self.curPicIndex>0){
+					self.curPicIndex--;
+				}else{
+					//切换图集
+					var prePic = localLists[self.curIndex-1];
+					if(prePic){
+						self.curPicIndex = prePic.screenshots.length-1;
+						self.curIndex--;
+					}
+				}
+			}
+			self.curDetail();
+			self.displayID = localLists[self.curIndex].id;
+		});
+
+		$(window).bind('hashchange',function(){
+			var hash = window.location.hash;
+			self.home.wrap.hide();
+			self.detail.wrap.hide();
+
+			if(hash){
+				if(hash.substr(0, 7) == "#detail"){
+				self.initDetail();
+				self.detail.wrap.show();
+				}
+			} else {
+				if(!self.listOK[self.curTab]){
+					//第一次初始化时渲染页面，后续hash变化就不需要重新渲染
+					self.renderList();
+					self.loadList(1);
+				}
+				self.detail.mainWrap.html("");
+				self.home.wrap.show();
+			}
+		});
+
+		$(window).bind("scroll", function(){
+			var toTop = $(window).scrollTop();
+			var diff = (toTop + $(window).height()) - $(document).height();
+			if(diff >= 0){
+				//scroll to bottom
+				if(!self.load[self.curTab].hasClass("disabled")){
+					self.loadList(self.page[self.curTab]+1);
+				}
+			}
+		});
+	}
+}
+
+window.theme = new Theme({skinsAPI : "/api/1/skins.json",detailAPI : "/api/1/skin/detail.json"});
+</script>

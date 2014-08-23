@@ -1,0 +1,30 @@
+{% spaceless %}
+<div class='scroll' style='left:0;'>
+    {% for topItem in top_list %}
+        <div class="slice">
+            {% if topItem.is_third_part %}
+                <a href={{ topItem.third_part_url }} onclick="track(this, 'image', '{{ topItem.title|addslashes }}' , '{{ topItem.third_part_url }}');" target='_blank' >
+                    <img src='{{ topItem.top_pic }}' />
+                </a>
+            {% else %} {% if topItem.category_id %}
+                <a href='#cateapps' onclick="loadCategoryApps(this, 'image', '{{ topItem.category_id }}', '{{ topItem.category_title|addslashes }}');">
+                    <img src='{{ topItem.top_pic }}' />
+                </a>
+            {% else %}
+                <a href={{ topItem.download_url }} onclick="track(this, 'image', '{{ topItem.title|addslashes }}' , '{{ topItem.download_url }}');" {% if "itms-apps://" not in topItem.download_url and "market://" not in topItem.download_url %}target='_blank'{% endif %} >
+                    <img src='{{ topItem.top_pic }}' />
+                </a>
+            {% endif %}{% endif %}
+        </div>
+    {% endfor %}
+</div>
+<div class='scrollbar'>
+    {% for topItem in top_list %}
+	{% if forloop.first %}
+        <div class="black"></div>
+	{% else %}
+	<div></div>
+	{% endif %}
+    {% endfor %}
+</div>
+{% endspaceless %}

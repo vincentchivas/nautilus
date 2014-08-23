@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>意见反馈</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+        name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+    <meta name="keyword" content="海豚浏览器,安卓应用,用户反馈" />
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="{{STATIC_URL}}styles/feedback.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript">
+        var DEVICETYPES = ['iphone','ipod','ipad','incognito','webmate', 'android','dream', 'cupcake','blackberry9500',
+                'blackberry9530','blackberry9520','blackberry9550','blackberry 9800','webos','s8000','bada','googlebot-mobile']; 
+        /**
+         * function deviceInfo()
+         * DESC: 
+         * This function will return an object.
+         * The object contains two property: "deviceType" and "pixelRatio"
+         * Possible values for "deviceType" are listed in the constant DEVICETYPES(/static/js/constants.js)
+         * Possible values for "pixelRatio" are LOW_DENSITY_SCREEN\NORMAL_DENSITY_SCREEN\HIGH_DENSITY_SCREEN on android(Until now, I found it is the same on ios). 
+         * You can get the result as follows:
+         *     var info = deviceInfo();
+         * Then the result object would be something like this:
+         *     {
+         *         "deviceType": "ipad",
+         *         "pixelRatio": 1.5
+         *     }
+        */
+        function deviceInfo() {
+            var deviceType = "";
+            var pixelRatio = window.devicePixelRatio; 
+
+            for(var index in DEVICETYPES) {
+                if(navigator.userAgent.toLowerCase().indexOf( DEVICETYPES[index] ) > -1 ) {
+                    deviceType = DEVICETYPES[index];
+                }
+            }
+
+            return { "deviceType": deviceType, "pixelRatio": pixelRatio };
+        }
+
+        var device = deviceInfo()
+        if(device['deviceType'] == 'ipad'){
+            var metas = document.getElementsByTagName('meta');
+            for(var i = 0; i < metas.length; i++){
+                if (metas[i].name == 'viewport'){
+                    metas[i].content = "width=screen-width,initial-scale=1,minimum-scale=1,maximum-scale=1"; 
+                }
+            }
+        }
+
+        function submitform() {
+			var message= document.getElementById("message");
+			if(message.value=='在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~' || message.value=='')
+			{
+				spanNotify.style.display = "block";				
+				return false;
+			}
+			else
+			{
+				spanNotify.style.display = "none";
+				document.forms["feedbackform"].submit();
+			}
+            
+        }
+        function onload() {
+            if (Request('result')) {
+                var result = decodeURI(Request('result'));
+
+                if (result.toLowerCase() == "ok") {
+                    document.getElementById("content").style.display = "none";
+                    document.getElementById("submitFinished").style.display = "block";
+                }
+
+            }
+        }
+
+        function Request(argname) {
+            var url = document.location.href;
+            var arrStr = url.substring(url.indexOf("?") + 1).split("&");
+
+            for (var i = 0; i < arrStr.length; i++) {
+                var loc = arrStr[i].indexOf(argname + "=");
+                if (loc != -1) {
+                    return arrStr[i].replace(argname + "=", "").replace("?", "");
+                    break;
+                }
+            }
+            return "";
+
+        }      
+
+    </script>
+
+<style>
+html, body
+{
+	 height: 100%;
+}
+#dlMainPage
+{
+	border:thin #000
+	 height: 100%;
+	 min-height: 100%; 
+	 text-align: left;
+}
+
+</style>
+</head>
+<body>
+    <dl id="dlMainPage">
+        <dd>           
+            <div id="content">                
+                <div id="feedback">
+                    <form method="POST" action="" id="feedbackform">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">                      
+                        <tr>
+                            <td >
+                                <table cellspacing="0" cellpadding="0" style="width: 100%;">
+                                    <tbody>
+                                        <tr>
+                                            <td width="80" style="white-space: nowrap; padding: 0px 5px 0px 6px;">
+                                                <span  class="selecttype">联系方式：</span>
+                                            </td>
+                                            <td style="padding-right: 5px;">
+                                                <div class="txtLeft">
+                                                    <div class="txtRight">
+                                                        <div class="txtCenter">
+                                                            <input type="text" HIDEFOCUS="true" name="contact_info" style="color:#636363;line-height:28px;height:28px;margin-top:5px;" value="邮件或微博" onfocus="if(value=='邮件或微博') {value=''}" onblur="if (value=='') {value='邮件或微博'}" >
+                                                        </div>
+                                                    </div>
+                                                </div></td>
+                                            <td width="50px"><span style="color:#5DA456;font-size:12px;">（可选）</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                      
+                        <tr>
+                            <td  style="height: 125px;">                            
+                                <table cellspacing="0" cellpadding="0" style="width: 100%;">
+                                    <tbody>
+                                    	<tr><td style="height: 15px;"></td></tr>
+                                        <tr>
+                                            <td style="width: 100%; padding-right: 5px;">
+                                                <div class="inputLeft" style="height: 120px;">
+                                                    <div class="inputRight" style="height: 120px;">
+                                                        <div class="inputCenter" style="height: 120px; width: 100%;">
+                                                            <textarea id="message" HIDEFOCUS="true" name="message" rows="5" style="width: 100%; height: 107px; color:#636363;font-size:14px;-webkit-appearance:caret;"
+                                                                value="在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~" onfocus="if(value=='在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~') {value='';}"
+                                                                onblur="if (value=='') {value='在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~'};">在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~</textarea>
+                                                                </div>
+                                                    </div>
+                                                </div>
+                                                <span  id="spanNotify" style="color:#5DA456;font-size:14px;font-weight: bold;margin-top:10px;display:none;"><img src="{{STATIC_URL}}image/pages/notifyicon.png" width="12px" style="display:inline;"/>您还没填写您的反馈意见哦...</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="name" value="name">
+                        <input type="hidden" name="os" value="{{os}}">
+                        <input type="hidden" name="l" value="{{locale}}">
+                        <input type="hidden" name="fish" value="{{fish}}">
+                        <input type="hidden" name="feedback_type" id="feedback_type" value="feedback" />
+                        
+                        <tr>
+                            <td  style="text-align: right;">
+                                <input type="hidden" value="/feedback_ios_ok.html" name="callback_url" id="callback_url" />
+                                <a href="javascript: submitform()">
+                                    <img id="btnSubmit" width="74px" src="{{STATIC_URL}}image/pages/feedback/submit.png" /></a> 
+                            </td>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+            </div>
+          
+        </dd>
+    </dl>
+  
+</body>
+</html>

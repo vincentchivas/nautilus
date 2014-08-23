@@ -1,0 +1,3 @@
+global-include *.tac *.cfg *.nginx *.conf
+graft scripts
+graft static

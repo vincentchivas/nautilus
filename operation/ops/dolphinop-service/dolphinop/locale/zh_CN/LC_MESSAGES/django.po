@@ -1,0 +1,200 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-08-01 23:27-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#: web/templates/hotapps/addon.html:7
+msgid "Add-ons"
+msgstr "海豚插件"
+
+#: web/templates/hotapps/addon.html:12
+msgid "addon.png"
+msgstr "addon_cn.png"
+
+#: web/templates/hotapps/addon.html:35 web/templates/hotapps/addon.html:63
+msgid "Loading..."
+msgstr "加载中..."
+
+#: web/templates/hotapps/addon.html:36 web/templates/hotapps/addon.html:64
+msgid "Load More Apps"
+msgstr "加载更多"
+
+#: web/templates/hotapps/addon.html:39
+msgid "Top"
+msgstr "顶端"
+
+#: web/templates/hotapps/addon.html:239
+msgid "Share"
+msgstr "分享"
+
+#: web/templates/hotapps/addon.html:243
+msgid "Get it"
+msgstr "下载"
+
+#: web/templates/hotapps/addon.html:251
+#: web/templates/hotapps/details_ipad.html:31
+msgid "Size: "
+msgstr "大小："
+
+#: web/templates/hotapps/addon.html:252 web/templates/hotapps/ads.html:14
+msgid "Type: "
+msgstr "类型："
+
+#: web/templates/hotapps/addon.html:253
+msgid "Developers: "
+msgstr "开发商："
+
+#: web/templates/hotapps/addon.html:254
+#: web/templates/hotapps/details_ipad.html:33
+msgid "Description: "
+msgstr "简介："
+
+#: web/templates/hotapps/addon.html:256 web/templates/hotapps/addon.html:315
+msgid "More"
+msgstr "查看"
+
+#: web/templates/hotapps/addon.html:282
+msgid "You may also like"
+msgstr "猜你喜欢"
+
+#: web/templates/hotapps/addon.html:314
+msgid "Less"
+msgstr "收起"
+
+#: web/templates/hotapps/ads.html:5
+msgid "Today's recommended"
+msgstr "今日推荐"
+
+#: web/templates/hotapps/ads.html:13
+#: web/templates/hotapps/details_ipad.html:29
+msgid "Category: "
+msgstr "分类："
+
+#: web/templates/hotapps/ads.html:18
+msgid "The recommendation reasons:"
+msgstr "推荐理由："
+
+#: web/templates/hotapps/applist_ipad.html:11
+#: web/templates/hotapps/applist_ipad.html:31
+#: web/templates/hotapps/details_ipad.html:7
+#: web/templates/hotapps/details_ipad.html:19
+msgid "free"
+msgstr "免费"
+
+#: web/templates/hotapps/applist_ipad.html:33
+#: web/templates/hotapps/details_ipad.html:21
+msgid "limit free"
+msgstr "限时免费"
+
+#: web/templates/hotapps/details.html:4 web/templates/hotapps/details.html:10
+#: web/templates/hotapps/ipad.html:5 web/templates/hotapps/phone.html:5
+#: web/templates/hotapps/phone.html:12
+msgid "Hot Apps"
+msgstr "热门程序"
+
+#: web/templates/hotapps/details.html:19
+msgid "Download"
+msgstr "免费下载"
+
+#: web/templates/hotapps/details.html:21
+msgid "Version:"
+msgstr "版本："
+
+#: web/templates/hotapps/details.html:22
+msgid "Category:"
+msgstr "类别："
+
+#: web/templates/hotapps/details.html:23
+msgid "Size:"
+msgstr "大小："
+
+#: web/templates/hotapps/details.html:24
+msgid "Developer:"
+msgstr "开发商："
+
+#: web/templates/hotapps/details.html:28
+#: web/templates/hotapps/details_ipad.html:37
+msgid "Screenshots"
+msgstr "软件截图"
+
+#: web/templates/hotapps/details.html:50
+msgid "Description:"
+msgstr "简介："
+
+#: web/templates/hotapps/details.html:53 web/templates/hotapps/details.html:77
+msgid "show details"
+msgstr "更多详情"
+
+#: web/templates/hotapps/details.html:77
+msgid "hide details"
+msgstr "隐藏详情"
+
+#: web/templates/hotapps/ipad.html:13 web/templates/hotapps/phone.html:21
+msgid "Featured"
+msgstr "编辑推荐"
+
+#: web/templates/hotapps/ipad.html:16
+msgid "Limit free"
+msgstr "限时免费"
+
+#: web/templates/hotapps/ipad.html:19
+msgid "Games"
+msgstr "游戏"
+
+#: web/templates/hotapps/ipad.html:22
+msgid "Applications"
+msgstr "应用"
+
+#: web/templates/hotapps/phone.html:26
+msgid "Free Now"
+msgstr "限时免费"
+
+#: web/templates/hotapps/phone.html:28
+msgid "Trending"
+msgstr "热门下载"
+
+#: web/templates/hotapps/phone.html:33
+msgid "Categories"
+msgstr "应用分类"
+
+#: web/templates/hotapps/phone2.html:7
+msgid "AppBox"
+msgstr ""
+
+#~ msgid ""
+#~ "http://m.facebook.com/sharer.php?u=<%=encodeURIComponent(location."
+#~ "href)%>&t=<%=encodeURIComponent(obj.title)%>"
+#~ msgstr ""
+#~ "http://m.weibo.com/sharer.php?u=<%=encodeURIComponent(location.href)%>&t=<"
+#~ "%=encodeURIComponent(obj.title)%>"
+
+#, fuzzy
+#~ msgid "No More Apps"
+#~ msgstr "加载更多"
+
+#~ msgid "Free"
+#~ msgstr "免费"
+
+#~ msgid "Limit"
+#~ msgstr "限时免费"
+
+#~ msgid "Charge"
+#~ msgstr "付费"
+
+#~ msgid "Discount"
+#~ msgstr "打折"

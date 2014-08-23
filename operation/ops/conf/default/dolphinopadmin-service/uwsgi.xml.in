@@ -1,0 +1,19 @@
+<!-- 
+ author:kunli
+ date:2011-03-30
+ email:kunli@bainainfo.com-->
+<uwsgi>
+    <socket>%(#dolphinop_admin_service.ip)s:%(#dolphinop_admin_service.http_port)s</socket>
+    <env>DJANGO_SETTINGS_MODULE=dolphinopadmin.settings</env>
+    <module>django.core.handlers.wsgi:WSGIHandler()</module>
+    <buffer-size>25000</buffer-size>
+    <processes>12</processes>
+    <master/>
+    <master-as-root />
+    <enable-threads />
+    <spooler>/var/app/enabled/dolphinopadmin-service/dolphinopadmin/cronjob</spooler>
+    <import>dolphinopadmin.advert.advert_report</import>
+    <import>dolphinopadmin.cronjob.cronjobs</import>
+    <daemonize>%(log_dir_base)s/dolphinopadmin-service/uwsgi.log</daemonize>
+</uwsgi>
+

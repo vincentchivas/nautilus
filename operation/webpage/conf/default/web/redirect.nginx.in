@@ -1,0 +1,23 @@
+server {
+    listen           %(web_port)s;
+    server_name      redirect.dolphin.com;
+        gzip             on;
+        gzip_comp_level  6;
+        gzip_min_length  1000;
+        gzip_proxied any;
+        gzip_buffers 16 8k;
+        gzip_types       application/javascript text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+        gzip_disable     "msie6";
+
+    root /var/app/enabled/web/static/pages/redirect;
+
+    log_format redirect_access '$remote_addr - $remote_user [$time_local]  '
+                '"$request" $status $body_bytes_sent '
+                '$request_time $upstream_response_time '
+                '$upstream_cache_status '
+                '"$http_referer" "$http_user_agent"';
+
+    access_log       %(log_dir_base)s/web/access.log redirect_access;
+    error_log       %(log_dir_base)s/web/error.log;
+    index            index.html index.htm index.php;
+}

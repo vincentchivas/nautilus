@@ -1,0 +1,14 @@
+{% spaceless %}
+{% for cate in cate_list %}
+{% cycle 'row1' 'row2' as rowcolors silent %}
+<a class='cate {{ rowcolors }}' href='#cateapps' onclick="loadCategoryApps(this, 'item', '{{ cate.id }}', '{{ cate.title|addslashes }}');">
+	<img class='icon lazy' src='{{ STATIC_URL }}image/pages/hotapps/dolphin.png' data-original='{{ cate.favicon }}' />
+	<div class='arr'></div>
+	<ul class='details'>
+		<li class='title'>{{ cate.title }}</li>
+		<li class='desp'>{{ cate.short_description }}</li>
+	</ul>
+	<div class='clear'></div>
+</a>
+{% endfor %}
+{% endspaceless %}

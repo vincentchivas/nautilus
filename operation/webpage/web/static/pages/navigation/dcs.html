@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>内容中心</title>
+<script>
+var baina = {
+	//兼顾工具函数、全局管理
+	pUrl : "*",
+	//pUrl : "http://test1.dolphin-browser.com/",
+	addEvent : function(obj,eventType,func){obj.addEventListener(eventType,func,false)},
+	ajaxGet : function(url,successfn,failfn){
+		var xmlhttp;
+		if (window.XMLHttpRequest){
+			xmlhttp=new XMLHttpRequest();
+		}else{
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send();
+		xmlhttp.onreadystatechange=function(){
+			if(xmlhttp.readyState==4){
+				if(xmlhttp.status==200 && successfn!=undefined){
+					successfn(xmlhttp.responseText);
+				}else if(failfn != undefined){
+					//alert("status:" + xmlhttp.status + " url:"+url);
+					failfn(xmlhttp.responseText);
+				}
+			}else{
+				//错误函数
+			}
+		}
+	},
+	dataToQuery : function(data){
+		//把location里面的search整理成json，然后返回整个JSON
+		var urlArray = data.split("&");
+		var result = {};
+		for(var i=0,l=urlArray.length;i<l;i++){
+			var pos = urlArray[i].indexOf("=");
+			if(pos!=-1){
+				var key = urlArray[i].slice(0,pos);
+				var value = urlArray[i].slice(pos+1);
+				result[key] = value;
+			}
+		}
+		return result;
+	},
+	dataToJson : function(data,get){
+		//把location里面的search整理成json，然后返回具体的值
+		var urlArray = data.split("&");
+		var result = {};
+		for(var i=0,l=urlArray.length;i<l;i++){
+			var pos = urlArray[i].indexOf("=");
+			if(pos!=-1){
+				var key = urlArray[i].slice(0,pos);
+				var value = urlArray[i].slice(pos+1);
+				result[key] = value;
+			}
+		}
+		if(result[get]){
+			return result[get];
+		}else{
+			return null;
+		}
+	},
+	postM : function(msg, origin){
+		if(!origin || "null" == origin) {
+			origin = "*";
+		}
+		window.parent.postMessage(msg, origin);
+	}
+};
+baina.addEvent(window,"message",function(e){
+	var query = baina.dataToQuery(e.data);
+	var url = "/api/2/sections?" + e.data;
+	baina.ajaxGet(url,function(text){
+		if(typeof text=="string" && (text.slice(0,10).toLowerCase().match("<html") || text.slice(0,10).toLowerCase().match("<!doctype"))){
+			baina.postM("", e.origin);
+		}else{
+			var tResponse = eval("("+text+")");
+			baina.postM(JSON.stringify(tResponse), e.origin);
+		}
+	},function(){
+		baina.postM(JSON.stringify([]), e.origin);
+	});
+});
+</script>
+</head>
+<body>
+</body>
+</html>

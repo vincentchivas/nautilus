@@ -1,0 +1,44 @@
+server {
+    listen           %(http_port)s;
+    server_name      %(admin_url)s;
+	gzip             on;
+	gzip_comp_level  6;
+	gzip_min_length  1000;
+	gzip_types       text/plain application/xml image/*;
+	gzip_disable     "msie6";
+    root             /var/app/enabled/dolphinopadmin-webfront/static/;
+	access_log       %(log_dir_base)s/dolphinopadmin-webfront/access.log;
+	error_log       %(log_dir_base)s/dolphinopadmin-webfront/error.log;
+	index		 index.html index.htm index.php;
+
+	# Load static resources.
+	uwsgi_connect_timeout 60;
+    uwsgi_read_timeout 3600;
+    uwsgi_send_timeout 3600;
+	location /admin/media { 
+        alias /var/app/data/dolphinopadmin-service;
+	}
+	location /admin { 
+        uwsgi_pass dolphinop_admin;
+        include uwsgi_params;
+	}
+	location ~(favicon.ico) {
+        alias /var/app/enabled/dolphinopadmin-webfront/static/favicon.ico;
+	    expires 30d;
+	    break;
+	 }
+        location /nginx-status {
+            stub_status on;
+            allow 127.0.0.1;
+            allow 119.97.214.98;
+            deny all;
+        }
+
+    client_max_body_size 50M;
+}
+
+upstream dolphinop_admin{
+###template(dolphinop_admin_service)
+        server %(#dolphinop_admin_service.ip)s:%(#dolphinop_admin_service.http_port)s;
+###
+}

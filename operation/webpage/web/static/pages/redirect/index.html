@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+<script>
+	var fromDefault = {
+		sms: 'http://news.dolphin-browser.com/#from=sms'
+	};
+
+	var queryStrings = {};
+	var search = location.search;
+	if (search.length){
+		var queries = search.substring(1).split('&');
+		for (var i=0, k=queries.length; i<k; ++i){
+			var pair = queries[i].split('=');
+			queryStrings[pair[0]] = decodeURIComponent(pair[1]);
+		}
+	}
+
+	if (queryStrings.target){
+		if (queryStrings.back || queryStrings.from in fromDefault){
+			var backUrl = queryStrings.back ? queryStrings.back : fromDefault[queryStrings.from];
+
+			var timer = null;
+			var redirect = function(){
+				var redirectKey = 'redirect-target';
+				if (sessionStorage.getItem(redirectKey) == queryStrings.target) {
+					sessionStorage.removeItem(redirectKey);
+					clearInterval(timer);
+					location.replace(backUrl);
+				} else {
+					sessionStorage.setItem(redirectKey, queryStrings.target);
+					location.assign(queryStrings.target);
+					setTimeout(function(){
+						//延迟1秒后开始interval计时，避免因网络延迟而直接跳转到第二步
+						timer = setInterval(function(){
+							redirect();
+						}, 200);
+					}, 1000);
+				}
+			};
+
+			setTimeout(function(){
+				redirect();
+			}, 200);
+		} else {
+			location.replace(queryStrings.target);
+		}
+	} else {
+		location.replace("http://nav.dolphin-browser.com");
+	}
+</script>
+</body>
+</html>

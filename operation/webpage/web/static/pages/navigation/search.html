@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html manifest="sitenav.manifest"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<title>手机酷站</title>
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Cache-Control" content="no-transform"> 
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+<link rel="stylesheet" type="text/css" href="sitenav.css"/>
+<style>
+#navlist {clear:both;margin:0;padding:0 10px;background-color:#f6f6f6;}
+.subclass {clear:both;list-style-type:square;color:#0c7b00;margin:0;height:26px;padding-top:10px;}
+.subclass >span{color:#0c7b00;line-height:22px;}
+.siteitems {overflow:hidden;}
+.cover {max-width:460px;min-width:300px;margin:0 auto 0 auto;overflow:hidden;}
+.cover2 {max-width:460px;min-width:300px;margin:0 0 -2px -2px;}
+.sitewrap{border-bottom:1px solid #e9e9e9;width:149px;margin:0;display:inline-block;padding:6px 0;}
+.site{border-left:1px solid #e0dfdf;width:149px;text-align:center;height:26px;line-height:26px;margin 0 7px;}
+.site >a{text-decoration:none;color:#5b5b5b;padding:5px 15px;}
+</style>
+</head>
+
+<body>
+<div id="navdiv">
+	<div id="bgnavlogo"></div>
+	<a href="dolphin://sites" id="logo">手机酷站</a>
+	<span id="primaryName">搜索</span>
+</div>
+<div id="navlist"><div class="siteitems"><div class="cover"><div class="cover2"><div class="sitewrap"><div class="site"><a tk="0" href="http://m.baidu.com/xs">小说搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://p2.easou.com/mt.e?id=15946">美女搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://m.baidu.com/app">应用搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://duokoo.baidu.com/game/">游戏搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://mp3.baidu.com/">音乐搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://mv.guotv.com/tv100-baidu-wap/tv100/index?pid=643&ssid=0&from=0&bd_page_type=1&uid=wiaui_1332298162_3481&pu=sz@224_220">视频搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://m.baidu.com/?from=1395a">百度搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://www.google.com.hk/">谷歌搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://wap.sogou.com/">搜狗搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://easou.com/">宜搜搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://wap.bing.com/">必应搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://m.youdao.com/">有道搜索</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://yicha.cn/">易查搜搜</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://wap.soso.com/">SOSO搜搜</a></div></div></div><div></div></div></div></div>
+
+<script type="text/javascript" src="sitenav.js"></script>
+<script type="text/javascript">
+var lastTouch;
+var lastTarget;
+	document.body.addEventListener("touchstart", function(e){
+		lastTarget = e.target;
+		lastTouch = e.touches[0];
+		handleTouchStart(e);
+	},false);
+	document.body.addEventListener("touchmove", function(e){
+		handleTouchMove(e);
+	},false);
+	document.body.addEventListener("touchend", function(e){
+		handleTouchEnd(e);
+	},false);
+	window.addEventListener("load", function(e){
+		track("pageView","subNav","search.html");
+	},false);
+	function handleTouchStart(e)
+	{
+		if(e.target.localName == "a" &&e.target.parentNode.className == "site")
+		{
+				var p = e.target;
+				p.style["background-color"] = "#e4efd4";;
+				p.style["border"] = "1px solid #99c56a";
+				p.style["border-radius"] = "5px";			
+		}
+		e.stopPropagation();
+	}
+	function handleTouchEnd(e)
+	{
+		if(e.target.localName == "a"&&e.target.parentNode.className == "site")
+		{
+				var p = e.target;
+				var item = e.target.innerText;
+				var subclass="search_搜索";
+				p.style["background-color"] = "#f6f6f6";;
+				p.style["border"] = 0;
+				p.style["border-radius"] = 0;
+				track("click","navItem",item,"navCat",subclass);
+		}
+		if(e.target.id == "logo")
+		{
+			track("click","backToNav",1,"subNav","search.html");
+		}
+		e.stopPropagation();
+	}
+	function handleTouchMove(e)
+	{
+		var pos = e.touches[0];
+		if(Math.abs(pos.pageX -lastTouch.pageX) >6 || Math.abs(pos.pageY -lastTouch.pageY >6))
+		{
+			if(lastTarget.localName == "a")
+			{
+				lastTarget.style["background-color"] = "#f6f6f6";;
+				lastTarget.style["border"] = 0;
+				lastTarget.style["border-radius"] = 0;
+			}
+		}
+		e.stopPropagation();
+	}
+</script>
+</body></html>

@@ -1,0 +1,184 @@
+﻿@charset "utf-8";
+*
+{
+    margin: 0px;
+    padding: 0px;
+    border: none;
+	font-family:"微软雅黑", "黑体";
+	color:#646464;
+}
+
+#header
+{	
+    height: 44px;
+    line-height: 40px;  
+	background:url(../image/pages/feedback/title_bg.png) repeat-x;  
+}
+
+#header .title
+{
+	margin-top:-2px;
+    position: absolute;
+    font-size: 17px;
+    font-family:"微软雅黑", "黑体";
+    font-weight: bold;
+    color: #5DA456;
+    left: 12px;
+}
+
+.topbg
+{
+    width:100%;
+    height:35px;
+    background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAiCAIAAAAcUVQBAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAABiSURBVHjapJExDoBQCEP5hvtfy8XVOxgHb0Crs/QnkN+E5aWhKYzj3C1pRMQPAfBvstdJZrqZkptRbmh49V5q73JaoxvJOpVpsxb1tEaLCQX1jxUFWPb20lYveT9Xpq8AAwBOmk9JLJ5gzQAAAABJRU5ErkJggg%3D%3D") repeat-x;  
+}
+
+#content
+{
+    padding: 5px 15px 5px 15px;
+}
+#descrtipion,#weibo,.careus
+{
+    font-size: #646464;
+    font-size: 14px;    
+    line-height: 20px;
+	text-indent:2em;
+	padding-bottom:0px;
+}
+#submitFinished
+{
+	font-size: 16px;
+    padding-top:20px;
+    padding-left:15px;
+ }
+ 
+.selecttype
+{
+	font-size: 14px;	
+	font-weight:bold;	
+	color:#5b5b5b;
+}
+ 
+#feedback
+{
+    padding-top: 2px;
+}
+
+#feedback td
+{
+    height: 45px;
+}
+
+#feedback span
+{
+    color: #4b4b4b;
+    font-size: 16px;
+}
+#feedback input
+{
+    background: none repeat scroll 0 0 #FFFFFF;
+    font-size: 100%;
+    height: 18px;
+    margin: 8px 0 5px 0;
+    height: 20px;
+    width: 100%;
+}
+.txtLeft
+{
+    background: url("../image/pages/feedback_textfield_left.png") no-repeat scroll left center transparent;
+    padding-left: 7px;
+}
+.txtRight
+{
+    background: url("../image/pages/feedback_textfield_right.png") no-repeat scroll right center transparent;
+    padding-right: 7px;
+}
+
+.txtRight2
+{
+    background: url("../image/pages/feedback_textfield_right.png") no-repeat scroll left center transparent;
+    padding-left: -90px;
+}
+
+.txtCenter
+{
+    background: url("../image/pages/feedback_textfield_repeat.png") repeat-x scroll center center transparent;
+    height: 41px;
+    overflow: hidden;
+    padding: 2px 0 0;
+	font-size:14px;	
+}
+
+#feedback textarea
+{
+    height: 18px;
+    margin: 8px 0 5px 0;
+    width: 100%;
+}
+.inputLeft
+{
+    background: url("../image/pages/feedback_input_left.png") no-repeat scroll left center transparent;
+    padding-left: 7px;
+}
+.inputRight
+{
+    background: url("../image/pages/feedback_input_right.png") no-repeat scroll right center transparent;
+    padding-right: 7px;
+}
+.inputCenter
+{
+    background: url("../image/pages/feedback_input_repeat.png") repeat-x scroll center center transparent;
+    height: 120px;
+    overflow: hidden;	
+}
+#submit
+{
+    background: url("../image/pages/feedback_comfirm_btn.png") repeat-x scroll center center transparent;
+}
+
+#footer
+{
+	clear:both;
+	width::100%;
+    text-align: center; /* padding-left: 505px;     */
+    height: 40px;	
+	background-color:#ECEDE7;
+	vertical-align:middle;
+	margin: -40px 0 0 0; 
+	padding:0;
+	
+}
+.footer-div
+{
+    border-right: solid 1px #3C7625;	
+}
+
+#footer-nav
+{
+	padding-top:12px;
+}
+
+#footer-nav a {
+     color: #3C7625;
+    text-decoration: none;
+    font-size:14px;
+}
+
+#btnSubmit
+{
+	margin-top:5px;
+	margin-right:5px;
+}
+
+
+#weibo a
+{
+	font-size: 16px;
+    font-weight: bold;
+    color: #5DA456;
+}
+
+.divweibo
+{
+	margin-top:10px;
+}

@@ -1,0 +1,19 @@
+CACHE MANIFEST
+# Aug 14th 2013 14:38 v0.9
+NETWORK:
+*
+CACHE:
+scripts/baina.js
+scripts/carousel.js
+scripts/tab.js
+scripts/list.js
+scripts/listdataadapter.js
+scripts/zepto.min.js
+images/add.png
+images/back.png
+images/logo.png
+images/select.png
+images/sure.png
+images/dolphin_b.png
+images/dolphin_w.png
+images/loading.gif

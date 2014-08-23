@@ -1,0 +1,20 @@
+CACHE MANIFEST
+# 2014-5-13 v1.11.43
+
+{{ STATIC_URL }}scripts/zepto1.0.min.js
+{{ STATIC_URL }}scripts/template.js
+{{ STATIC_URL }}scripts/lazyload.min.js
+{{ STATIC_URL }}image/pages/hotapps/hotapps.png
+{{ STATIC_URL }}image/pages/hotapps/tabs.png
+{{ STATIC_URL }}image/pages/hotapps/box.png
+{{ STATIC_URL }}image/pages/hotapps/box2.png
+{{ STATIC_URL }}image/pages/hotapps/loading2.png
+{{ STATIC_URL }}image/pages/hotapps/like_btn.png
+{{ STATIC_URL }}image/pages/hotapps/green-star.png
+{{ STATIC_URL }}image/pages/hotapps/gray-star.png
+{{ STATIC_URL }}image/pages/hotapps/half-star.png
+{{ STATIC_URL }}image/pages/hotapps/delete.png
+{{ STATIC_URL }}image/pages/hotapps/search.png
+
+NETWORK:
+*

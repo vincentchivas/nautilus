@@ -1,0 +1,48 @@
+{% load i18n %}
+
+<a href='{{ app_details.download_url }}' onclick="track(this, 'details', '{{ app_details.title|addslashes }}', '{{ app_details.download_url }}');">
+    <div class='icon'>
+        <img src='{{ app_details.icon}}' />
+        {% if app_details.price_type == 'Limit' %}
+            <span class='mark'>{% trans 'free' %}</span>
+        {% endif %}
+    </div>
+    <ul class='prices'>
+        {% if app_details.price_type == 'Discount' or app_details.price_type == 'Limit' %}
+            <li class='original'>{{ app_details.original_price }}</li>
+            <li class='mark'></li>
+            <li class='now price'>
+        {% else %}
+            <li class='price'>
+        {% endif %}
+            {% if app_details.price_type == 'Free' %}
+                {% trans 'free' %}
+            {% else %} {% if app_details.price_type == 'Limit' %}
+                {% trans 'limit free' %}							
+            {% else %}
+                {{ app_details.price }}
+            {% endif %}{% endif %}
+        </li>
+    </ul>
+    <ul class='summary'>
+        <li class='title'>{{ app_details.title }}</li>
+        <li><strong>{% trans 'Category: ' %}</strong>{{ app_details.category }}</li>
+        {% if app_details.app_size %}
+            <li><strong>{% trans 'Size: ' %}</strong>{{ app_details.app_size }}</li>
+        {% endif %}
+        <li class='desp'><strong>{% trans 'Description: ' %}</strong>{{ app_details.detail_description }}</li>
+    </ul>
+</a>
+<div class='screenshots'>
+    <h2>{% trans 'Screenshots' %}</h2>
+    <div class='scrollview'>
+        <div class='scroll' style='-webkit-transform:translate3d(0,0,0);'>
+            {% for screenshot in app_details.screenshots %}
+                <div class='slice'>
+                    <img class='lazy' alt='{{ screenshot.title }}' src='{{ STATIC_URL }}image/pages/hotapps/ipadsc-bg.jpg' data-original='{{ screenshot.pic_url }}' />
+                </div>
+            {% endfor %}
+            <div style='clear:both;'></div>
+        </div>
+    </div>
+</div>

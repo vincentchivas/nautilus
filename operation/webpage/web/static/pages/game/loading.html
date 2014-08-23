@@ -1,0 +1,77 @@
+﻿<!Doctype HTML>
+<html>
+<head>
+	<meta name="format-detection" content="telephone=no">
+	<meta http-equiv="Cache-Control" content="no-transform"> 
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<meta http-equiv="Pragma" contect="no-cache">
+	<meta http-EQUIV="Cache-Control" CONTENT="no-store, must-revalidate">
+	<style>	
+		body{margin: 0;padding: 0;text-align: center;overflow: hidden}
+		.wenliBg{background-image: url(images/wenli_bg.png);z-index: -1}
+		.center{margin:0 auto;}
+		.topImgHolder{width: 202px;height: 120px;margin-top: 30px;background-image: url(images/game.png),url(images/center.png),url(images/dolphin.png);background-repeat: no-repeat;background-position:26px 100px,135px 64px,0;background-size: 60px,66px,192px}
+		#loadingShow{width: 202px;height: 9.8px;margin-top: 49px;background-color:#4d4d4d;border-radius:4.8px;-webkit-border-radius:4.8px;overflow: hidden;}
+		#loadingMessage{font:18px Arial,Verdana,Sans-serif;color:#fff; margin-top: 10px;}
+		#jindu{height:9.8px;width:0;background-color:#ffbb00;background-image: url(images/wenli.png);background-size:auto 10px;border-radius:4.8px;-webkit-border-radius:4.8px;-webkit-transition:width 2s linear;}
+	</style>
+	<script>
+		var d = document,dd=document.documentElement,w = window;
+		var W=dd.clientWidth||d.body.clientWidth; //横竖屏控制
+		var H=w.innerHeight||dd.clientHeight||d.body.clientHeight;
+		var style = d.createElement('style');
+		style.innerHTML = '#topImgHolder{margin-top:'+(H/2-157)+'px}';
+		d.head.appendChild(style);
+	</script>
+</head>
+<body class="wenliBg">
+	<div id="loadingMain">
+		<div id="topImgHolder" class="center topImgHolder">
+		</div>
+		<div id="loadingShow" class="center">
+			<div id="jindu"></div>
+		</div>
+		<div id="loadingMessage" class="center">
+			Enter Ninja fruit
+		</div>
+	</div>
+</body>
+<script>
+(function(){
+var gameUrl,loadFlag=false,timeFlag=false,idBor;
+	window.addEventListener('onhashchange',function(e){e.preventDefault();})
+	window.onload = function(){
+		jindu.style.width = "90%";
+		gameUrl = location.hash;
+		if(gameUrl&&gameUrl!=''){
+			idBor =gameUrl.indexOf('&');
+			if(idBor!=-1){
+				loadingMessage.innerHTML = gameUrl.substring(idBor+1);
+				gameUrl = gameUrl.substring(1,idBor);
+			}else{
+				gameUrl=gameUrl.substring(1);
+			}
+			dd.appendChild(jump(gameUrl));
+			setTimeout(function(){if(loadFlag) pageDone();else timeFlag=true;},2000);
+		}else{
+			loadingMessage.innerHTML = "非法的游戏地址！";
+			setTimeout(function(){window.location.href="index1.html";},2000);
+		}
+	}
+	function pageDone(){
+		d.getElementById('jindu').setAttribute('style','width:100%;-webkit-transition:width 0.3s linear;');
+			setTimeout(function(){var tmp = d.getElementById('gamePage');d.getElementById('loadingMain').style.display="none";tmp.style.display='';tmp.style.height = "100%";tmp.style.width='100%'},300);//iframe 加载完成后处理
+	}
+	function jump(url){  //新建iframe 这样处理是避免跨域问题
+		var gamePage = document.createElement('iframe');
+		gamePage.style.display='none';
+		gamePage.style.border = "none";
+		gamePage.id = "gamePage";
+		gamePage.src = url;
+		gamePage.onload = function(){if(timeFlag){pageDone()}else{loadFlag=true}}
+		return gamePage;
+	}
+})();
+
+</script>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html manifest="sitenav.manifest">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<title>手机酷站</title>
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Cache-Control" content="no-transform"> 
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+<link rel="stylesheet" type="text/css" href="sitenav.css"/>
+<style>
+#navlist {clear:both;margin:0;padding:0 10px;background-color:#f6f6f6;}
+.subclass {clear:both;list-style-type:square;color:#0c7b00;margin:0;height:26px;padding-top:10px;}
+.subclass >span{color:#0c7b00;line-height:22px;}
+.siteitems {overflow:hidden;}
+.cover {max-width:460px;min-width:300px;margin:0 auto 0 auto;overflow:hidden;}
+.cover2 {max-width:460px;min-width:300px;margin:0 0 -2px -2px;}
+.sitewrap{border-bottom:1px solid #e9e9e9;width:149px;margin:0;display:inline-block;padding:6px 0;}
+.site{border-left:1px solid #e0dfdf;width:149px;text-align:center;height:26px;line-height:26px;margin 0 7px;}
+.site >a{text-decoration:none;color:#5b5b5b;padding:5px 15px;}
+</style>
+</head>
+
+<body>
+<div id="navdiv">
+	<div id="bgnavlogo"></div>
+	<a href="dolphin://sites" id="logo">手机酷站</a>
+	<span id="primaryName">科技</span>
+</div>
+<div id="navlist"><div class="siteitems"><div class="cover"><div class="cover2"><div class="sitewrap"><div class="site"><a tk="0" href="http://tech.sina.cn/">新浪科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://tech.3g.qq.com/">腾讯科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://3g.pconline.com.cn/">太平洋电脑</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://wap.pchome.net/">电脑之家</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://3g.zol.com.cn/">中关村在线</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://www.36kr.com/">36氪</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://cn.engadget.com/">瘾科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://3g.yesky.com.cn/">天极数码</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://tech.3g.cn/">3G科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://3g.163.com/tech/">网易科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://m.sohu.com/science/">搜狐科技</a></div></div><div class="sitewrap"><div class="site"><a tk="0" href="http://i.ifeng.com/tech/techi">凤凰科技</a></div></div></div><div></div></div></div></div>
+
+<script type="text/javascript" src="sitenav.js"></script>
+<script type="text/javascript">
+var lastTouch;
+var lastTarget;
+	document.body.addEventListener("touchstart", function(e){
+		lastTarget = e.target;
+		lastTouch = e.touches[0];
+		handleTouchStart(e);
+	},false);
+	document.body.addEventListener("touchmove", function(e){
+		handleTouchMove(e);
+	},false);
+	document.body.addEventListener("touchend", function(e){
+		handleTouchEnd(e);
+	},false);
+	window.addEventListener("load", function(e){
+		track("pageView","subNav","science.html");
+	},false);
+	function handleTouchStart(e)
+	{
+		if(e.target.localName == "a" &&e.target.parentNode.className == "site")
+		{
+				var p = e.target;
+				p.style["background-color"] = "#e4efd4";;
+				p.style["border"] = "1px solid #99c56a";
+				p.style["border-radius"] = "5px";			
+		}
+		e.stopPropagation();
+	}
+	function handleTouchEnd(e)
+	{
+		if(e.target.localName == "a"&&e.target.parentNode.className == "site")
+		{
+				var p = e.target;
+				var item = e.target.innerText;
+				var subclass="science_科技";
+				p.style["background-color"] = "#f6f6f6";;
+				p.style["border"] = 0;
+				p.style["border-radius"] = 0;
+				track("click","navItem",item,"navCat",subclass);
+		}
+		if(e.target.id == "logo")
+		{
+			track("click","backToNav",1,"subNav","science.html");
+		}
+		e.stopPropagation();
+	}
+	function handleTouchMove(e)
+	{
+		var pos = e.touches[0];
+		if(Math.abs(pos.pageX -lastTouch.pageX) >6 || Math.abs(pos.pageY -lastTouch.pageY >6))
+		{
+			if(lastTarget.localName == "a")
+			{
+				lastTarget.style["background-color"] = "#f6f6f6";;
+				lastTarget.style["border"] = 0;
+				lastTarget.style["border-radius"] = 0;
+			}
+		}
+		e.stopPropagation();
+	}
+
+	function setLocal(key,value){
+		var storage = window.localStorage;
+		if(window.dolphinLocalStorage){
+			//storage = window.dolphinLocalStorage;
+		}
+		storage.removeItem(key);
+		storage.setItem(key,value.toString());
+	}
+	 function getLocal(key,dolphin){
+		//获得localStorage里面的值
+		var storage = window.localStorage;
+		if(window.dolphinLocalStorage && dolphin){
+			storage = window.dolphinLocalStorage;
+			if(storage.getItem(key) && storage.getItem(key).length>10){
+				return storage.getItem(key);
+			}else{
+				return null;
+			}
+		}else if(storage.getItem(key)){
+			return storage.getItem(key);
+		}else{
+			return null;
+		}
+	}	
+	function track(action_type,item_type,item_self,reference_item_type,reference_item,position){
+		//用于统计
+		if(navigator.onLine){
+			//有网的情况下才统计
+			var url = "http://a.dolphin-browser.com/track/t.gif?";
+			url += "t=" + Date.now();
+			if(getLocal("deviceid")){
+				//如果有uid了，则把uid发送给服务器，作为用户的标识
+				url += "&did=" + getLocal("deviceid");
+			}else{
+				//否则随机生成一个，记录在storage中
+				var did = Math.floor(Math.random()*1e16) + "" + Date.now();
+				setLocal("deviceid",did);
+				url += "&did=" + did;
+			}
+			if(navigator.platform){
+				url += "&dt=" + navigator.platform;//device_type
+			}
+			if(navigator.language){
+				url += "&os=" + navigator.language;//os
+			}
+			if(screen.width){
+				url += "&re=" + screen.width + "*" + screen.height;//resolution
+			}
+			if(window.dolphin && window.dolphin.getActiveNetworkInfo){
+				url += "&nt=" + window.dolphin.getActiveNetworkInfo();//network_type
+			}
+			url += "&at=" + action_type;
+			url += "&it=" + item_type;
+			url += "&i=" + item_self;
+			if(reference_item_type!=undefined){
+				url += "&rt=" + reference_item_type;
+			}
+			if(reference_item!=undefined){
+				url += "&ri=" + reference_item;
+			}
+			if(position!=undefined){
+				url += "&p=" + position;
+			}
+			url += "&src=siteNavigation";
+			var timg = new Image();
+			timg.src = encodeURI(url);
+		}
+		return false;
+	}
+</script>
+</body></html>

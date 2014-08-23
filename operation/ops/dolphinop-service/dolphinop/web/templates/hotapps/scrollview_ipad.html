@@ -1,0 +1,26 @@
+{% spaceless %}
+
+<div class='showbox'>
+    <ul class='showarea'>
+        <li class='front'>
+            <a>
+                <img />
+            </a>
+        </li>
+        <li class='back'></li>
+    </ul>
+    <ul class='showcontrol' style='-webkit-transform:translate3d(0, 0, 0);'>
+        {% for item in top_list %}
+            <li>
+                <a href='javascript:void(0)' onclick='showNext(this);'>
+                    {% if item.category_id %}
+                        <img src='{{ item.small_pic }}' data-src='{{ item.top_pic }}' data-href='#cateapps:{{ item.category_id }}:{{ item.category_title }}'"/>
+                    {% else %}
+                        <img src='{{ item.small_pic }}' data-src='{{ item.top_pic }}' data-href='{{ item.download_url }}' data-click="track(this, 'image', '{{ item.title|addslashes }}' , '{{ item.download_url }}');" />
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endspaceless %}

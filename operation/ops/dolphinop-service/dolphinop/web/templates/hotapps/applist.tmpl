@@ -1,0 +1,13 @@
+<% var rowcolors = ['row1', 'row2']; %>
+<% for ( var i = 0; i < applications.length; ++i ) { %>
+	<% var app = applications[i]; %>
+	<a class='app <%=rowcolors[i%2]%>' href='<%=app.downloadurl%>' target='_blank' onclick="track(this, 'item', '<%=app.title%>' , '<%=app.downloadurl%>');">
+		<img class='icon lazy' src='{{ STATIC_URL }}image/pages/hotapps/dolphin.png' data-original='<%=app.iconUrl%>' />
+		<div class='arr'></div>
+		<ul class='details'>
+			<li class='title'><%=app.title%></li>
+			<li class='desp'><%=app.description%></li>
+		</ul>
+		<div class='clear'></div>
+	</a>
+<% } %>

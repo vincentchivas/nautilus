@@ -1,0 +1,17 @@
+{% spaceless %}
+<html {% block manifest%}{% endblock %}>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="Content-Language" content="zh-CN"/>
+        {% block viewport %}<meta name="viewport" content="initial-scale=1.0, width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />{% endblock %}
+        <title>{% block title %} Your title is here{% endblock %}</title>
+        
+        {% block style %} Your style is here {% endblock %}
+        {% block script %} Your script is here {% endblock %}
+        {% block tracking %}{% endblock %}
+    </head>
+    <body>
+        {% block body %} Your body is here{% endblock %}
+    </body>
+</html>
+{% endspaceless %}

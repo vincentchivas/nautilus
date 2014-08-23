@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html manifest="theme.manifest">
+<head>
+<meta charset="UTF-8">
+<title>皮肤下载中心</title>
+<meta name="format-detection" content="telephone=no"/>
+<meta http-equiv="Cache-Control" content="no-transform"/> 
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+<style>
+	body{padding:0;margin:0;background:#fff;color:#389d00;}
+	.logo{width:100%;font:36px/58px arial;vertical-align:top;position:absolute;top:25%;text-align:center;}
+	.progress-wrapper{position:absolute; top:65%; left:50%; margin-left:-116px;}
+	.loading-border{width:230px; border-radius:7px; border: 1px solid #389d00; padding:1px;}
+	.loading-progress{height:10px; width:0; border-radius:5px; background:#389d00; text-align:center;}
+	.loading-text{font-size:12px; text-align:center; margin-top:10px;}
+</style>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/fastboot.min.js"></script>
+<script>
+	if(typeof(Storage) !== "undefined"){
+		sessionStorage.clear();
+	}
+
+	function ga(){
+		var trackKey = "fastboot_tracking";
+		if(typeof(Storage) !== "undefined"){
+			var events = JSON.parse(sessionStorage.getItem(trackKey) || "[]");
+			events.push(Array.prototype.slice.call(arguments));
+			sessionStorage.setItem(trackKey, JSON.stringify(events));
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="wrapper" style="display:none;">
+		<div class="logo">
+			皮肤下载中心
+		</div>
+		<div class="progress-wrapper">
+			<div class="loading-border">
+				<div class="loading-progress"></div>
+			</div>
+			<div class="loading-text"></div>
+		</div>
+	</div>
+	<script>
+		var wrapper = document.getElementById('wrapper');
+		window.fastboot({
+			element: wrapper,
+			appName : "dolphin_theme",
+			bootUrl: "./theme.html",
+			track: ga
+		});
+	</script>
+</body>
+</html>

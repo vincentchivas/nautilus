@@ -1,0 +1,36 @@
+{% load i18n %}
+
+<% var itemColors = ['one', 'two', 'three', 'four']; %>
+<% for ( var i = 0; i < applications.length; ++i ) { %>
+	<% var app = applications[i]; %>
+	<a class='app <%=itemColors[i%4]%>' href='<%=app.downloadurl%>' target='_blank' onclick="track(this, 'item', '<%=app.title%>', '<%=app.downloadurl%>');">
+		<div class='layout'>
+			<div class='icon'>
+				<img class='lazy' src='{{ STATIC_URL }}image/pages/hotapps/dolphin.png' data-original='<%=app.iconUrl%>' />
+				<span class='mark'>{% trans 'free' %}</span>
+			</div>
+			<ul class='details'>
+				<li class='title'><%=app.title%></li>
+				<li class='desp'><%=app.description%></li>
+			</ul>
+			<ul class='prices'>
+				<% if (app.price_type == 'limited') { %>
+					<li class='original'>￥<%=app.original_price%></li>
+					<li class='mark'></li>
+					<li class='now price'>
+				<% } else { %>
+					<li class='price'>
+				<% } %>
+					<% if (app.price_type == 'limited') { %>
+						{% trans 'limit free' %}							
+					<% } else if (app.isFree) { %>
+						{% trans 'free' %}
+					<% } else { %>
+						<%=app.price%>
+					<% } %>
+				</li>
+			</ul>
+			<div class='clear'></div>
+		</div>
+	</a>
+<% } %>

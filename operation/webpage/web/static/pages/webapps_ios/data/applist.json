@@ -1,0 +1,168 @@
+{
+	"name" : "娱乐",
+	"banners_backup":[
+		{
+			"pic" : "http://placehold.us/200x150",
+			"url" : "http://weibo.com"
+		},{
+			"pic" : "http://placehold.us/200x150",
+			"url" : "http://weibo.com"
+		},{
+			"pic" : "http://placehold.us/200x150",
+			"url" : "http://weibo.com"
+		},{
+			"pic" : "http://placehold.us/200x150",
+			"url" : "http://weibo.com"
+		}
+	],
+	"apps":[
+		{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : false,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : false,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		},{
+			"icon" : "./images/icon.png",
+			"name" : "微公益",
+			"category" : "社交",
+			"desp" : "汇集最优秀的网站及资源。即使收录影视、音乐、小说、游戏",
+			"added" : true,
+			"url" : "http://weibo.com"
+		}
+	]
+}

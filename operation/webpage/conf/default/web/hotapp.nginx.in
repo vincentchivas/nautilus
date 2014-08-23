@@ -1,0 +1,27 @@
+server {
+       listen	80;
+       server_name hotapp.dolphin-browser.com;
+       root /var/app/enabled/web/static/pages/hotapps;
+
+       log_format hotapp '$remote_addr - $remote_user [$time_local]  '
+                '"$request" $status $body_bytes_sent '
+                '$request_time $upstream_response_time '
+                '"$http_referer" "$http_user_agent"';
+
+    	access_log       /var/app/log/dolphinop-webfront/access.log hotapp;
+        error_log       /var/app/log/dolphinop-webfront/error.log;
+        location ~(favicon.ico) {
+            alias /var/app/enabled/dolphinop-webfront/static/favicon.ico;
+            log_not_found off;
+            access_log off;
+            expires 30d;
+            break;
+        }  
+
+        index            index.html index.htm index.php;
+
+	location / {
+		 try_files $uri $uri/ /index.html;
+	}
+
+}

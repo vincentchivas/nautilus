@@ -1,0 +1,38 @@
+﻿<!Doctype html>
+<html>
+	<head>
+	<script src="http://zeptojs.com/zepto.min.js"></script>
+	</head>
+	<body>
+		<label>target:</label><input id='target' placeHolder='请输入目标url'/> <br/>
+        <label>back:</label><input id='back' placeHolder='请输入要返回的url'/> <br/>
+        <button onclick='make()'>生成</button>
+        <div><span id='result'></span></div>
+	</body>
+    <script>
+        function $(id){
+           return document.getElementById(id) 
+        }
+        function make(){
+            var doms = ['target','back'];
+            var result_box = $('result');
+            var results = [];
+            for(var i=0; i<doms.length;i++){
+                var tmp = $(doms[i]);
+                var tmp_value = tmp.value
+                if(tmp_value ==''){
+                    tmp.style.borderColor = 'red';
+                    result_box.innerText = '';
+                    return ;
+                }else{
+                    if(!tmp_value.match(/^http:\/\//)){
+                        tmp_value='http://'+tmp_value
+                    }
+                    tmp.style.borderColor = '';
+                    results.push(encodeURIComponent(tmp_value));
+                }
+            }
+            result_box.innerText = 'http://redirect.dolphin.com/?target='+results[0]+'&back='+results[1];
+        }
+    </script>
+</html>

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html manifest="hotapps.appcache">
+<head>
+<meta charset="UTF-8">
+<title>热门应用</title>
+<meta name="format-detection" content="telephone=no"/>
+<meta http-equiv="Cache-Control" content="no-transform"/> 
+<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+<style>
+	@-webkit-keyframes progress-bar{0%{-webkit-transform:translateX(0)}100%{-webkit-transform:translateX(-22px)}}
+	body{padding:0;margin:0;background:#fff;color:#389d00;}
+	.logo{width:100%;vertical-align:top;position:absolute;top:25%;text-align:center;}
+	.logo h1{font:36px/58px arial; margin:0;}
+	.logo p{font-size:20px; margin:10px;}
+	.progress-wrapper{position:absolute; top:65%; left:50%; margin-left:-116px;}
+	.loading-border{width:230px; border: 1px solid #389d00; padding:1px;}
+	.loading-progress{height:11px; width:100%; background:-webkit-gradient(linear, 0 0, 100% 0, from(#3a9b00), to(#43db00)); text-align:center; overflow:hidden;}
+	.loading-progress div{height:100%; width:150%; background-image: -webkit-gradient(linear, 0 0, 11 11, from(#399900), to(transparent), color-stop(0.25, #399900), color-stop(0.26, transparent), color-stop(0.5, transparent), color-stop(0.51, #399900), color-stop(0.75, #399900), color-stop(0.75, transparent));-webkit-background-size: 11px 11px;-webkit-animation:progress-bar 0.4s linear infinite;}
+	.loading-text{font-size:12px; text-align:center; margin-top:10px; color:#777;}
+	.loading-text a{color:#3A9B00;}
+</style>
+<script src="http://webapp.statics.dolphin.com/web_statics/scripts/fastboot.js"></script>
+<script>
+	if(typeof(Storage) !== "undefined"){
+		sessionStorage.clear();
+	}
+
+	function ga(){
+		var trackKey = "fastboot_tracking";
+		if(typeof(Storage) !== "undefined"){
+			var events = JSON.parse(sessionStorage.getItem(trackKey) || "[]");
+			events.push(Array.prototype.slice.call(arguments));
+			sessionStorage.setItem(trackKey, JSON.stringify(events));
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="wrapper" style="display:none;">
+		<div class="logo">
+			<h1>热门应用</h1>
+			<p>首次访问，为您极速加载中...</p>
+		</div>
+		<div class="progress-wrapper">
+			<div class="loading-border">
+				<div class="loading-progress"><div></div></div>
+			</div>
+			<div class="loading-text"></div>
+		</div>
+	</div>
+	<script>
+		var wrapper = document.getElementById('wrapper');
+		window.fastboot({
+			element: wrapper,
+			appName : "dolphin_hotapps",
+			bootUrl: "./hotapps.html",
+			track: ga
+		});
+	</script>
+</body>
+</html>

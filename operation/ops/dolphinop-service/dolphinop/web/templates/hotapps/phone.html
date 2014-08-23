@@ -1,0 +1,123 @@
+﻿{% extends "base_generic.html" %}
+{% load compress %}
+{% load i18n %}
+
+{% block title %}{% trans 'Hot Apps' %}{% endblock %}
+
+{% block body %}
+<div id='body'>
+	<div id='border'>
+		{% if search_template %}
+			<div id='header'>
+				<div id='logo'>{% trans 'Hot Apps' %}</div>
+				<div id='search_box'>
+					{% include search_template %}
+				</div>	
+			</div>
+		{% endif %}
+		<div id='container'>
+			<div id='activebar'>
+				<div id='feature_tab' class='active'>
+					<div class='tab'><a id='feature' href='#featured'>{% trans 'Featured' %}</a></div>
+				</div>
+				<div id='trend_tab'>
+					<div class='tab'><a id='trend' href='#trending'>
+						{% if platform == 'iPhone' %}
+							{% trans 'Free Now' %}
+						{% else %}
+							{% trans 'Trending' %}
+						{% endif %}
+					</a></div>
+				</div>
+				<div id='category_tab'>
+					<div class='tab'><a id='category' href='#categories'>{% trans 'Categories' %}</a></div>
+				</div>
+			</div>
+			<div id='contents'>
+				<div id='feature_wrap'>
+					<div id='scrollview_container'>
+                                             {% include "hotapps/scrollview.html" %}
+                                        </div>
+					<div id='feature_content'>
+                                             {% include "hotapps/applist.html" %}
+                                        </div>
+					<div class='bottom'>
+						<div id='feature_load' class='app_loading'></div>
+					</div>
+				</div>
+				<div id='trend_wrap' style='display:none;'>
+					<div id='trend_content'></div>
+					{% if trend_api %}
+						<script type='text/html' id='trending_tmpl'>
+							{% include "hotapps/applist.tmpl" %}
+						</script>
+					{% endif %}
+					<div class='bottom'>
+						<div id='trend_load' class='app_loading'></div>
+					</div>
+				</div>
+				<div id='category_wrap' style='display:none;'>
+					<div id='category_content'></div>
+				</div>
+				<div id='cateapps_wrap' style='display:none;'>
+					<div id='cateapps_title'></div>
+					<div id='cateapps_content'></div>
+					<div class='bottom'>
+						<div id='cateapps_load' class='app_loading'></div>
+					</div>
+				</div>
+			</div>
+			<div id='page_load' class='page_loading' style="display:none;"></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block style %}
+	<style>{% include 'hotapps/style/hotapps.css' %}</style>
+{% endblock %}
+
+{% block script %}
+
+{% compress js %}
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/zepto.min.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/touch.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/lazyload.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/template.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}scripts/hotapps.js"></script>
+{% endcompress %}
+
+	<script type="text/javascript">
+		var product = 'hotapps';
+		var version = '1.0';
+		var platform = '{{ platform }}'; 
+		var lang = '{{ language }}';
+		var staticPath = '{{ STATIC_URL }}';
+		var keyword = '{{ keyword }}';
+		var touchSupport = {{ touch_support }};
+		var trendApi = {{ trend_api }};
+		var adTracking = {{ ad_tracking }};
+		var adPublisherId = '{{ ad_publisher_id }}';
+	</script>
+{% endblock %}
+
+{% block tracking %}
+	<script type="text/javascript">
+
+	 
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', '{{ ga_account }}']);
+		_gaq.push(['_trackPageview']);
+		_gaq.push(['_trackPageLoadTime']);
+	 
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = '{{ STATIC_URL }}scripts/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	 
+	</script>
+	
+	<script id="jsonp" type="text/javascript"></script>
+{% endblock %}

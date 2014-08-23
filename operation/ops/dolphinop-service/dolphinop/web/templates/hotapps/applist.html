@@ -1,0 +1,25 @@
+{% spaceless %}
+{% for app in app_list %}
+{% cycle 'row1' 'row2' as rowcolors silent %}
+
+{% if app.is_ad %}
+<a id='ad_{{ app.ad_id }}' class='app {{ rowcolors }}' href='{{ app.download_url }}' onclick="track(this, 'item', '{{ app.title|addslashes }}' , '{{ app.download_url }}');" {% if "itms-apps://" not in app.download_url and "market://" not in app.download_url %}target='_blank'{% endif %} >
+    <img class='track loadtrack' data-id='{{ app.ad_id }}'/>
+{% else %}
+<a class='app {{ rowcolors }}' href='{{ app.download_url }}' onclick="track(this, 'item', '{{ app.title|addslashes }}' , '{{ app.download_url }}');" {% if "itms-apps://" not in app.download_url and "market://" not in app.download_url %}target='_blank'{% endif %} >
+{% endif %}
+    <img class='icon lazy' src='{{ STATIC_URL }}image/pages/hotapps/dolphin.png' data-original='{{ app.favicon }}' />
+    <div class='arr'></div>
+    <ul class='details'>
+        {% if app.is_new %}
+            <span class='title span'>{{ app.title }}</span>
+            <span class='title new'></span>
+        {% else %}
+            <li class='title span'>{{ app.title }}</li>
+        {% endif %}
+        <li class='desp'>{{ app.short_description }}</li>
+    </ul>
+    <div class='clear'></div>
+</a>
+{% endfor %}
+{% endspaceless %}

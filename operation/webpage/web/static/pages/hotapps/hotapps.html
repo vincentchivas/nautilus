@@ -1,0 +1,361 @@
+<!doctype html>
+<html manifest="hotapps.appcache">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0"/>
+	<title>热门应用</title>
+	<style>
+			/*Here the style of the hope can be inherited ---Start---*/
+		body,ul,img,h2,p{margin: 0;padding: 0;}
+		body{min-width:320px; font-size:16px;font-family:Arial, Helvetica, sans-serif;-webkit-tap-highlight-color:rgba(0,0,0,0);tap-highlight-color:rgba(0,0,0,0);-webkit-text-size-adjust:none !important;}
+		a{color: #f18101;text-decoration: none;cursor: pointer;}
+		p{color: #2F2F2F;font-size: 14px;}
+		li{list-style: none;display: block;}
+		.lovelevel span{width: 16px;height: 16px;display: inline-block;background: url(./image/sprite.png) -12px -219px;background-size: 320px;}
+		.lovelevel .hatestar{background: url(./image/sprite.png) -291px -219px;background-size: 320px;}
+		.lovelevel{margin-top: -10px;}
+		.errormsg{line-height: 45px;background: #E7E8E7;color: #818181;padding-left: 20px;margin-top: -18px;}
+	
+			/*footer ---Start---*/
+		footer{border-top: 1px solid #D1D1D1;border-bottom: 1px solid #D1D1D1;text-align: center;overflow: hidden;}
+		footer a{line-height: 44px;display: block;width: 50%;float: left;}
+		#feedback{background: url(./image/sprite.png) no-repeat -12px -359px;background-size: 320px;padding-left: 25px;}
+		#back2top{background: url(./image/sprite.png) no-repeat -290px -357px;background-size: 320px;padding-left: 25px;}
+		footer i{border-right: 1px solid #f18101;height: 20px;float: right;margin-top: 12px;}
+			/* scroll style */
+		/*::-webkit-scrollbar{
+			height: 2px;
+		}
+		::-webkit-scrollbar-thumb:horizontal{
+			background-color: #379C00;
+			margin-bottom: 1px;
+		}*/
+		#homePiece,#rankPiece,#usePiece,#useAppPiece,#gamePiece,#topicPiece,#searchPiece{display: none;}
+	
+		.loading{background: url(./image/loading.gif) no-repeat center center;background-size: 20px;line-height: 249px;text-align: center;text-indent: 189px;margin-left: -166px;}
+		#homeAppList .loading{line-height: 80px;}
+		#rankAppList .loading{line-height: 156px;}
+		#useAppPiece .loading{line-height: 163px;}
+		#searchPiece .loading{line-height: 202px;}
+		#addmoremsg.loading{text-indent: 96px;margin-left: -48px;}
+	/*****************************************************hotapp**********************************************************/
+	
+			/*header part ---Start---*/
+		header{background: #10100f no-repeat;background-size: 320px;padding-top: 8px;height: 83px;overflow: hidden;}
+		header nav{text-align: center;overflow: hidden;background-color: #272524;height:47px;position: relative;}
+		header a{width:20%;-webkit-box-sizing: border-box;box-sizing: border-box;float:left;line-height:24px;color: #FFF;border-left:1px solid #595959;border-right:1px solid #595959;margin-top: 13px;font-size: 17px;font-family: microsoft yahei;}
+		header #backFromSearch{margin-top: 0;}
+		header .active:before{width: 60px; height: 25px; margin-left: -12px; border-bottom: 2px solid #f18101; content: ''; position: absolute; top: 20px;} 
+		header .active{color: #f18101;}
+		.top{padding: 0 12px 0;overflow: hidden;background-color: #1a1918;}
+		.topTitle{background: url(./image/icon_hotapps.png);-webkit-background-size: 236px 36px;
+		background-size: 118px 36px;margin: 0;width: 118px;float: left;line-height: 36px;text-indent: -9999px;}
+		.top span{color: #FFF;float: left;}
+		#searchBtn{float: right; width: 46px; height: 35px; background: url('image/search.png') no-repeat 22px center; -webkit-background-size: 17px auto; } 
+		#searchForm{position: relative;float: right;}
+		#search{line-height: 28px;width: 140px;border-radius: 5px;border: none;padding: 0 0 0 6px;border: 1px solid #588c39;box-shadow: 1px 1px 2px inset;margin: 0 -1px;-webkit-box-sizing: border-box;box-sizing: border-box;}
+		#search:focus{outline: none;}
+		#submit{text-indent: -9999px;display: block;background: url(./image/sprite.png) no-repeat -281px -96px;background-size: 320px;height: 28px;width: 28px;position: absolute;border: none;right: 0;top: 0;z-index: 100;}
+		.searchForm{width: 100%;-webkit-box-sizing: border-box;box-sizing: border-box;margin-top: 5px;}
+		.searchForm #search{width: 100%;line-height: 20px;height:30px;border: 1px solid #f18101;box-shadow: 0 1px 2px rgba(0,0,0,.13) inset;}
+		.searchForm #submit{height: 30px;width: 45px;margin: 0;background: url(./image/sprite.png) no-repeat -275px -416px,-webkit-gradient(linear, 0 0, 0 100%, from(#FFF), to(#C0BFBF));background-size: 320px;border: 1px solid #f18101;border-top-right-radius:5px;border-bottom-right-radius: 5px;margin：0;}
+		#backFromSearch{background: url(./image/sprite.png) no-repeat -278px -147px;background-size: 320px;text-indent: -9999px;position: absolute;display: block;width: 35px;height: 40px;right: 10px;top: 0;border: none;display: none;}
+		.searchText{display: inline-block;width: 35px;}
+	
+		#searchPiece{overflow: hidden;}
+		#word a{border: 1px solid #68B63C;line-height: 30px;background: #EEFEE6;padding: 0 15px;color: #4C4C4C;border-radius: 1px;display: block;float: left;margin: 10px 15px;}
+		#newWord{color: #379C00;line-height: 30px;margin-top:15px;text-align: center;clear: both;cursor: pointer;width: 100px;margin: 0 auto;}
+	
+		.subTab{background: #F6F6F6 -webkit-gradient(linear, 0 0, 0 100%, from(#F6F6F6), to(#E4E4E4));padding: 8px 13px 8px 14px;border-bottom: 1px solid#A8A8A8;display: none;}
+		.subinner{text-align: center;border-radius: 5px;line-height: 30px;height: 30px;}
+		.subinner a{float: left;width: 33%;height:28px;color: #383838;border: 1px solid #B9B8B8;box-shadow: 0 1px 0 #FDFDFD;background: #FDFDFD -webkit-gradient(linear, 0 0, 0 100%, from(#FDFDFD), to(#DDDDDD));}
+		.subinner a:first-of-type{border-top-left-radius: 5px;border-bottom-left-radius: 5px;border-right: none;}
+		.subinner a:last-child{border-top-right-radius: 5px;border-bottom-right-radius: 5px;border-left: none;}
+		.subinner .active{background: -webkit-gradient(linear, 0 0, 0 100%, from(#52C102), to(#4AAC03));box-shadow: 0 2px 6px rgba(0, 0, 0, .4) inset, 0 1px 0 #FDFDFD;color: #FFF;}
+	
+		#picAppshow{overflow: hidden;position: relative;width: 320px;height: 110px;}
+		#focusImg{display: -webkit-box;-webkit-box-orient: horizontal;-webkit-transform: translate3d(0,0,0);}
+		#focusImg a{z-index: 0;}
+		#focusImg img{width: 320px;display:block;height: 110px;}
+		#flashchange{position: absolute;right: 20px;bottom: 5px;overflow: hidden;z-index: 10;}
+		#flashchange span{display: inline-block;width: 10px;height: 10px;border-radius: 5px;background: #F7F7F7;box-shadow: 0 1px 2px #A1A1A1 inset;margin-right: 5px;}
+		#flashchange .active{background: #6FC0FF;box-shadow: 0 1px 2px #4A7EA6 inset;}
+	
+		.appList{background-color: #e7e7e7;overflow: hidden;margin-bottom: -1px;-webkit-box-sizing: border-box;box-sizing: border-box;}
+		.appList>li{height: 60px;position: relative;margin: 12px;line-height: 40px;border-bottom: 1px solid #D8D8D8;border-top: 1px solid #FFF;background-color: #fff;border-radius: 2px;box-shadow: 2px;-webkit-box-shadow:0 1px 2px rgba(0,0,0,0.1);;}
+		.touchEffect{background-color: #9CD0E4 !important;}
+		.apptitle{width: 65%;position: absolute;top: 0;}
+		.apptitle>span{display:block;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;line-height: 16px;font-size: 16px;color: #4c4c4c;padding: 12px 0 5px 0;}
+		.apptitle img{width: 48px;height: 48px;float: left;padding: 6px 10px 6px 7px;}
+		.appList p{color: #9C9C9C;line-height: 20px;}
+		.size{margin-top: 12px;}
+		.size,.downs{font-size: 12px; text-align: right;padding-right: 70px;}
+		#homeAppList{border-top: 1px solid #A8A8A8;}
+		#updateList{border-top: 1px solid #A8A8A8;}
+		#rankAppList{border-top: 1px solid #A8A8A8;}
+		#gamePiece a,#usePiece a{width: 32%;display: inline-block;padding: 20px 0 10px;text-align: center;}
+		#gamePiece img,#usePiece img{width: 54px;height: 54px;display: block;margin: 0 auto;}
+		#gamePiece span,#usePiece span{line-height: 26px;color: #4D4D4D;}
+	
+		#topicPiece{margin-bottom: -1px;}
+		#topicPiece>a{height: 60px;padding:22px;position: relative;border-bottom: 1px solid #D8D8D8;border-top: 1px solid #FFF;display: block;overflow: hidden;}
+		#topicPiece>a:nth-child(even) {background: #F3F3F3;}
+		#topicPiece div{width: 68px;height: 68px;border: 1px solid #CACACA;border-radius: 10px;margin-right: 15px;float: left;overflow: hidden;}
+		#topicPiece img{width: 69px;height: 69px;}
+		.topicName{color: #383838;line-height: 20px;width:50%;display:block;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
+		.pv{margin-left: 3px;}
+		#topicPiece p{color: #808080;line-height: 16px;height: 32px;overflow: hidden;}
+		#topicPiece i{position: absolute;top: 50px;right: 10px;background: url(./image/sprite.png) no-repeat -297px -300px;background-size: 320px;width: 10px;height: 13px;}
+	
+		#backbar{background: #E6E6E6; line-height: 40px;box-shadow: 1px 1px 2px #AEAEAE;/*border-top: 1px solid #568140;*/border-bottom: 1px solid #ADADAD;margin-bottom: -1px;z-index: 100;position: relative;}
+		#back2tab{background: url(./image/sprite.png) no-repeat 7px -90px;background-size: 320px;width: 58px;display: inline-block;border-right: 1px solid #B3B3B3;text-indent: -9999px;box-shadow: -1px 0 0 #F2F2F2 inset;}
+		#pieceName{color: #383838;padding-left: 12px;} 
+	
+	/****************************************************detail**********************************************************/
+		#detail, #update{display: none;overflow: hidden;} 
+	
+		.smallLoveLevel{width: 55px;margin: 8px auto;}
+		.smallLoveLevel span{width: 11px;height: 11px;display: inline-block;background: url(./image/sprite.png) -12px -299px;background-size: 320px;}
+		.smallLoveLevel .hatestar{background: url(./image/sprite.png) -64px -299px;background-size: 320px;}
+	
+		.detail, .update{background-color: #1a1918;;background-size: 320px;padding: 0 18px;text-align: center;line-height: 40px;}
+		/*.detail, .update{background: url(./image/sprite.png) no-repeat;background-size: 320px;padding: 0 18px;text-align: center;line-height: 40px;}*/
+		.back{background: url(./image/sprite.png) no-repeat -4px -147px;background-size: 320px;text-indent: -9999px;float: left;width: 40px;}
+		.home{background: url(./image/sprite.png) no-repeat -274px -147px;background-size: 320px;text-indent: -9999px;float: right;width: 40px;}
+		.detail span{font-weight: bold;color: #F5FCF1;}
+	
+		.appTitle{overflow: hidden;position: relative;background: -webkit-gradient(linear, 0 0, 0 100%, from(#F0F1F0), to(#E1E2E1 ));border-top: 1px solid rgba(255,255,255,.3);border-bottom:1px solid #BDBDBD;margin-top: -1px;padding: 18px 0 10px;width:100%;}
+		.icon{width: 75px;float: left;}
+		.icon img{width: 48px;height: 48px;display: block;margin: 0 auto;}
+		.about{float: left;}
+		.about h2{color: #0B0B0B;font-size:16px;font-weight: normal;margin: 6px 0;width: 160px;}
+		.about p{color: #808080;line-height: 20px;}
+		.about span{padding: 0 8px 0 5px;}
+		.downLink{float: right; width: 48px; height: 42px; margin: 8px 0; border-left: 1px solid #d7d7d7; text-indent: -9999px; background: url("./image/download.png") no-repeat center center; background-size: 27px; -webkit-background-size: 27px auto;}
+		.appDetail nav{background: #E7E8E7;border-bottom:1px solid #BDBDBD;box-shadow: 0 1px 3px #BDBDBD;}
+		.appDetail a{width:50%;display: inline-block;line-height: 36px;text-align: center;}
+		.appDetail span{border-top: 2px solid #f18101;display: inline-block;width: 100%;}
+		.splitline{border-left: 1px solid #BDBDBD;margin-left: -1px;}
+		.appDetail .notactive{color: #676767;border-top: 1px solid #F9F9F9;line-height: 38px;}
+	
+		#intro{margin: 10px 18px;text-indent: 2em;line-height: 18px;color: #2F2F2F;}
+		.picWarp{overflow: hidden;width: 320px;position: relative;}
+		#picCut{display:none;padding: 15px 0 10px;}
+		#picCut img{display: block;width: 138px;height: 230px;box-shadow: 1px 1px 2px #AEAEAE;border: 1px solid #AEAEAE;margin: 0 10px;}
+	
+		.addmore{display:none;background: -webkit-gradient(linear, 0 0, 0 100%, from(#FBFBFB), to(#F3F3F3));border-top: 1px solid #D8D8D8;text-align: center;}
+		.addmore a{color: #414141;display: block;line-height: 47px;}
+	
+		.recommend p{line-height: 25px;background: #E7E8E7;color: #818181;padding-left: 20px;}
+		#add4New{float: right;margin-right: 10px;padding: 0 10px;}
+		#recoApp a{width: 25%;display: inline-block;padding: 20px 0 10px;text-align: center;}
+		#recoApp img{width: 48px;height: 48px;display: block;margin: 0 auto;}
+		#recoApp span{line-height: 24px;color: #4D4D4D;font-size: 14px;display:block;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
+
+		#updateEntry {float: right;margin-top: 1px;}
+		#updateEntry .updateBtn{width: 50px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#f18101), to(#ec7e01));border: 1px solid #d47100;color: white;border-radius: 5px;text-align: center;font-size: 14px;height: 28px;line-height: 28px;margin-left: 10px;}
+		#updateNum{position: absolute;top: 5px;right: 5px;font-size: 10px;font-weight: bold;display: inline-block;width: 16px;height: 16px;line-height:16px;text-align:center;background: red;border: 2px solid #fff;border-radius: 10px;display: none;}
+
+		.update span{font-weight: bold;color: #F5FCF1;}
+		.update #updateAll{float: right;width: 80px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#6AB53E), to(#56A12F));border: 1px solid #308100;color: white;border-radius: 5px;text-align: center;font-size: 14px;font-weight:normal;height: 28px;line-height: 28px;margin: 5px -10px 0 -30px;visibility: hidden;}
+
+		#updatePiece .apptitle{width: 75%;}
+		#updatePiece .apptitle span{font-size: 12px; color: #999999;line-height: 16px; padding: 0;}
+		#updatePiece .apptitle span.name{font-size: 14px;color: #000000;line-height: 18px; margin-top:5px;}
+		</style>
+		<script type="text/javascript">
+			var baina = {
+				$: function (elem) {
+					return document.getElementById(elem);
+				},
+				addEvent: function (elem, type, hander){
+					elem.addEventListener(type, hander, false);
+				},
+				ErrorImg: function (pic) {
+					pic.src = './image/icon.png';
+				},
+				getScreenWidth: function() {
+					return window.innerWidth;
+				},
+				getStorage: function (key) {
+					var data = localStorage.getItem(key);
+					if(data === null){
+						return false;
+					} else{
+						return JSON.parse(data);
+					}
+				},
+				setStorage: function (key, data) {
+					var curData = [];
+					var olddata = localStorage.getItem(key);
+					if(olddata !== null){
+						curData = JSON.parse(olddata);
+					}
+					for(var i = 0, k = data.length; i < k; i++){
+						curData.push(data[i]);
+					}
+					var newData = JSON.stringify(curData);
+					localStorage.setItem(key, newData);
+				}
+			};
+		</script> 
+		<script>
+			setTimeout(function(){
+				var s = document.createElement('script');
+				s.id = '_baspace';
+				s.async = 1;
+				s.src = 'http://cn.belugaboost.com/static/ba.js';
+				s.onload = function(){
+					var appinfo ={"app_key":"0dab4b16e2ca4bebb90aadffc5fcf251","version":"0.1","chn":"dolphin"};
+					_ba.setAppInfo(appinfo);
+				};
+
+				h = document.getElementsByTagName('script')[0];
+				h.parentNode.insertBefore(s, h);
+			}, 200);
+		</script>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			ga('create', 'UA-41492209-4', 'dolphin-browser.com');
+			ga('send', 'pageview');
+
+			(function(){
+				var trackKey = "fastboot_tracking";
+				if(typeof(Storage) !== "undefined"){
+					var events = JSON.parse(sessionStorage.getItem(trackKey) || "[]");
+					for(var i=0; i<events.length; ++i){
+						ga.apply(window, events[i]);
+					}
+					sessionStorage.removeItem(trackKey);
+				}
+			})();
+		</script>
+	</head>
+<body>
+	<section id="hotapp">
+		<header id="header">
+			<div class="top">
+				<h1 class="topTitle">热门应用</h1>
+				<a id="backFromSearch"><span class="searchText">主页</span></a>
+				<div id="updateEntry">
+					<span class="updateBtn">更新</span>
+					<span id="updateNum"></span>
+				</div>
+				<div id="searchBtn" class="searchBtn"></div>
+				<div id="searchForm" class="searchForm" style="display:none">
+					<input id="search" type="text" />
+					<a id="submit">提交</a>
+				</div>
+			</div>
+			<nav id="mainTab">
+				<a id="homeTab" href="#home" class="active">首页</a>
+				<a id="rankTab" href="#rank">排行</a>
+				<a id="appTab" href="#app">应用</a>
+				<a id="gameTab" href="#game">游戏</a>
+				<a id="topicTab" href="#topic">专题</a>
+			</nav>
+		</header>
+		<section>
+			<div id="homePiece">
+				<div class="subTab">
+					<div class="subinner" id="homeSubTab">
+						<a href="#home" title="bestmatch" class="active">最适合你</a>
+						<a href="#new" title="newest" class="tesa">最新上架</a>
+						<a href="#hot" title="hotest">热门排行</a>
+					</div>
+				</div>
+				<div id="picAppshow">
+					<div id="focusImg"></div>
+					<div id="flashchange"></div>
+				</div>
+				<div id="homeLoading" class="loading">页面正在努力加载中…</div>
+				<ul id="homeAppList" class="appList">
+				</ul>
+			</div>
+			<div id="rankPiece">
+				<div class="subTab">
+					<div class="subinner" id="rankSubTab">
+						<a href="#userrank" title="user" class="active">应用排行</a>
+						<a href="#gamerank" title="game">游戏排行</a>
+						<a href="#videorank" title="video">影音娱乐</a>
+					</div>
+				</div>
+				<div id="rankLoading" class="loading">页面正在努力加载中…</div>
+				<ul id="rankAppList" class="appList">
+				</ul>
+			</div>
+			<div id="usePiece" title="14334">
+				<div class="loading">页面正在努力加载中…</div>
+			</div>
+			<div id="useAppPiece">
+				<div id="backbar">
+					<a id="back2tab" href="">返回</a><span id="pieceName">社交工具</span>
+				</div>
+				<div id="useLoading" class="loading">页面正在努力加载中…</div>
+				<ul id="useAppList" class="appList">
+				</ul>
+			</div>
+			<div id="gamePiece" title="14357">
+				<div class="loading">页面正在努力加载中…</div>
+			</div>
+			<div id="topicPiece">
+				<div class="loading">页面正在努力加载中…</div>
+			</div>
+			<div id="searchPiece">
+				<div id="searchLoading" class="loading">搜索热词加载中…</div>
+				<div id="word"></div>
+				<a id="newWord">换一换</a>
+				<ul id="searchAppList"  class="appList">
+				</ul>
+			</div>
+			<div class="addmore" id="addmore">
+				<a id="addmoremsg">加载更多</a>
+			</div>
+		</section>
+	</section>
+	<section id="detail">
+		<nav class="detail" id="detailHead">
+			<a class="back" href="#hotapp" id="back2app">back</a>
+			<span>应用详情</span>
+			<a class="home" href="#home" id="back2home">home</a>
+		</nav>
+		<section>
+			<div class="appTitle" id="appTitle">
+			</div>
+			<div class="appDetail" id="appDetail">
+				<nav><a><span id="tabIntro">软件介绍</span></a><a class="splitline"><span id="tabPicCut" class="notactive">软件截图</span></a></nav>
+				<div id="intro"></div>
+				<div class="picWarp" id="picWarp">
+					<div id="picCut"></div>
+				</div>
+			</div>
+			<div id="detailLoad" class="loading">页面正在努力加载中…</div>
+			<div class="recommend">
+				<p>猜你喜欢<a href="" id="add4New">换一换</a></p>
+				<div id="recoApp"></div>
+			</div>
+		</section>
+	</section>
+	<section id="update">
+		<nav class="update" id="updateHead">
+			<a class="back" href="#hotapp" id="backToApp">back</a>
+			<span>更新管理</span>
+			<span id="updateAll">一键更新</span>
+		</nav>
+		<div id="updatePiece">
+			<div id="updateLoad" class="loading">页面正在努力加载中…</div>
+			<ul id="updateList" class="appList">
+			</ul>
+		</div>
+	</section>
+	<footer id="footer">
+		<a href="http://cn.dolphin-browser.com/feedback.htm" class="feedback"><span id="feedback">意见反馈</span><i></i></a>
+		<a href="" class="back2top"><span id="back2top">返回顶部</span></a>
+	</footer>
+</body>
+<script type="text/javascript" src="hotapps.js"></script>
+</html>

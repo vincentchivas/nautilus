@@ -1,0 +1,36 @@
+server {
+    listen 80;
+    server_name nav.dolphin-browser.com;
+
+    access_log /var/app/log/dolphinop-webfront/access.log;
+    error_log /var/app/log/dolphinop-webfront/error.log;
+	index		 index.html index.htm index.php;
+
+    location ~(favicon.ico) {
+        alias /var/app/enabled/dolphinop-webfront/static/favicon.ico;
+        log_not_found off;
+        access_log off;
+        expires 30d;
+        break;
+    }
+
+    location ~* (^/service/1/weathers.json) {
+        rewrite ^/service/1/weathers.json(.*) /service/1/weathers.json$1 break;
+        proxy_pass      http://opscn.dolphin-browser.com;
+    }
+
+    location ~* (^/api/1/navigate.json) {
+        rewrite ^/api/1/navigate.json(.*) /api/1/navigate.json break;
+        proxy_pass      http://opscn.dolphin-browser.com;
+    }
+
+    location /sitenav.manifest {
+        rewrite (.*) /static/pages/navigate/sitenav.manifest break;
+        proxy_pass http://opscn.dolphin-browser.com;
+    }
+
+    location / {
+        root /var/app/enabled/web/static/pages/navigate;
+    }
+}
+

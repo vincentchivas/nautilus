@@ -1,0 +1,469 @@
+﻿{% extends "base_generic.html" %}
+{% load compress %}
+
+{% block manifest %}manifest="ipad.appcache"{% endblock %}
+{% block title %}海豚导航{% endblock %}
+
+{% block body %}
+    <div id='header'>
+        <div id='weather'>
+            <ul>
+                <li id='frame'>
+                    <div id='zoom'>
+                        <iframe src="http://www.thinkpage.cn/weather/weather.aspx?uid=&cid=&l=zh-CHS&p=CMA&a=1&u=C&s=4&m=0&x=0&d=1&fc=FFFFFF&bgc=&bc=&ti=1&in=1&li=2&ct=iframe" frameborder="0" scrolling="no" width="370" height="27" allowTransparency="true"></iframe>
+                    </div>
+                </li>
+                <li id='greet'>喝杯咖啡，享受一下美好的时光吧</li>
+            </ul>
+        </div>
+        <div id='promotion'>
+            <input type="hidden" name="os" value="{{os}}">
+            <input type="hidden" name="l" value="{{locale}}">
+            <a {% block promotion_click_url %}href='http://weibo.com'{% endblock %} >
+                <img src={% block promotion_img_url %}'http://placehold.it/57x57'{% endblock %}></img>
+                <div>
+                    <ul>
+                        <li id='ptitle'>{% block promotion_title %}海豚浏览器HD{% endblock %}</li>
+                        <li id='pdesp'>{% block promotion_desp %}iPad版本终于iOS登录了！{% endblock %}</li>
+                    </ul>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div id='features'>
+        <h1>酷站推荐</h1>
+        <div>
+            <ul>
+                {% for feature in features %}
+                <li>
+                    <a {% block feature_click_url %}href='http://weibo.com'{% endblock %}>
+                        <img src={% block feature_image_url %}'http://placehold.it/163x90'{% endblock%}></img>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <div style='clear:both;'></div>
+        </div>
+    </div>
+    <div id='content'>
+        <h1>分类导航</h1>
+        <div id='navigate'>
+            <ul>
+                {% for cate in categories %}
+                <li>
+                    <h2>{% block category_name %}新闻{% endblock %}</h2>
+                    <div class='container'>
+                        <a class='toggle' href='javascript:void(0)'>
+                            <img class='down' src='{{STATIC_URL}}image/pages/navigation/arr_down.gif'></img>
+                        </a>
+                        <div>
+                            <ul class='sites'>
+                                {% for site in cate.sites %}
+                                <li>
+                                    <a {% block site_url %}href='http://weibo.com'{% endblock %}>
+                                        {% block site_name %}微博{% endblock %}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id='sponsors'>
+            <ul>
+                {% for ad in ads %}			
+                <li>
+                    <a {% block ad_click_url %}href='http://weibo.com'{% endblock %}>
+                        <img class='ad' src={% block ad_img_url %}'http://placehold.it/175x135'{% endblock %} /> 
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block style %}
+{% compress css inline %}
+<style>
+    body
+    {
+        font-family:'Hiragino Sans GB';
+        background-color:#F5F5F5;
+        margin:0;
+    }
+
+    #header 
+    {
+        height:95px;
+        /*background:url({{STATIC_URL}}image/pages/navigation/bg_top.jpg) no-repeat;*/
+        background-image:url({{STATIC_URL}}image/pages/navigation/header_bg.png);
+        border-bottom:1px solid #5e5e5e;
+        padding:0 20px;
+        overflow:hidden;
+    }
+    
+    /*
+    body.vertical #header
+    {
+        background:url({{STATIC_URL}}image/pages/navigation/bg_top_v.jpg) no-repeat;	
+    }
+    */
+
+    #header div
+    {
+        display:inline-block;
+        float:left;
+        margin-right:15px;
+        color:#fff;
+    }
+
+    #header img
+    {
+        float:left;
+    }
+    
+    #header #promotion
+    {
+        float:right;
+        margin:0;
+    }
+
+    #promotion div
+    {
+        margin:0;
+    }
+
+    #promotion ul
+    {
+        margin-top:18px;
+    }
+
+    #promotion li
+    {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 250px;
+        margin-bottom:15px;
+    }
+
+    #promotion img
+    {
+        margin:20px 20px 0 0;
+    }
+
+    #ptitle
+    {
+        font-size:20px;
+    }
+
+    #greet
+    {
+        font-size:16px;
+    }
+    
+    #pdesp
+    {
+        font-size:15px;
+    }
+
+    /* weather frame related */
+    #weather ul
+    {
+        margin-top:12px;
+    }
+
+    #header #frame
+    {
+        overflow:hidden;
+        padding:8px 0;
+        margin:0;
+    }
+
+    #zoom
+    {
+        float:none;
+        -webkit-transform:scale(1.4) translate(-2px);
+    }
+
+    /* Feature area */
+    #features
+    {
+        -webkit-box-shadow:0 0 5px -2px #000 inset;
+        padding:10px 20px 18px;
+        /*background: url({{STATIC_URL}}image/pages/navigation/bg_feature.jpg) no-repeat;*/
+        background: -webkit-gradient(linear, 0 0, 0 100%, from(#4b4a4a), to(#f5f5f5));
+    }
+
+    /*
+    body.vertical #features
+    {
+        background: url({{STATIC_URL}}image/pages/navigation/bg_feature_v.jpg) no-repeat;	
+    }
+    */
+
+    #content
+    {
+        border-top: 1px solid #fff;
+        padding:10px 195px 25px 20px;
+        /*background: url({{STATIC_URL}}image/pages/navigation/lantern.png) 20px 0 no-repeat;*/
+    }
+
+    #navigate
+    {
+        float:left;
+        width:100%;
+    }
+
+    #sponsors
+    {
+        width:175px;
+        margin-right:-195px;
+        float:left;
+    }
+
+    #features ul
+    {
+        border-radius:5px;
+        -webkit-box-shadow:0 0 8px #000;
+        background-color:#F5F5F5;
+        overflow:hidden;
+        width:100%;
+        float:left;
+    }
+
+    #features li
+    {
+        float:left;
+        text-align:center;
+        width:163px;
+        height:90px;
+        border-right:1px solid #ddd;
+        border-bottom:1px solid #ddd;
+    }
+
+    #features li.vertical
+    {
+        width:181px;
+    }
+
+    ul
+    {
+        padding:0;
+        margin:0;
+        display:block;
+    }
+
+    li
+    {
+        list-style-type:none;
+    }
+
+    h1,h2
+    {
+        margin:0 0 10px;
+        font-size:22px;
+        font-weight:normal;
+    }
+
+    #features h1
+    {
+        /*color:#e60b11;*/
+        /*padding-left:120px;*/
+        color:#ddd;
+        text-shadow:0 0 5px #000;
+    }
+
+    #content h1
+    {
+        /*padding-left:40px;*/
+        color:#5d5d5d;
+    }
+
+    h2
+    {
+        color:#a6a6a6;
+        line-height:62px;
+        margin: 0 15px 0 10px;
+        float:left;
+    }
+
+    .container
+    {
+        margin:0 20px 20px 0;
+        border-radius:5px;
+        height:60px;
+        overflow:hidden;
+        background-color:#fff;
+        border:1px solid #cdcdcd;
+    }
+
+    .container div
+    {
+        padding:0 62px 0 5px;
+    }
+
+    .sites
+    {
+        padding:9px 0;
+        width:100%;
+        float:left;
+    }
+
+    .sites li
+    {
+        float:left;
+        padding:0 15px;
+        margin:10px 0;
+        border-right:1px solid #cdcdcd;
+    }
+
+    .sites li:last-child
+    {
+        border-right:none;
+    }
+
+    a
+    {
+        font-size:20px;
+        color:#5b5b5b;
+        text-decoration:none;
+    }
+
+    .sites a
+    {
+        white-space:nowrap;
+    }
+
+    #sponsors li
+    {
+        margin-bottom:20px;
+        border-radius:5px;
+        border:1px solid #b5b5b5;
+        height:135px;
+        overflow:hidden;
+    }
+
+    .toggle
+    {
+        padding:24px 20px;
+        float:right;
+    }
+
+    .toggle img
+    {
+        width:21;;
+        height:11px;
+    }
+
+</style>
+{% endcompress %}
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="{{STATIC_URL}}scripts/zepto.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            init();
+            greeting();
+        });
+
+        function init()
+        {
+            if (!navigator.onLine) {
+                $('iframe').css('visibility', 'hidden');
+            }
+            
+            window.addEventListener('resize', checkOrientation, false);
+            window.addEventListener('orientationchange', checkOrientation, false);
+
+            checkOrientation();
+            window.scrollTo(0, 1);
+
+            $('.toggle').bind('click', function () {
+                var  image = $('img', this);
+                var container = $(this.parentElement);
+
+                if (image.hasClass('down'))
+                {
+                    var toH = $('.sites', container).dom[0].scrollHeight;
+                    container.css('height', 'auto');
+                    image.attr("src", "{{STATIC_URL}}image/pages/navigation/arr_up.gif");
+                    image.removeClass('down');						
+                }
+                else
+                {
+                    container.css('height', 60);
+                    image.attr("src", "{{STATIC_URL}}image/pages/navigation/arr_down.gif");					
+                    image.addClass('down');						
+                }
+            });
+        }
+
+        function checkOrientation()
+        {
+            var body = $('body');
+            var features = $('#features li');
+            
+            body.removeClass('vertical');
+            features.removeClass('vertical');
+            $('#date').show();
+
+            if ($("#features").width() < 800)
+            {
+                body.addClass('vertical');
+                features.addClass('vertical');
+                $('#date').hide();
+            }
+        }
+
+        function greeting()
+        {
+            var date = new Date();
+            var hour = date.getHours();
+            var message = null;
+
+            if (22 <= hour || hour < 6 )
+            {
+                message = '亲，赶快休息吧，不要影响明天工作哦~';
+            }
+            else if (6 <= hour && hour < 12)
+            {
+                message = '上午好，海豚与您共享美好的一天！';
+            }
+            else if (12 <= hour && hour < 18)
+            {
+                message = '累了吧，海豚陪您一起休息一下吧！';
+            }
+            else
+            {
+                message = '在这里，海豚陪您一起娱乐学习！';
+            }
+
+            $('#greet').html(message);
+        }
+
+    </script>
+{% endblock %}
+
+{% block tracking %}
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-27399685-1']);
+        _gaq.push(['_trackPageview']);
+        _gaq.push(['_trackPageLoadTime']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+{% endblock %}

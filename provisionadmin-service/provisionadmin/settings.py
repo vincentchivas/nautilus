@@ -89,7 +89,7 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 CUS_TEMPLATE_DIR = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'templates')
 
-HOST = "172.16.7.14"
+HOST = "127.0.0.1"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"

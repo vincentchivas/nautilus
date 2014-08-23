@@ -1,0 +1,250 @@
+﻿<!Doctype html>
+<html>
+<head>
+	<style>
+		.page_flag{position:fixed;right:10px;top:10px;display:inline-block;font-size:18px;color:red}
+		.edit_flag{display:none;position:fixed;left:10px;top:10px;display:inline-block;font-size:18px;color:red}
+                .show_click{position:fixed;top:0;right:50%;font-weight:bold;color:red}
+		.img_input .title,.normal_input span,.text_input span,.icon_input span{
+			position: absolute;
+			left: 10px;
+		}
+		.item input,.normal_input input,.icon_input input{
+			width: 100%;
+			border: #ccc 1px solid;
+			border-radius: 2px;
+			text-indent: 5px;
+			margin-bottom: 8px;
+		}
+		#ad_form{
+                        margin-bottom:50px;
+                }
+		.normal_input{
+			margin: 10px 0;
+			padding-left: 150px;
+		}
+		.text_input{
+			padding: 0 150px;
+		}
+			.text_input textarea{
+				width: 100%;
+				height: 170px;
+				border-radius: 5px;
+				border-color: #ccc;
+				padding: 10px;
+			}
+		.icon_input{
+			margin: 10px 0;
+			padding-left: 45px;
+		}
+			.icon_input img{
+				margin-left: -14px;
+			}
+			
+		.img_input{
+			margin: 10px 0;
+			padding-left: 28px;
+		}
+			.img_input .item{
+				width:100%;
+				display: inline-block;
+			}
+			.item input{
+				margin-top:20px;
+			}
+		footer{position:fixed;bottom:0;left:0}
+			.con_btn{
+				display: inline-block;
+				padding: 5px 8px;
+				border-radius: 3px;
+				cursor: pointer;
+				background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
+				border: 1px solid #3079ed;
+				margin: 0 10px;
+			}
+	</style>
+	<script src='http://code.jquery.com/jquery-1.10.2.min.js'></script>
+</head>
+<body id='main_area'>
+	<span class="edit_flag" id="edit_flag">已审核</span>
+	<span class="page_flag" id="page_flag"></span>
+        <span class="show_click" id="track_count"></span>
+	<section id='ad_form'>
+		<!--<div class='normal_input'>
+			<span>title</span><input value='WHAFF, Get Rewarded Everyday'/>
+		</div>
+		<div class='text_input'>
+			<span>简介</span><textarea value=''></textarea>
+		</div>
+		<div class='icon_input'>
+			<span>icon</span><input value='https://lh3.ggpht.com/BhskXcZN8KpqF_07Dht9e_PbYryU54e9i0kX_ELzfa9X8AYje0V3I32k2X8zQ2-PXA=w300'/>
+			<img src='https://lh3.ggpht.com/BhskXcZN8KpqF_07Dht9e_PbYryU54e9i0kX_ELzfa9X8AYje0V3I32k2X8zQ2-PXA=w300'/>
+		</div>
+		<div class='img_input'>
+			<span class='title'>screenshots</span>
+			<span class='item'>
+				<input value='http://rescf.appflood.com/get_bid_img/913/10/1372387476?a='></input>
+				<img src="http://rescf.appflood.com/get_bid_img/913/10/1372387476?a=" />
+			</span>
+		</div>-->
+	</section>
+	<footer>
+		<span class="con_btn" id='next'>下一个</span><span class="con_btn" id='last'>上一个</span><span class="con_btn" id='save'>保存</span><span class="con_btn" id='submit'>提交</span><span class="con_btn" id="cancle">取消审核</span>
+	</footer>
+</body>
+<script>
+	window.onload=function(){
+		var track_count,data_obj={},dom_items=['app_size','app_type','detail_description','title','app_developer','pub_time','download_url','short_description','app_ratingcount','app_rating','display_area','display_order','icon','screenshots'],text_reg={'<br/>':'\n','&nbsp;':'\r'};
+		(function(){
+			var p = arguments;
+			switch(p[0]){
+				case 'init':
+					$.getJSON('../../api/promotion/edit_get.json?',p.callee.bind(this,'treat_data'));
+				break;
+				case 'treat_data':
+					var respon = p[1];
+                                        if(respon&&respon.items&&respon.items.length){
+                                                track_count = respon.track_count;
+                                                respon = respon.items
+						data_obj.len = respon.length;
+						data_obj.id_arr = [];
+						data_obj.cur_page = 0;
+						respon.forEach(function(item){
+							data_obj.id_arr.push(item.sid);
+							data_obj[item.sid] = item;
+						});
+						data_obj.content = respon;
+						p.callee.apply(this,['init_page',data_obj.id_arr[0]])
+						$('#main_area').bind('click',function(e){
+							var tar_node = e.target;
+							switch(tar_node.id){
+								case 'next':
+									var tmp = ++data_obj.cur_page;
+									p.callee.apply(this,['change_page',data_obj.id_arr[tmp],tmp+1]);
+								break;
+								case 'last':
+									var tmp = --data_obj.cur_page;
+									p.callee.apply(this,['change_page',data_obj.id_arr[tmp],tmp+1]);
+								break;
+								case 'save':
+									p.callee.call(this,'save');
+								break;
+								case 'submit':
+									p.callee.call(this,'submit')
+								break;
+								case 'cancle':
+									p.callee.apply(this,['save','cancle']);
+								break;
+								case 'delete':
+								    p.callee.apply(this,['delete_screenshot',tar_node])
+								break;
+								default:
+								break;
+							}
+							return ;
+						});
+					}
+					return false;
+				break;
+				case 'change_page':
+					var p_id = p[1],img_url;
+					data_obj[p_id].is_edit?$('#edit_flag').show():$('#edit_flag').hide();
+					$('#items').html(data_obj[p_id]['screenshots'].map(function(item,i){return '<span class="item"><input id="screenshots_'+i+'" value="'+item.pic_url+'"></input><img src="'+item.pic_url+'"/><span id="delete" class="con_btn">删除</span></span>'}).join(''));
+					$('#ad_form').find('input,textarea').each(function(i,input){
+						/(screenshots_)(\d)/.test(input.id)?'':
+						/icon/.test(input.id)?(img_url = data_obj[p_id][input.id],input.value = img_url,$(input).next('img').each(function(i,t){t.src=img_url}))
+						:input.value = data_obj[p_id][input.id];
+					});
+					$('#ad_form')[0].className = p_id;
+					$('#page_flag').html(p[2]+'/'+data_obj.len);
+				break; 
+				case 'save':
+					var p_node = $('#ad_form'),items = p_node.find('input,textarea'),other_flag = p[1],tmp;
+						if(other_flag=='cancle'){
+							p_id = p_node[0].className;
+							data_obj[p_id]['edit_flag']=true;
+							data_obj[p_id]['is_edit']=false;
+							alert('已经取消审核');
+							return ;
+						}
+						p.callee.apply(this,['valid',items])?
+						
+						(p_id = p_node[0].className,items.each(function(i,input){
+							 /(screenshots_)(\d)/.test(input.id)?
+							(input.name=='delete'?
+								(delete data_obj[p_id]['screenshots'][RegExp.$2])
+								:(tmp = data_obj[p_id]['screenshots'][RegExp.$2],tmp['pic_url']=input.value))
+							:data_obj[p_id][input.id]=(/app_rating|app_ratingcount/.test(input.id)?parseFloat(input.value):input.value);
+						}),data_obj[p_id]['edit_flag']=true,data_obj[p_id]['is_edit']=true,data_obj[p_id]['screenshots']=data_obj[p_id]['screenshots'].filter(function(item){return item}),alert('保存成功！'))
+						:alert('只能保存完整数据！');
+				break;
+				case 'delete_screenshot':
+				    var dom = p[1];
+					target_node = $(dom).parent().find('input')
+					target_node.attr('name','delete');
+                                        target_node.parent().hide();
+					return ;
+				case 'valid':
+					var input_items = p[1];
+					for(var i=0,len=input_items.length;i<len;i++){
+						if(input_items[i].value == ''){
+							return false;
+						}
+					}
+					return true;
+				break;
+				case 'submit':
+					var key_arr=[],data_arr=[],tmp;
+					for(i in data_obj){
+						if(data_obj.hasOwnProperty(i)){
+							if(data_obj[i].edit_flag){
+								delete data_obj[i].edit_flag;
+								key_arr.push(i);
+								data_arr.push(data_obj[i])
+							}
+						}
+					}
+					if(key_arr.length&&data_arr.length){
+					    tmp = JSON.stringify(data_arr)
+						$.post('../../api/promotion/edit_sent.json',{len:key_arr.length,keys:JSON.stringify(key_arr),datas:tmp},function(re){
+							if(/ok/.test(re)){
+								alert('提交成功！');
+							}else{
+								alert('提交失败，请重试！');
+							}
+						});
+					}else{
+						alert('没有修改需要提交！');
+					}
+				break;
+				case 'init_page':
+					var p_node = $('#ad_form'),items=p[1];
+					if(items&&(items=data_obj[items])){
+						p_node.html(dom_items.map(function(key){
+							switch(key){
+								case 'detail_description':
+									return "<div class='text_input'><span>"+key+"</span><textarea id='"+key+"' >"+items[key]+"</textarea></div>"
+								case 'icon':
+									return "<div class='icon_input'><span>"+key+"</span><input id='"+key+"' value='"+items[key]+"'/><img src='"+items[key]+"'/></div>"
+								break;
+								case 'screenshots':
+									return "<div class='img_input'><span class='title'>"+key+"</span><span id='items'>"+items[key].map(function(item,i){return '<span class="item"><input id="screenshots_'+i+'" value="'+item.pic_url+'"></input><img src="'+item.pic_url+'"/><span id="delete" class="con_btn">删除</span></span>'}).join('')+"</span></div>"
+								default:
+									return "<div class='normal_input'><span>"+key+"</span><input id='"+key+"' value='"+items[key]+"'/></div>"
+								break;
+							}
+						}).join(''));
+						items.is_edit?$('#edit_flag').show():$('#edit_flag').hide();
+                                                track_count!=undefined?$('#track_count').html('总的点击数：'+track_count):'';
+						p_node[0].className=p[1];
+						$('#page_flag').html('1/'+data_obj.len)
+					}
+				break;
+				default:
+				break;
+			}
+			return '';
+		})('init')
+	}
+</script>
+</html>

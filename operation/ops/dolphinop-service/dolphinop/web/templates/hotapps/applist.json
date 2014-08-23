@@ -1,0 +1,12 @@
+{% spaceless %}
+[
+	{% for app in app_list %}
+	{
+		"title":"{{ app.title }}",
+		"icon":"{{ app.favicon }}",
+		"description":"{{ app.short_description }}",
+		"url":"{{ app.download_url }}"
+	},
+	{% endfor %}
+]
+{% endspaceless %}

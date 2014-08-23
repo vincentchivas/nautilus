@@ -1,0 +1,491 @@
+{% extends "html5_generic.html" %}
+{% load compress %}
+{% load i18n %}
+
+{% block manifest %}manifest="addons.appcache"{% endblock %}
+
+{% block title %}{% trans 'Add-ons' %}{% endblock %}
+
+{% block body %}
+    <div class="body">
+        <div class="header">
+            <img class="logo" src="{{STATIC_URL}}image/pages/hotapps/{% trans 'addon.png' %}" title="Hot Apps" />
+        </div>
+        <div id="search_bar" class="search_bar">
+            <span id="search_btn" class="search_btn">Search</span>
+            <div class="search_input_wrap">
+                <span class="clear_input_btn"></span>
+                <form action="" id="search_form">
+                    <input class="search_box" type="text" default="true" placeholder="Dolphin is my browser" />
+                </form>
+            </div>
+        </div>
+        <div id="search_wrap" style="display:none;">
+            <div id="search_content" class="new_apps"></div>
+        </div>
+        <div class="content">
+            <div class="hot_apps">
+                <div class="tab_wrap" style="display:none;">
+                    <div class="menus">
+                        <ul>
+                            <li id="left_tab" class="menu_tab"><a href="#left">New Free</a></li>
+                            <li id="middle_tab" class="menu_tab"><a href="#middle">Hot Today</a></li>
+                            <li id="right_tab" class="menu_tab last"><a href="#right">App Album</a></li>
+                        </ul>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+                <div id="middle_wrap" style="display:none;">
+                    <div id="middle_content"></div>
+                    <div class="footer">Dolphin Browser &copy;2012</div>
+                </div>
+                <div id="left_wrap" style="display:none;">
+                    <div id="left_content" class="new_apps"></div>
+                    <div class="bottom">
+                        <span class="loading_more">
+                            <div class="footer" style="display:none;">Dolphin Browser &copy;2013</div>
+                            <label style="display:none;">{% trans 'Loading...' %}</label>
+                            <a href="javascript:void(0);" onclick="loadApps('left');">{% trans 'Load More Apps' %}</a>
+                        </span>
+                        <span class="go_top">
+                            <a href="javascript:void(0);" onclick="window.scrollTo(0,1);">{% trans 'Top' %}</a>
+                        </span>
+                    </div>
+                </div>
+                <div id="right_wrap" style="display:none;">
+                    <div class="more_apps">
+                        <div>
+                            <ul id="right_content"></ul>
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                    <div class="footer">Dolphin Browser &copy;2012</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cateapps_wrap" class="body" style="display:none;">
+        <div id="cateapps_tab" class="tab_wrap" style="display:none;">
+            <span id="cateapps_title">Installed necessary</span>
+        </div>
+        <div id="cateapps_content" class="content"></div>
+        <div class="bottom">
+            <span class="loading_more">
+                <div class="footer" style="display:none;">Dolphin Browser &copy;2013</div>
+                <label style="display:none;">{% trans 'Loading...' %}</label>
+                <a href="javascript:void(0);" onclick="loadApps('cateapps');">{% trans 'Load More Apps' %}</a>
+            </span>
+            <span class="go_top">
+                <a href="javascript:void(0);" onclick="window.scrollTo(0,40);">Top</a>
+            </span>
+        </div>
+    </div>
+    <div id="details_wrap" class="body" style="display:none;">
+        <div id="details_tab"></div>
+        <div id="details_content" class="content"></div>
+        <div class="footer">Dolphin Browser &copy;2013</div>
+    </div>
+    <div id="pop_wrapper" style="display:none;">
+        <div class="pop_content">
+            <a class="close_button" href="javascript:void(0);" onclick="$('#pop_wrapper').hide();"></a>
+            <a class="prev_button" href="javascript:void(0);"></a>
+            <a class="next_button" href="javascript:void(0);"></a>
+            <img />
+        </div>
+    </div>
+    
+    <script type='text/html' id='left_tmpl'>
+        <% var itemColors = ['', 'even']; %>
+        <% for (var i = 0; i < obj.length; ++i) {%>
+        <% var app = obj[i]; %>
+        <% sessionStorage.setItem("addon:" + app.id, JSON.stringify(app)); %>
+        <a class="recomment_app_wrap <%=itemColors[i%2]%>" href="#details:<%=app.id%>" onclick="track(this, 'item', '<%=addslashes(app.title)%>' , '<%=app.id%>');">
+            <div class="recomment_app_left">
+                <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=app.icon%>" />
+                <span>(<%=shortNum(app.app_lovecount)%>)</span>
+            </div>
+            <div class="recomment_app_right">
+                <h1><%=app.title%></h1>
+                <% if (app.is_hot) { %><div class="hot"></div><% } %>
+                <p><%=app.short_description%></p>
+            </div>
+            <div class="recomment_next">
+                <span></span>
+            </div>
+            <div class="clear"></div>
+        </a>
+        <% } %>
+    </script>
+    <script type='text/html' id='middle_tmpl'>
+        <div class="image_scrollbox">
+            <% var count = top_feature.length; %>
+            <ul class="image_scroll" style="width:<%=count*50%>%">
+            <% for (var i = 0; i < count; ++i) {%>
+            <% var topItem = top_feature[i]; %>
+                <li class="slice" style="width:<%=100/count%>%">
+                <% if (topItem.category_id) { %>
+                    <% localStorage.setItem("cate:" + topItem.category_id, topItem.category_name); %>
+                    <a href='#cateapps:<%=topItem.category_id%>' onclick="track(this, 'image', '<%="cate:" + addslashes(topItem.category_name)%>' , '<%=topItem.category_id%>');">
+                <% } else { %>
+                    <% var app = topItem.application; %>
+                    <% sessionStorage.setItem("addon:" + app.id, JSON.stringify(app)); %>
+                    <a href='#details:<%=app.id%>' onclick="track(this, 'image', '<%="app:" + addslashes(app.title)%>' , '<%=app.id%>');">
+                <% } %>
+                        <img src='<%=topItem.top_pic%>' />
+                    </a>
+                </li>
+            <% } %>
+            </ul>
+        </div>
+        <div class="image_scrollbar">
+            <% for (var i = 0; i < count; i+=2) {%>
+                <span <% if (i == 0) { %>class="active"<% } %>></span>
+            <% } %>
+        </div>
+        <% sessionStorage.setItem("addon:" + daily.id, JSON.stringify(daily)); %>
+        <a class="recomment_app_wrap even" href="#details:<%=daily.id%>" onclick="track(this, 'daily', '<%=addslashes(daily.title)%>' , '<%=daily.id%>');">
+            <div class="recomment_app_left">
+                <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=daily.icon%>" />
+                <span>(<%=shortNum(daily.app_lovecount)%>)</span>
+            </div>
+            <div class="recomment_app_right">
+                <h1><%=daily.title%></h1>
+                <% if (daily.is_new) { %><div class="new"></div><% } %>
+                <p><%=daily.short_description%></p>
+            </div>
+            <div class="recomment_next">
+                <span></span>
+            </div>
+            <div class="clear"></div>
+        </a>
+        <div class="apps icon_list border">
+            <ul>
+            <% for (var i = 0; i < apps.length; ++i) {%>
+            <% var app = apps[i]; %>
+            <% sessionStorage.setItem("addon:" + app.id, JSON.stringify(app)); %>
+                <li <% if (i % 3 == 2) { %> class="last" <% } %>>
+                    <a href="#details:<%=app.id%>" onclick="track(this, 'item', '<%=addslashes(app.title)%>' , '<%=app.id%>');">
+                        <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=app.icon%>" />
+                        <span>(<%=shortNum(app.app_lovecount)%>)</span>
+                        <h2><%=app.title%></h2>
+                    </a>
+                </li>
+            <% } %>
+            </ul>
+            <div class="clear"></div>
+        </div>
+    </script>
+    <script type='text/html' id='right_tmpl'>
+        <% var itemColors = ['', 'even']; %>
+        <% for (var i = 0; i < obj.length; ++i) {%>
+        <% var cate = obj[i]; %>
+        <% localStorage.setItem("cate:" + cate.id, cate.title); %>
+            <li class="<%=itemColors[i%2]%>">
+                <a href="#cateapps:<%=cate.id%>" class="recomment_app_wrap" onclick="track(this, 'item', '<%=addslashes(cate.title)%>' , '<%=cate.id%>');">
+                    <div class="app_list_left">
+                        <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box2.png" data-original="<%=cate.favicon%>" />
+                    </div>
+                    <div class="app_list_right">
+                        <h2><%=cate.title%></h2>
+                        <p><%=addslashes(cate.short_description)%></p>
+                    </div>
+                    <% if (cate.update_number > 0) {%><div class="new"></div><% } %>
+                    <div class="clear"></div>
+                </a>
+            </li>
+        <% } %>
+    </script>
+    <script type='text/html' id='cateapps_tmpl'>
+        <% var itemColors = ['', 'even']; %>
+        <% for (var i = 0; i < obj.length; ++i) {%>
+        <% var app = obj[i]; %>
+        <% sessionStorage.setItem("addon:" + app.id, JSON.stringify(app)); %>
+            <a class="recomment_app_wrap <%=itemColors[i%2]%>" href="#details:<%=app.id%>" onclick="track(this, 'item', '<%=addslashes(app.title)%>' , '<%=app.id%>');">
+                <div class="recomment_app_left">
+                    <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=app.icon%>" />
+                    <span>(<%=shortNum(app.app_lovecount)%>)</span>
+                </div>
+                <div class="recomment_app_right">
+                    <h1><%=app.title%></h1>
+                    <p><%=app.short_description%></p>
+                </div>
+                <div class="recomment_next">
+                    <span></span>
+                </div>
+                <% if (app.is_new) { %><div class="new"></div><% } %>
+                <div class="clear"></div>
+            </a>
+        <% } %>
+    </script>
+    <script type='text/html' id='details_tmpl'>
+        <div class="app_detail_wrap">
+            <div class="app_detail_left">
+                <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=obj.icon%>" />
+            </div>
+            <div class="app_detail_right">
+                <h1><%=obj.title%></h1>
+                <p>
+                    <% var rating = obj.app_rating; %>
+                    <% var star = ""; %>
+                    <% for (var i = 0; i < 5; ++i) { %>
+                        <% if (i+0.5 > rating) { %>
+                            <% star = "gray"; %>
+                        <% } else if (i+1 > rating) { %>
+                            <% star = "half"; %>
+                        <% } %>
+                        <span class="<%=star%>"></span>
+                    <% } %>
+                    &nbsp;(<%=obj.app_ratingcount%>)
+                </p>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="app_tools">
+            <div class="share">
+        {% ifequal  share_link  "facebook"  %}
+            <a href="http://m.facebook.com/sharer.php?u=<%=encodeURIComponent(location.href)%>&t=<%=encodeURIComponent(obj.title)%>" onclick="track(this, 'share', '<%=addslashes(obj.title)%>' , '<%=obj.id%>');">
+        {% endifequal %}
+        {% ifequal share_link  "sina"  %}
+            <a href="http://weibo.cn/dpool/ttt/extShare.php?ru=<%=encodeURIComponent(location.href)%>&rt=<%=encodeURIComponent(obj.title)%>&wm=4124&st=<%=new Date().getTime()%>" onclick="track(this, 'share', '<%=addslashes(obj.title)%>','<%=obj.id%>');">
+        {% endifequal %}
+                    <span>{% trans 'Share' %}</span>
+                </a>
+            </div>
+            <div class="app_get">
+                <a href="<%=obj.download_url%>" onclick="track(this, 'download', '<%=addslashes(obj.title)%>' , '<%=obj.id%>');">{% trans 'Get it' %}</a>
+            </div>
+        </div>
+        <div class="app_detail_list">
+            <ul id="app_content" class="app_items">
+                <li>
+                    <div class="dotted"><div></div></div>
+                    <ul id="details">
+                        <li><strong>{% trans 'Size: ' %}</strong><%=obj.app_size%></li>
+                        <li><strong>{% trans 'Type: ' %}</strong><%=obj.app_type%></li>
+                        <li><strong>{% trans 'Developers: ' %}</strong><%=obj.app_developer%></li>
+                        <li><strong>{% trans 'Description: ' %}</strong><%=obj.detail_description.replace(/\r\n/g, '<br />')%></li>
+                    </ul>
+                    <button class="more_btn more">{% trans 'More' %}</button>
+                    <div class="clear"></div>
+                </li>
+                <% if (obj.screenshots.length > 0 ) {%>
+                <li>
+                    <div class="dotted"><div></div></div>
+                    <div class="screenshots">
+                        <% for (var i = 0; i < obj.screenshots.length; ++i) { %>
+                        <% var screenshot = obj.screenshots[i]; %>
+                        <a onclick="showpop(<%=i%>, <%=obj.screenshots.length%>); track(this, 'image', '<%=addslashes(obj.title)%>' , '<%=i%>');">
+                            <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/loading2.png" data-original="<%=screenshot.thumbnails%>" data-url="<%=screenshot.pic_url %>"/>
+                        </a>
+                        <% } %>
+                        <div class="clear"></div>
+                    </div>
+                </li>
+                <% } %>
+            </ul>
+            <div class="clear"></div>
+        </div>
+    </script>
+    <script type='text/html' id='related_tmpl'>
+        <% if (obj.length > 0) { %>
+        <li>
+            <div class="dotted"><div></div></div>
+            <ul>
+                <li><strong>{% trans 'You may also like' %}</strong></li>
+                <li class="apps icon_list">
+                    <ul class="related">
+                    <% for (var i = 0; i < obj.length; ++i) { %>
+                    <% var app = obj[i]; %>
+                    <% sessionStorage.setItem("addon:" + app.id, JSON.stringify(app)); %>
+                        <li>
+                            <a href="#details:<%=app.id%>" onclick="track(this, 'related', '<%=addslashes(app.title)%>' , '<%=app.id%>');">
+                                <img class="lazy" src="{{ STATIC_URL }}image/pages/hotapps/box.png" data-original="<%=app.icon%>" />
+                                <span>(<%=shortNum(app.app_lovecount)%>)</span>
+                                <h2><%=app.title%></h2>
+                            </a>
+                        </li>
+                    <% } %>
+                    </ul>
+                </li>
+            </ul>
+            <% } %>
+        </li>
+    </script>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var product = 'addons';
+    var version = '1.0';
+    var platform = '{{ platform }}'; 
+    var lang = '{{ language }}';
+    var staticPath = '{{ STATIC_URL }}';
+
+    var strings = {
+        LESS: "{% trans 'Less' %}",
+        MORE: "{% trans 'More' %}",
+    };
+</script>
+
+{% compress js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/zepto.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/lazyload.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/template.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/addon.js"></script>
+{% endcompress %}
+{% endblock %}
+
+{% block tracking %}
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', '{{ ga_account }}']);
+    _gaq.push(['_trackPageview']);
+    _gaq.push(['_trackPageLoadTime']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = '{{ STATIC_URL }}scripts/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+{% endblock %}
+
+{% block style %}
+{% compress css inline %}
+<style>
+    *{ margin:0; padding:0; vertical-align:top;}
+    .clear{ clear:both; }
+    img{ border:0 none; }
+    ul li{ list-style:none;}
+    a{ text-decoration:none; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+    a:hover{ text-decoration:none;}
+    button{-webkit-tap-highlight-color: rgba(0,0,0,0);}
+
+    html{ /*background:#3e3e3e;*/ min-width:320px;}
+    body{ margin: 0 auto; font-family:"Diorid Sans"; min-height:600px; background:#fff;}
+
+    #pop_wrapper{ z-index:999; position:absolute; width:100%; height:100%; top:0; left:0; background:rgba(0, 0, 0, 0.5);}
+    #pop_wrapper img{ max-height:400px; min-height:120px; width:240px; height:auto;}
+    .horizontal #pop_wrapper img{ max-width:400px; min-width:120px; height:240px; width:auto;}
+    .pop_content{ border:2px solid #e6e6e6; background:#ffffff; top:50%; left:50%; position:fixed; -webkit-box-shadow: 0 0 25px #333;}
+    .close_button{ position:absolute;top:-15px;right:-15px;background:url("{{STATIC_URL}}image/pages/hotapps/close.png") no-repeat; width:30px; height:30px; -webkit-background-size:30px auto;}
+    .prev_button{ position:absolute;left:-20px;top:50%;margin-top:-25px;background:url("{{STATIC_URL}}image/pages/hotapps/arrows.png") no-repeat left top; width:30px; height:55px; -webkit-background-size:60px auto;}
+    .next_button{ position:absolute;right:-20px;top:50%;margin-top:-25px;background:url("{{STATIC_URL}}image/pages/hotapps/arrows.png") no-repeat right top; width:30px; height:55px; -webkit-background-size:60px auto;}
+
+    .header{ background:-webkit-gradient(linear,0 0,0 100%,from(#F6F6F6),to(#D2D2D2)); border-bottom:1px solid #909090; height:40px; line-height:40px;}
+    .header .logo{ height:33px; margin:3px 0 0 15px;}
+    .header h1{ font-size:18px; color:#717171; padding:0 20px;}
+    .header .search_box{ float:right; border-left:1px solid #c1c1c1;}
+    .header .search_box a{ display:block; background:url("{{STATIC_URL}}image/pages/hotapps/search_ico.png") no-repeat scroll -4px 0px transparent; width:45px; height:40px; border-left:1px solid #ffffff;}
+    .tab_wrap {background:#d6d6d6;border-top:1px solid #ffffff;border-bottom:1px solid #909090;line-height:40px;font-size:14px; text-align:center;color:#676767;text-shadow: 0 1px 1px #fff;}
+
+    .menus{ margin:5px; overflow:hidden;}
+    .menus ul{ background: -webkit-gradient(linear,0 0,0 100%,from(#FDFDFD),to(#D2D2D2)); border:1px solid #909090; border-radius:4px;}
+    .menus ul li{ display:inline-block; width:33.3%; box-sizing:border-box;}
+    .menus ul li.active{ background: -webkit-gradient(linear,0 0,0 100%,from(#52C002),to(#4AAC03)); -webkit-box-shadow: 0 1px 2px #3c8101 inset;}
+    .menus a{ display:block; color:#505050;}
+    .menus .active a{ color:#ffffff; text-shadow: 0 1px 1px #676767;}
+    #middle_tab{border-left:1px solid #909090; border-right:1px solid #909090;}
+
+    .content .image_scrollbox{ border-bottom:1px solid #d8d8d8; background:url("{{STATIC_URL}}image/pages/hotapps/image_slider_bg.png") repeat-x; border-top:1px solid #ffffff; overflow:hidden; padding:0 10px; min-height:80px;}
+    .image_scroll{ margin:0px auto; padding:10px 0;}
+    .image_scroll li{ display:inline-block;}
+    .image_scroll a{ padding:0 10px; display:block;}
+    .image_scroll img{ width:100%; }
+    .content .image_scrollbar{ border-bottom:1px solid #d8d8d8;height:10px;padding-top:3px; text-align:center;}
+    .content .image_scrollbar span{ background:url("{{STATIC_URL}}image/pages/hotapps/bullets.png") no-repeat; width:6px;height:6px; display:inline-block; margin:0 8px; -webkit-background-size:6px auto;}
+    .content .image_scrollbar span.active{ background-position:0 -6px;}
+
+    .recomment_app_wrap{display:block; padding:10px; border-top:1px solid #ffffff; border-bottom:1px solid #d8d8d8; position:relative;}
+    .even{background:#f3f3f3;}
+    .recomment_app_left,.app_detail_left{ float:left; width:65px;}
+    .recomment_app_right,.app_detail_right{ float:left; width:70%;}
+    .recomment_app_left img,.app_detail_left img{ width:55px; height:55px;}
+    .recomment_app_left span, .apps span{ background:url("{{STATIC_URL}}image/pages/hotapps/like.png") no-repeat; text-indent:18px; display:inline-block; color:#646464; font-size:13px; line-height:14px; margin-top:5px; overflow:hidden; -webkit-background-size:16px auto; width:55px; text-align:left; display:none;}
+    .recomment_app_right h1{ color:#505050; font-size:20px; font-weight:bold; max-width:95%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block;}
+    .recomment_app_right p{ margin:3px 3px 0 0; font-size:12px; color:#646464; line-height:16px; height:32px; overflow:hidden;}
+    .recomment_next span{ background:url({{STATIC_URL}}image/pages/hotapps/next_arrow.png) no-repeat; width:8px; height:13px; margin-top:22px; float:right; -webkit-background-size:8px auto;}
+    .app_detail_right span{ display:block; float:left; margin-top:-1px; width:16px; height:16px; background:url("{{STATIC_URL}}image/pages/hotapps/green-star.png"); -webkit-background-size:16px auto;}
+    .app_detail_right span.half{ background-image:url("{{STATIC_URL}}image/pages/hotapps/half-star.png");}
+    .app_detail_right span.gray{ background-image:url("{{STATIC_URL}}image/pages/hotapps/gray-star.png");}
+
+    .bottom a{ display:block; color:#777;}
+    .bottom span{ background:-webkit-gradient(linear,0 0,0 100%,from(#F6F6F6),to(#D2D2D2)); text-align:center; line-height:40px; color:#777; font-size:16px; margin:5px; border:1px solid #c9c9c9;border-radius:3px; display:inline-block;}
+    .bottom .go_top{ width:73px; margin-left:0px;}
+    .go_top a{ background:url("{{STATIC_URL}}image/pages/hotapps/top.png") no-repeat 12px 12px; background-size:16px auto; text-indent:20px;}
+    .loading_more{ width:228px;}
+
+    .app_detail_wrap, #cateapps_content{ background:-webkit-gradient(linear,0 0,0 30,from(#F0F0F0),to(#FFF));}
+    .app_detail_wrap{ border-top:1px solid #ffffff;padding:10px 15px 15px;}
+    .app_detail_right h1{font-size:16px;color:#505050; font-weight:bold; height:36px;}
+    .app_detail_right p{margin-top:7px; font-size:12px; color:#9c9c9c; line-height:16px; height:16px;}
+
+    .app_tools{ margin: 0 10px 15px;}
+    .app_tools div{display:inline-block; width:50%; text-align:center;}
+    .app_tools .like a{ display:inline-block; padding:0 24px; height:30px; line-height:30px; border-radius:5px; background:url("{{STATIC_URL}}image/pages/hotapps/like_btn.png"); border:1px solid #c9c9c9; -webkit-background-size:100% 100%; color:#50b501;}
+    .app_tools .like span{ display:block; text-align:right; width:90px; background:url("{{STATIC_URL}}image/pages/hotapps/green_like.png") no-repeat 0 8px; -webkit-background-size:16px auto;}
+    .app_tools .like span.like{ background:url("{{STATIC_URL}}image/pages/hotapps/like.png") no-repeat 0 8px;}
+    .app_tools .share a{ display:inline-block; padding:0 30px; height:30px; line-height:30px; border-radius:5px; background:-webkit-gradient(linear, 0 0, 0 100%, from(#f9f9f9), to(#d2d2d2)); border:1px solid #c9c9c9; color:#50b501;}
+    .app_tools .share span{ display:block; text-align:right; width:78px; background:url("{{STATIC_URL}}image/pages/hotapps/share.png") no-repeat 0 8px; -webkit-background-size:16px auto;}
+    .app_tools img{ height:33px;}
+    .app_get a{ width:138px; height:30px; border-radius:5px; border:1px solid #49a500; display:inline-block; background:-webkit-gradient(linear, 0 0, 0 100%, from(#67dd0a), to(#4eb100)); line-height:30px; font-size:17px;color:#ffffff;text-align:center; text-shadow: 0 1px 1px #676767;}
+
+    .app_detail_list{ margin:0 10px 0;}
+    .app_detail_list li{ list-style:disc inside; color:#67cc17;}
+    .app_detail_list .dotted{ border-top:1px dashed #67cc17; width:96%; margin-left:4%; position:relative;}
+    .app_detail_list .dotted div{ height:6px; width:6px; border-radius:3px; background:#67CC17; position:absolute; left:-12px; top:-4px;}
+    .app_detail_list ul li{ list-style:none; line-height:18px; color:#646464; font-size:14px;margin-top:3px;}
+    .app_detail_list ul ul{ margin:0 10px;}
+    .app_detail_list .more_details{margin:25px 10px 0;}
+    .app_detail_list .more_details{display:none;}
+    .app_detail_list .more_btn{background:-webkit-gradient(linear, 0 0, 0 100%, from(#f9f9f9), to(#d2d2d2)); border:1px solid #c9c9c9; border-radius:5px; width:75px; height:30px; line-height:30px; color:#242424; float:right;font-size:12px;margin-right:10px; text-shadow: 0 1px 1px #fff; margin-bottom:10px;}
+
+    .screenshots{margin-top:10px;}
+    .screenshots img{float:left;margin:0 5px 10px;min-width:90px; max-width:135px; min-height:90px; max-height:135px; -webkit-box-shadow:0 0 5px #444;}
+
+    #app_content strong, {font-weight:bold; color:#898989;}
+    #app_content .related{margin:-10px -20px;}
+
+    #details{ overflow:hidden; height:140px; margin-bottom:10px; }
+
+    #middle_content .icon_list{padding-top:12px;}
+    #middle_content .icon_list ul{border-top:1px solid #E5E5E5;}
+
+    .icon_list li{ float:left; width:33.3%;}
+    .icon_list a{ display:block; text-align:center;}
+    .icon_list img { width:56px; height:56px; margin:6px auto 0; display:block;}
+    .icon_list .app_number{ position:absolute; background:url({{STATIC_URL}}image/pages/hotapps/more.png) no-repeat; -webkit-background-size:30px auto; width:30px; height:30px;line-height:30px; text-align:center; font-size:15px; font-weight:bold; color:#ffffff; margin:-70px 0 0 55px;}
+    .icon_list h2 { display:inline-block; font-size:13px; color:#505050; font-weight:bold; margin-bottom:6px; width:94px; text-overflow:ellipsis; line-height:16px; overflow:hidden; white-space:nowrap;}
+
+    .icon_list.border li{ float:left; border-right:1px solid #e5e5e5; border-bottom:1px solid #e5e5e5; box-sizing:border-box;}
+    .icon_list.border li.last { border-right:none;}
+
+    .top{ position:absolute; top:0; width:320px; background:#fff;}
+    .footer{background:#f3f3f3;text-align:center;border-top:1px solid #d8d8d8;height:39px;line-height:39px;color:#b6b6b6;text-shadow: 0 1px 1px #fff;font-size:14px;margin-top:-1px;}
+
+    .more_apps a{ display:block; padding:10px;}
+    .app_list_left{ margin-right:15px; float:left;}
+    .app_list_left img{ width:130px; height:78px;}
+    .app_list_right h2{ color:#505050; font-size:16px; font-weight:bold; line-height:20px; max-height:40px; overflow:hidden; margin-bottom:5px;}
+    .app_list_right p{ font-size:12px; color:#646464; line-height:16px; max-height:32px; overflow:hidden;}
+    .new, .hot{ position:absolute; top:-1px; right:0px; width:30px; height:30px; -webkit-background-size:30px auto; background-position:right top; background-repeat:no-repeat;}
+    .new{ background-image:url("{{STATIC_URL}}image/pages/hotapps/new2.png");}
+    .hot{ background-image:url("{{STATIC_URL}}image/pages/hotapps/hot.png");}
+
+    .bottom{width:320px; margin:auto;}
+
+    /*search */
+    .search_bar{height:40px;padding:10px;}
+    .search_btn{float:right;width:60px;height:39px;line-height:39px;text-align:center;color:#119C06;font-size:16px;border-radius:2px;margin-right:-2px;}
+    .search_btn:active{color:#119c06;}
+    .search_input_wrap{border:1px solid #389d00;border-radius:2px;height:36px;padding-top:1px;padding-right:1px;margin-right:66px;}
+    .clear_input_btn{float:right;width:35px;height:35px;text-align:center;background:url("{{STATIC_URL}}image/pages/hotapps/delete.png") no-repeat center center;-webkit-background-size:16px;}
+    .search_bar form{margin-right:40px;}
+    .search_bar form input{font-size:15px;border:0;height:35px;width:95%;display:block;outline:0;-webkit-appearance:none;color:#505050;padding-left:8px;}
+    #search_wrap .recomment_app_wrap:first-child, #left_wrap .recomment_app_wrap:first-child{border-top:1px solid #D8D8D8;}
+    .no_result, .searching{text-align:center;font-size:12px;color:#504a4a;}
+    .searching{font-size:16px;}
+</style>
+{% endcompress %}
+{% endblock %}

@@ -1,0 +1,127 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<title>意见反馈</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"  name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
+    <meta name="keyword" content="海豚浏览器,安卓应用,用户反馈" />
+    <link rel="shortcut icon" href="http://opscn.dolphin-browser.com/static/favicon.ico">
+	<script>
+		function checkValid(elem,flag){
+			if(elem.value=='{% if product != 'white' %}在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~{% else %}在这里写下您对浏览器的意见和建议，我们会努力做得更好~{% endif %}'){
+				if(flag)
+					elem.value = '';
+				return true;
+			}else if(elem.value==''){
+				if(flag)
+                elem.value = '{% if product != 'white' %}在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~{% else %}在这里写下您对浏览器的意见和建议，我们会努力做得更好~{% endif %}';
+				return true;
+			}else
+				return false;
+		}
+		function submitform() {
+			if(typeof(spanNotify)=='undefined')
+				spanNotify = document.getElementById('spanNotify');
+			var message= document.getElementById("message");
+			if(checkValid(message,false))
+			{
+				spanNotify.style.display = "block";				
+				return false;
+			}
+			else
+			{
+				spanNotify.style.display = "none";
+				document.forms["feedbackform"].submit();
+			}            
+        }
+        function onload() {
+            if (Request('result')) {
+                var result = decodeURI(Request('result'));
+                if (result.toLowerCase() == "ok") {
+                    document.getElementById("content").style.display = "none";
+                    document.getElementById("submitFinished").style.display = "block";
+                }
+            }
+        }
+        function Request(argname) {
+            var url = document.location.href;
+            alert(url);
+            var arrStr = url.substring(url.indexOf("?") + 1).split("&");
+            alert(arrStr);
+            for (var i = 0; i < arrStr.length; i++){
+                var loc = arrStr[i].indexOf(argname + "=");
+                if (loc != -1) {
+                    return arrStr[i].replace(argname + "=", "").replace("?", "");
+                    break;
+                }
+            }
+            return "";
+        }      
+	</script>
+	<style>
+		body{margin: 0; padding: 0;font-family:"Microsoft YaHei", "SimHei ","Arial Black";color:#646464;font-size:14px;-webkit-text-size-adjust:none;-webkit-appearance:none;}
+		#header{height: 41px;line-height: 40px;padding-left:12px;background:#fdfdfe;filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fdfdfe', endColorstr='#ebebeb');background:-moz-linear-gradient(top,#fdfdfe,#ebebeb);background:-webkit-gradient(linear,left top,left bottom,from(#FDFDFE),to(#EBEBEB));border-bottom:1px solid #c2c2c2;}
+		#header .title{margin-top:-2px;font-size:17px;font-weight:bold;color: #5DA456;}
+		#content{position:relative;padding:10px 15px 5px;height:270px;}
+		#constact{position:relative;margin-left:96px;margin-right:50px;height:31px;}
+		#cContentI{position:relative;height: 29px;padding: 1px;}
+		#cContentI input{font-family:"Microsoft YaHei", "SimHei ","Arial Black";border: none;float:left;width:100%;color:#636363;line-height:28px;height:28px;font-size:14px;}
+		#cContentL{position:absolute;top:0px;width:80px;height:33px;padding:18px 5px 0px 6px;font-size:16px;color:#4B4B4B;font-weight:bold;white-space:nowrap;}
+		#i_tip{position:absolute;top:7px;right:0px;text-align:center;width:50px;color:#5DA456;font-size:12px;height:31px;padding:14px 0 0;}
+		#feedInfo{height: 114px;margin-top:15px;margin-right:5px;}
+		#feedInfo textarea{font-family:"Microsoft YaHei", "SimHei ","Arial Black";border:none;display:block;width: 100%; height:108px; color:#636363;font-size:14px;}
+		#spanNotify{color:#5DA456;font-weight: bold;display:;margin-top:10px;display:none;}
+		#submit_btn{margin-top:10px;text-align:center;color:white;float:right;width:63px;height:27px;background:white;filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#BAE79F', endColorstr='#388A0F');background:-moz-linear-gradient(top,#BAE79F,#388A0F);background:-webkit-gradient(linear,left top,left bottom,from(#BAE79F),to(#388A0F));font-size:15px;}
+		.border{border:1px solid #c2c2c2;-moz-border-radius: 11px;-khtml-border-radius: 11px;-webkit-border-radius: 11px;border-radius: 11px;padding:5px;}
+		#footer{position:fixed;background-color:#ECEDE7;clear:both;width:100%;height:40px;text-align: center;vertical-align:middle;bottom:-2px;}
+		#footer div{margin-top:12px;}
+		#footer a{text-decoration:none;color: #3C7625;}
+	</style>
+</head>
+<body>
+	<div id="header">               
+        <div class="title">
+            意见反馈
+        </div>
+	</div>
+	<div id="content">
+		<form method="POST" action="" id="feedbackform">
+		<div id="constact" class="border">
+			<div id="cContentI">
+				<input type="text" HIDEFOCUS="true" name="contact_info"  value="电话、邮件或微博" onfocus="if(value=='电话、邮件或微博') {value=''}" onblur="if (value=='') {value='电话、邮件或微博'}" />
+			</div>
+		</div>
+		<div id="cContentL">
+			联系方式：
+		</div>
+		<div id="i_tip">（可选）</div>
+		<div id="feedInfo" class="border">
+			<div style="margin:0 8px 0 4px;">
+			<textarea id="message" HIDEFOCUS="true" name="message" rows="5" value="{% if product != 'white' %}在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~{% else %}在这里写下您对浏览器的意见和建议，我们会努力做得更好~{% endif %}" onfocus="checkValid(this,true)"
+                onblur="checkValid(this,true);">{% if product != 'white' %}在这里写下想对小海豚说的话吧，小海豚会在你的关注下变得更好的~{% else %}在这里写下您对浏览器的意见和建议，我们会努力做得更好~{% endif %}</textarea>
+			</div>
+		</div>
+		 <span id="spanNotify"><img src="http://opscn.dolphin-browser.com/static/image/pages/notifyicon.png" width="12px" />您还没填写您的反馈意见哦...</span>
+			<div id="submit_btn" class="border" onclick="submitform()">
+				提交
+			</div>
+		<input type="hidden" name="name" value="name">
+        <input type="hidden" name="os" value="{{os}}">
+        <input type="hidden" name="l" value="{{locale}}">
+        <input type="hidden" name="product" value="{{product}}">
+        <input type="hidden" name="pn" value="{{package}}">
+        <input type="hidden" name="src" value="{{source}}">
+        <input type="hidden" name="vn" value="{{version}}">
+        <input type="hidden" name="feedback_type" id="feedback_type" value="feedback" />
+		</form>
+	</div>
+	<div id="footer">     			
+			<div>
+                联系我们： <a href="mailto:cn@dolphin-browser.com">电子邮件</a> | <a class="gl nobr"
+				href="http://t.sina.com.cn/dolphinbrowser">新浪微博</a> | <a href="http://t.qq.com/dolphinbrowser ">腾讯微博</a>
+			</div>
+    </div>
+</body>
+</html>

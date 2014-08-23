@@ -1,0 +1,2105 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-05-22 18:32+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: settings.py:342
+msgid "browsers"
+msgstr "浏览器相关"
+
+#: settings.py:392
+msgid "static file"
+msgstr "静态资源"
+
+#: settings.py:403
+msgid "webpage"
+msgstr "网站后台"
+
+#: settings.py:424
+msgid "authority manage"
+msgstr "权限管理"
+
+#: admin_enhancer/admin.py:42
+msgid "None"
+msgstr "空"
+
+#: admin_enhancer/widgets.py:46
+#, fuzzy
+msgid "Lookup"
+msgstr "查询"
+
+#: admin_enhancer/widgets.py:105
+msgid "Change related model"
+msgstr "修改关联项"
+
+#: admin_enhancer/widgets.py:109
+msgid "Add another"
+msgstr "保存并再添加"
+
+#: admin_enhancer/widgets.py:116
+msgid "Delete related model"
+msgstr "删除关联项"
+
+#: admin_tools/dashboard/dashboards.py:82 admin_tools/menu/menus.py:103
+msgid "Dashboard"
+msgstr "消息框"
+
+#: admin_tools/dashboard/dashboards.py:228
+msgid "Quick links"
+msgstr "快捷链接"
+
+#: admin_tools/dashboard/dashboards.py:234
+msgid "Return to site"
+msgstr "返回网站"
+
+#: admin_tools/dashboard/dashboards.py:235
+#: admin_tools/theming/templates/admin/base.html:55
+msgid "Change password"
+msgstr "修改密码"
+
+#: admin_tools/dashboard/dashboards.py:237
+#: admin_tools/theming/templates/admin/base.html:62
+msgid "Log out"
+msgstr "登出"
+
+#: admin_tools/dashboard/dashboards.py:254
+#: admin_tools/dashboard/dashboards.py:310
+#: admin_tools/dashboard/modules.py:570
+msgid "Recent Actions"
+msgstr "最近操作"
+
+#: admin_tools/dashboard/dashboards.py:258
+msgid "Latest Django News"
+msgstr ""
+
+#: admin_tools/dashboard/dashboards.py:265
+msgid "Support"
+msgstr "支持"
+
+#: admin_tools/dashboard/dashboards.py:268
+msgid "Django documentation"
+msgstr "django 文档"
+
+#: admin_tools/dashboard/dashboards.py:273
+msgid "Django \"django-users\" mailing list"
+msgstr ""
+
+#: admin_tools/dashboard/dashboards.py:278
+msgid "Django irc channel"
+msgstr ""
+
+#: admin_tools/dashboard/modules.py:341
+msgid "Links"
+msgstr "链接"
+
+#: admin_tools/dashboard/modules.py:413 admin_tools/menu/menus.py:106
+msgid "Applications"
+msgstr "应用"
+
+#: admin_tools/dashboard/modules.py:624
+msgid "No recent actions."
+msgstr "最近未操作"
+
+#: admin_tools/dashboard/modules.py:671
+msgid "RSS Feed"
+msgstr "rss订阅"
+
+#: admin_tools/dashboard/templates/admin/app_index.html:9
+#: admin_tools/theming/templates/admin/base.html:69
+#: admin_tools/theming/templates/admin/change_form.html:19
+#: admin_tools/theming/templates/admin/change_list.html:43
+#: admin_tools/theming/templates/registration/logged_out.html:4
+msgid "Home"
+msgstr "首页"
+
+#: admin_tools/dashboard/templates/admin/app_index.html:11
+#, python-format
+msgid "%(name)s"
+msgstr ""
+
+#: admin_tools/dashboard/templates/admin_tools/dashboard/dashboard.html:55
+msgid "Modules"
+msgstr "模块"
+
+#: admin_tools/dashboard/templates/admin_tools/dashboard/modules/app_list.html:13
+#: admin_tools/dashboard/templates/admin_tools/dashboard/modules/model_list.html:11
+#: admin_tools/theming/templates/admin/change_form.html:24
+msgid "Add"
+msgstr "添加"
+
+#: admin_tools/dashboard/templates/admin_tools/dashboard/modules/app_list.html:14
+#: admin_tools/dashboard/templates/admin_tools/dashboard/modules/model_list.html:12
+msgid "Change"
+msgstr "修改"
+
+#: admin_tools/menu/items.py:330
+msgid "Bookmarks"
+msgstr "书签"
+
+#: admin_tools/menu/menus.py:110
+msgid "Administration"
+msgstr "管理员"
+
+#: admin_tools/menu/templates/admin/base_site.html:4
+msgid "Django site admin"
+msgstr "django 后台管理"
+
+#: admin_tools/menu/templates/admin/base_site.html:16
+msgid "Django administration"
+msgstr "django 管理员"
+
+#: admin_tools/menu/templates/admin_tools/menu/menu.html:32
+msgid "Please enter a name for the bookmark"
+msgstr "请输入书签名"
+
+#: admin_tools/theming/templates/admin/base.html:47
+msgid "Documentation"
+msgstr "文档"
+
+#: admin_tools/theming/templates/admin/change_form.html:36
+msgid "History"
+msgstr "历史"
+
+#: admin_tools/theming/templates/admin/change_form.html:37
+msgid "View on site"
+msgstr "网站视图"
+
+#: admin_tools/theming/templates/admin/change_form.html:48
+#: admin_tools/theming/templates/admin/change_list.html:93
+#: admin_tools/theming/templates/admin/login.html:18
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] ""
+msgstr[1] "请纠正下下列错误"
+
+#: admin_tools/theming/templates/admin/change_list.html:69
+#, python-format
+msgid "Add %(name)s"
+msgstr "添加 %(name)s"
+
+#: admin_tools/theming/templates/admin/change_list.html:76
+#, python-format
+msgid "Sync %(name)s to production"
+msgstr "同步 %(name)s 到线上"
+
+#: admin_tools/theming/templates/admin/change_list.html:83
+#, python-format
+msgid "Sync %(name)s from production"
+msgstr ""
+
+#: admin_tools/theming/templates/admin/change_list.html:102
+msgid "Filter"
+msgstr "筛选"
+
+#: admin_tools/theming/templates/admin/filter.html:2
+#, python-format
+msgid " By %(filter_title)s "
+msgstr "由 %(filter_title)s "
+
+#: admin_tools/theming/templates/admin/login.html:15
+msgid "user login"
+msgstr "用户登陆"
+
+#: admin_tools/theming/templates/admin/login.html:34
+msgid "Username"
+msgstr "用户名"
+
+#: admin_tools/theming/templates/admin/login.html:38
+msgid "Password"
+msgstr "密码"
+
+#: admin_tools/theming/templates/admin/login.html:44
+msgid "Verify Code:"
+msgstr "验证码:"
+
+#: admin_tools/theming/templates/admin/login.html:44
+msgid "Verify Code"
+msgstr "验证码"
+
+#: admin_tools/theming/templates/admin/login.html:48 utils/sites.py:100
+msgid "Log in"
+msgstr "登陆"
+
+#: admin_tools/theming/templates/admin/pagination.html:12
+msgid "Show all"
+msgstr "显示全部"
+
+#: admin_tools/theming/templates/admin/pagination.html:13
+#: admin_tools/theming/templates/admin/submit_line.html:3
+msgid "Save"
+msgstr "保存"
+
+#: admin_tools/theming/templates/admin/submit_line.html:4
+msgid "Save as new"
+msgstr "保存为新的"
+
+#: admin_tools/theming/templates/admin/submit_line.html:5
+msgid "Save and add another"
+msgstr "保存并再添加"
+
+#: admin_tools/theming/templates/admin/submit_line.html:6
+msgid "Save and continue editing"
+msgstr "保存并继续编辑"
+
+#: admin_tools/theming/templates/admin/submit_line.html:7
+msgid "Save and sync"
+msgstr "保存并同步"
+
+#: admin_tools/theming/templates/registration/logged_out.html:9
+msgid "Thanks for spending some quality time with the Web site today."
+msgstr ""
+
+#: admin_tools/theming/templates/registration/logged_out.html:11
+msgid "Log in again"
+msgstr "重新登陆"
+
+#: admin_tools/theming/templatetags/admin_tools_pagination_tags.py:19
+msgid "next page"
+msgstr "下一页"
+
+#: admin_tools/theming/templatetags/admin_tools_pagination_tags.py:22
+msgid "prev page"
+msgstr "上一页"
+
+#: advert/models.py:82 advert/models.py:83
+msgid "position"
+msgstr "序号"
+
+#: advert/models.py:95 splashscreen/models.py:91
+msgid "valid time"
+msgstr "生效时间"
+
+#: advert/models.py:96 splashscreen/models.py:93
+msgid "invalid time"
+msgstr "失效时间"
+
+#: advert/models.py:110 desktop/models.py:126 hotappsnew/models.py:12
+#: preset/models.py:233 search/models.py:38 search/models.py:165
+#: splashscreen/models.py:97 treasure/models.py:27 treasure/models.py:79
+#: webapps/models.py:50 webapps/models.py:107 websitesnav/models.py:97
+msgid "rule"
+msgstr "规则"
+
+#: advert/models.py:111 desktop/models.py:127
+msgid "this is a new column, old data may not match"
+msgstr "这是新加的，旧数据是不相符的"
+
+#: ajax_select/fields.py:236
+msgid ""
+"Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+msgstr "按住\"Control\"(在Mac上请按住\"Command\")键添加多个"
+
+#: base/base_admin.py:88
+#, python-format
+msgid ""
+"Warning: %(item)s has been upload to %(server)s, please delete it from "
+"%(server)s first!"
+msgstr "警告：%(item)s已经被上传到%(server)s,请先从%(server)s上删除！"
+
+#: base/base_admin.py:94
+msgid "delete from admin"
+msgstr "从admin删除"
+
+#: base/base_admin.py:128 base/base_admin.py:169
+#, python-format
+msgid "%(method)s to %(server)s successfully"
+msgstr "成功 %(method)s  到 %(server)s"
+
+#: base/base_admin.py:136
+msgid "can't orginize mongo data"
+msgstr "没有规则可以组织mongo数据"
+
+#: base/base_admin.py:144
+msgid "missing mognodb sync keys"
+msgstr "缺少同步key"
+
+#: base/base_admin.py:155
+msgid "not assign target monogodb table"
+msgstr "没有指定mongodb表"
+
+#: base/base_admin.py:159
+#, python-format
+msgid "User: %(name)s %(method)s data from %(server)s"
+msgstr "用户：%(name)s 从 %(server)s 上 %(method)s 数据"
+
+#: base/base_admin.py:164
+#, python-format
+msgid "assign server:%(server)s can't %(method)s "
+msgstr "指定服务器 %(server)s 不能 %(method)s"
+
+#: base/base_admin.py:175 base/base_admin.py:178
+#, python-format
+msgid "%(method)s %(item)s fail,fail reason is %(e)s"
+msgstr "%(method)s %(item)s失败，原因是%(e)s"
+
+#: base/base_admin.py:186
+#, python-format
+msgid "%(method)s %(count)s %(name)s from %(server)s successfully!\n"
+msgstr "成功从 %(server)s %(method)s %(count)s 项 %(name)s \n"
+
+#: base/base_admin.py:192
+#, python-format
+msgid "Error:some unexcepted cause %(method)s failed, error is %(event)s!"
+msgstr "错误：%(method)s 操作中断，原因是%(event)s!"
+
+#: base/base_admin.py:305
+msgid "export select data"
+msgstr ""
+
+#: base/base_admin.py:472
+#, python-format
+msgid "publish to %s"
+msgstr "上传到%s"
+
+#: base/base_admin.py:478
+#, python-format
+msgid "delete from %s"
+msgstr "从%s删除"
+
+#: base/base_model.py:109 base/base_model.py:112
+#, python-format
+msgid "%(m)s Link %(s)s"
+msgstr "%(m)s 关联 %(s)s"
+
+#: base/base_model.py:165
+msgid "upload to local"
+msgstr "上传到local"
+
+#: base/base_model.py:167
+msgid "upload to china"
+msgstr "上传到china"
+
+#: base/base_model.py:169
+msgid "upload to ec2"
+msgstr "上传到ec2"
+
+#: base/base_model.py:171
+msgid "modifier"
+msgstr "修改人"
+
+#: base/base_model.py:173
+msgid "creator"
+msgstr "修改人"
+
+#: base/base_model.py:175
+msgid "last modified"
+msgstr "上次更新时间"
+
+#: base/base_model.py:177
+msgid "create time"
+msgstr "创建时间"
+
+#: base/base_model.py:179
+msgid "hided"
+msgstr "隐藏"
+
+#: base/base_model.py:182 desktop/models.py:23 desktop/models.py:50
+#: hotappsnew/models.py:108 hotappsnew/models.py:134 hotappsnew/models.py:284
+#: preset/models.py:26 preset/models.py:47 preset/models.py:73
+#: preset/models.py:125 preset/models.py:217 push/models.py:42
+#: push/models.py:65 push/models.py:105 resource/models.py:130
+#: search/models.py:120 sms/models.py:28 splashscreen/models.py:21
+#: splashscreen/models.py:86 treasure/models.py:75 treasure/models.py:147
+#: treasure/models.py:178 treasure/models.py:223
+msgid "title"
+msgstr "名称"
+
+#: base/base_model.py:183 desktop/models.py:22 desktop/models.py:49
+#: desktop/models.py:125 preset/models.py:25 preset/models.py:46
+#: preset/models.py:72 preset/models.py:100 push/models.py:342
+#: search/models.py:29 search/models.py:119 search/models.py:155
+#: sms/models.py:15 treasure/models.py:26 treasure/models.py:73
+#: treasure/models.py:145 treasure/models.py:176 webapps/models.py:45
+#: webapps/models.py:92 webapps/models.py:158
+msgid "name"
+msgstr "标题"
+
+#: base/base_model.py:183 desktop/models.py:24 preset/models.py:27
+#: preset/models.py:76 push/models.py:41 push/models.py:115
+#: search/models.py:94 search/models.py:121 treasure/models.py:180
+#: treasure/models.py:224 webapps/models.py:94
+msgid "url"
+msgstr "地址"
+
+#: base/base_model.py:204
+#, python-format
+msgid "upload file %s fail"
+msgstr "上传%s失败！"
+
+#: base/content.py:34
+msgid "Webpage"
+msgstr "网页"
+
+#: base/content.py:35
+msgid "Novels"
+msgstr "小说"
+
+#: base/content.py:36
+msgid "News"
+msgstr "新闻"
+
+#: base/content.py:37
+msgid "Shopping"
+msgstr "购物"
+
+#: base/content.py:38
+msgid "Pictures"
+msgstr "图片"
+
+#: base/content.py:47 base/content.py:54 base/content.py:59
+msgid "Common Search"
+msgstr "普通搜索"
+
+#: base/content.py:48
+msgid "Vertical Search"
+msgstr "垂直搜索"
+
+#: base/content.py:106
+msgid "New"
+msgstr "最新"
+
+#: base/content.py:107
+msgid "Hot"
+msgstr "最热"
+
+#: base/content.py:108
+msgid "Recommend"
+msgstr "推荐"
+
+#: base/content.py:109
+msgid "Unkown"
+msgstr "未知"
+
+#: base/content.py:119
+msgid "Navigate"
+msgstr "网址导航"
+
+#: base/content.py:120
+msgid "Shortcut"
+msgstr "快捷方式"
+
+#: base/content.py:121
+msgid "HotSearch"
+msgstr "热门搜索"
+
+#: base/content.py:126
+msgid "iPadCn"
+msgstr ""
+
+#: base/content.py:127
+msgid "iPadEn"
+msgstr ""
+
+#: base/content.py:128
+msgid "iPhoneCn"
+msgstr ""
+
+#: base/content.py:129
+msgid "iPhoneEn"
+msgstr ""
+
+#: configure/models.py:288
+msgid "min os version"
+msgstr ""
+
+#: configure/models.py:289
+msgid "max os version"
+msgstr ""
+
+#: configure/models.py:290
+msgid "gray level"
+msgstr "灰度比例"
+
+#: configure/models.py:290
+msgid "number limit 0 to 100"
+msgstr "0到100间的整数"
+
+#: configure/models.py:291
+msgid "gray level start"
+msgstr "灰度起点"
+
+#: configure/models.py:291
+msgid "it must lower than 100 - gray level "
+msgstr "要求为大于0的整数且必须小于100减灰度比例"
+
+#: desktop/admin.py:45 desktop/models.py:152 desktop/models.py:153
+msgid "desktop"
+msgstr "桌面"
+
+#: desktop/admin.py:47
+msgid "ios"
+msgstr ""
+
+#: desktop/models.py:26 desktop/models.py:52
+msgid "enable delete"
+msgstr "允许用户删除"
+
+#: desktop/models.py:28 desktop/models.py:54 hotappsnew/models.py:51
+#: hotappsnew/models.py:135 preset/models.py:74 push/models.py:44
+#: resource/admin.py:20 search/models.py:128 sms/models.py:31
+#: treasure/models.py:76 treasure/models.py:229 webapps/models.py:49
+#: webapps/models.py:105 webapps/models.py:164 websitesnav/models.py:21
+msgid "icon"
+msgstr "图标"
+
+#: desktop/models.py:44 desktop/models.py:45 push/models.py:109
+msgid "item"
+msgstr "项"
+
+#: desktop/models.py:77 desktop/models.py:78 push/models.py:111
+msgid "folder"
+msgstr "文件夹"
+
+#: desktop/models.py:119 desktop/models.py:120 splashscreen/models.py:80
+#: splashscreen/models.py:81
+msgid "screen"
+msgstr "屏"
+
+#: hotapps/admin.py:161
+msgid "hostapps"
+msgstr "热门应用"
+
+#: hotapps/models.py:42
+msgid "Category Name"
+msgstr "分类名"
+
+#: hotapps/models.py:43
+msgid "Third Party URL"
+msgstr "第三方链接"
+
+#: hotapps/models.py:44 hotappsnew/models.py:64
+msgid "Please icon URL exist!!"
+msgstr ""
+
+#: hotapps/models.py:45
+msgid "Whether Is Third Part"
+msgstr "是否来自第三方"
+
+#: hotapps/models.py:46 hotapps/models.py:137 hotapps/models.py:387
+#: skin/models.py:87 skin/models.py:297 skin/models.py:364
+msgid "Icon"
+msgstr "图标"
+
+#: hotapps/models.py:46
+msgid "url of the icon"
+msgstr ""
+
+#: hotapps/models.py:48 hotapps/models.py:148
+msgid "Brief Description"
+msgstr "简短描述"
+
+#: hotapps/models.py:49 hotapps/models.py:149 hotapps/models.py:399
+msgid "Detail Description"
+msgstr "详细描述"
+
+#: hotapps/models.py:52 hotapps/models.py:166 hotapps/models.py:244
+#: hotapps/models.py:297 hotapps/models.py:414 skin/models.py:80
+#: skin/models.py:295 skin/models.py:362
+msgid "Order"
+msgstr "序号"
+
+#: hotapps/models.py:78 hotapps/models.py:79 hotapps/models.py:167
+#: hotapps/models.py:246 hotapps/models.py:415 websitesnav/models.py:91
+#: websitesnav/models.py:92
+msgid "Category"
+msgstr "分类"
+
+#: hotapps/models.py:89 hotapps/models.py:417
+msgid "Picture URL"
+msgstr "图片链接"
+
+#: hotapps/models.py:90 hotapps/models.py:136 hotapps/models.py:386
+#: promotionlink/models.py:25 websitesnav/models.py:96
+msgid "Title"
+msgstr "标题"
+
+#: hotapps/models.py:110 hotapps/models.py:111
+msgid "ScreenShot"
+msgstr "预览图"
+
+#: hotapps/models.py:140 hotapps/models.py:390
+msgid "Is New?"
+msgstr "是否为新"
+
+#: hotapps/models.py:141 hotapps/models.py:391 skin/models.py:61
+msgid "Download URL"
+msgstr "下载链接"
+
+#: hotapps/models.py:143 hotapps/models.py:393 promotionlink/models.py:29
+#: skin/models.py:70
+msgid "Update Time"
+msgstr "应用更新时间"
+
+#: hotapps/models.py:144 hotapps/models.py:394
+msgid "App Version"
+msgstr "应用版本"
+
+#: hotapps/models.py:144
+msgid "Application Version"
+msgstr "应用版本"
+
+#: hotapps/models.py:145 hotapps/models.py:395
+msgid "App Developer"
+msgstr "应用开发者"
+
+#: hotapps/models.py:147
+msgid "App Rate"
+msgstr "应用评分"
+
+#: hotapps/models.py:150 hotapps/models.py:400
+msgid "App Size"
+msgstr "应用大小"
+
+#: hotapps/models.py:152 hotapps/models.py:402
+msgid "App Type"
+msgstr "应用类型"
+
+#: hotapps/models.py:153 hotapps/models.py:403
+msgid "Price"
+msgstr "当前价格"
+
+#: hotapps/models.py:154 hotapps/models.py:404
+msgid "Origin Price"
+msgstr "原始价格"
+
+#: hotapps/models.py:156 hotapps/models.py:405
+msgid "Favourable Price"
+msgstr "优惠价"
+
+#: hotapps/models.py:158 hotapps/models.py:407
+msgid "Price Type"
+msgstr "价格类型"
+
+#: hotapps/models.py:160 hotapps/models.py:409
+msgid "Price Limit Time"
+msgstr "价格优惠限时"
+
+#: hotapps/models.py:161 hotapps/models.py:239
+msgid "Is Third Part?"
+msgstr "是否是第三方"
+
+#: hotapps/models.py:162 hotapps/models.py:412
+msgid "API URL"
+msgstr "API链接"
+
+#: hotapps/models.py:224 hotapps/models.py:225 hotapps/models.py:245
+#: hotapps/models.py:298 hotapps/models.py:332
+msgid "Application"
+msgstr "应用"
+
+#: hotapps/models.py:231
+msgid "Feature Type"
+msgstr "专题类型"
+
+#: hotapps/models.py:233
+msgid "Feature On Top"
+msgstr ""
+
+#: hotapps/models.py:235
+msgid "Top Feature Picture"
+msgstr ""
+
+#: hotapps/models.py:237
+msgid "Small Picture"
+msgstr "缩略图"
+
+#: hotapps/models.py:241
+msgid "Third Part URL"
+msgstr "第三方链接"
+
+#: hotapps/models.py:271 hotappsnew/models.py:275
+msgid "feature type is category feature on top must be true!"
+msgstr "专题类型为category的专题的feature on top必须为true!"
+
+#: hotapps/models.py:284 hotapps/models.py:285
+msgid "Feature"
+msgstr "专题"
+
+#: hotapps/models.py:320 hotapps/models.py:321
+msgid "Trending"
+msgstr "流行"
+
+#: hotapps/models.py:331
+msgid "Reason"
+msgstr "原因"
+
+#: hotapps/models.py:355 hotapps/models.py:356
+msgid "Daily Recommend"
+msgstr "每日推荐"
+
+#: hotapps/models.py:397
+msgid "Rate"
+msgstr "评分"
+
+#: hotapps/models.py:398
+msgid "Short Description"
+msgstr "短描述"
+
+#: hotapps/models.py:410
+msgid "Is Third Part"
+msgstr "是否来自第三方"
+
+#: hotapps/models.py:472 hotapps/models.py:473
+msgid "Advertisement"
+msgstr "广告"
+
+#: hotappsnew/admin.py:64
+msgid "Basic Info"
+msgstr "基本"
+
+#: hotappsnew/admin.py:70
+msgid "Other Info"
+msgstr "其他信息"
+
+#: hotappsnew/admin.py:76
+msgid "Addition Info"
+msgstr "额外信息"
+
+#: hotappsnew/admin.py:148
+msgid "new hotapps"
+msgstr "新热门应用"
+
+#: hotappsnew/models.py:13 push/models.py:80 push/models.py:116
+#: search/models.py:36 webapps/models.py:48 webapps/models.py:163
+msgid "order"
+msgstr "序号"
+
+#: hotappsnew/models.py:50
+msgid "category_name"
+msgstr "分类"
+
+#: hotappsnew/models.py:53
+msgid "brief_description"
+msgstr "短描述"
+
+#: hotappsnew/models.py:55 hotappsnew/models.py:162
+msgid "detail_description"
+msgstr "详细描述"
+
+#: hotappsnew/models.py:56 hotappsnew/models.py:142
+msgid "is_hot"
+msgstr "热门"
+
+#: hotappsnew/models.py:58
+msgid "display_update"
+msgstr "是否标记升级"
+
+#: hotappsnew/models.py:60
+msgid "update_number"
+msgstr ""
+
+#: hotappsnew/models.py:62 hotappsnew/models.py:176 hotappsnew/models.py:249
+msgid "is_third_part"
+msgstr ""
+
+#: hotappsnew/models.py:64
+msgid "third_party_url"
+msgstr ""
+
+#: hotappsnew/models.py:99 hotappsnew/models.py:100 treasure/models.py:217
+#: treasure/models.py:218 webapps/models.py:87 webapps/models.py:106
+msgid "category"
+msgstr "分类"
+
+#: hotappsnew/models.py:104
+msgid "pic_url"
+msgstr ""
+
+#: hotappsnew/models.py:106
+msgid "thumbnails"
+msgstr ""
+
+#: hotappsnew/models.py:128 hotappsnew/models.py:129 resource/admin.py:21
+msgid "screenshot"
+msgstr "预览图"
+
+#: hotappsnew/models.py:137
+msgid "backup_icon"
+msgstr ""
+
+#: hotappsnew/models.py:139
+msgid "is_new"
+msgstr "新的"
+
+#: hotappsnew/models.py:141
+msgid "download_url"
+msgstr "下载地址"
+
+#: hotappsnew/models.py:144
+msgid "app_update_status"
+msgstr ""
+
+#: hotappsnew/models.py:146
+msgid "app_updatetime"
+msgstr ""
+
+#: hotappsnew/models.py:148
+msgid "app_version"
+msgstr "应用类型"
+
+#: hotappsnew/models.py:150
+msgid "app_developer"
+msgstr ""
+
+#: hotappsnew/models.py:152
+msgid "app_rating"
+msgstr "应用评分"
+
+#: hotappsnew/models.py:154
+msgid "app_ratingcount"
+msgstr "应用评分人数"
+
+#: hotappsnew/models.py:156
+msgid "app_lovecount"
+msgstr "推荐人数"
+
+#: hotappsnew/models.py:158
+msgid "force_lovecount"
+msgstr "伪推荐人数"
+
+#: hotappsnew/models.py:160
+msgid "short_description"
+msgstr "短描述"
+
+#: hotappsnew/models.py:164
+msgid "app_size"
+msgstr "应用大小"
+
+#: hotappsnew/models.py:166
+msgid "price"
+msgstr "价格"
+
+#: hotappsnew/models.py:168
+msgid "original_price"
+msgstr "原始价格"
+
+#: hotappsnew/models.py:170
+msgid "favourable_price"
+msgstr "指导价"
+
+#: hotappsnew/models.py:174
+msgid "price_limit_time"
+msgstr "价格有效期"
+
+#: hotappsnew/models.py:178
+msgid "The URL of the Third-part API!!"
+msgstr "第三方api地址"
+
+#: hotappsnew/models.py:178
+msgid "api_url"
+msgstr "api地址"
+
+#: hotappsnew/models.py:180
+msgid "pub_time"
+msgstr "发布时间"
+
+#: hotappsnew/models.py:182
+msgid "app_type"
+msgstr "应用类型"
+
+#: hotappsnew/models.py:231 hotappsnew/models.py:232 hotappsnew/models.py:296
+#: webapps/models.py:153
+msgid "application"
+msgstr "应用"
+
+#: hotappsnew/models.py:237
+msgid "feature_type"
+msgstr "专题类型"
+
+#: hotappsnew/models.py:239 splashscreen/models.py:95 webapps/models.py:47
+#: webapps/models.py:96 webapps/models.py:160
+msgid "description"
+msgstr "描述"
+
+#: hotappsnew/models.py:241
+msgid "feature_on_top"
+msgstr ""
+
+#: hotappsnew/models.py:242
+msgid "hot_today"
+msgstr ""
+
+#: hotappsnew/models.py:245
+msgid "top_feature_pic"
+msgstr ""
+
+#: hotappsnew/models.py:247
+msgid "small_pic"
+msgstr "缩略图"
+
+#: hotappsnew/models.py:252
+msgid "third_part_url"
+msgstr ""
+
+#: hotappsnew/models.py:290 hotappsnew/models.py:291
+msgid "feature"
+msgstr "专题"
+
+#: hotappsnew/models.py:315 hotappsnew/models.py:316
+msgid "trending"
+msgstr "流行"
+
+#: preset/admin.py:104
+msgid "preset"
+msgstr "预置数据"
+
+#: preset/models.py:25 preset/models.py:46 preset/models.py:72
+msgid "for operation"
+msgstr "用于控制台"
+
+#: preset/models.py:26 preset/models.py:47 preset/models.py:73
+#: sms/models.py:28
+msgid "for client"
+msgstr "客户端显示"
+
+#: preset/models.py:42 preset/models.py:43 push/models.py:18
+msgid "bookmark"
+msgstr "书签"
+
+#: preset/models.py:67 preset/models.py:68
+msgid "bookmark folder"
+msgstr "书签文件夹"
+
+#: preset/models.py:94 preset/models.py:95
+msgid "Speeddial"
+msgstr "快捷方式"
+
+#: preset/models.py:101
+msgid "duration"
+msgstr ""
+
+#: preset/models.py:102 preset/models.py:223
+msgid "is test"
+msgstr "是否用于测试"
+
+#: preset/models.py:104
+msgid "You can specify a list of tutorials separated by ','"
+msgstr "你可以指定多个tutorials通过用‘,’分割"
+
+#: preset/models.py:119 preset/models.py:120 websitesnav/models.py:173
+#: websitesnav/models.py:174
+msgid "Strategy"
+msgstr ""
+
+#: preset/models.py:127
+msgid "gesture file"
+msgstr "手势文件"
+
+#: preset/models.py:127
+msgid "please upload gesture!"
+msgstr "请上传手势文件"
+
+#: preset/models.py:128
+msgid "user gesture file"
+msgstr "手势文件下载地址"
+
+#: preset/models.py:128
+msgid "auto complete when publish!"
+msgstr "上传后自动生成"
+
+#: preset/models.py:129
+msgid "marked file"
+msgstr ""
+
+#: preset/models.py:139 preset/models.py:180
+#, python-format
+msgid "operation %s fail!"
+msgstr "操作 %s 失败！"
+
+#: preset/models.py:145
+msgid "without upload getsture_file!"
+msgstr "数据中包含未上传的手势配置，请先上传它！"
+
+#: preset/models.py:159 preset/models.py:160
+msgid "Gesture"
+msgstr "手势配置"
+
+#: preset/models.py:165
+msgid "adblock list"
+msgstr "广告拦截配置"
+
+#: preset/models.py:165
+msgid "please upload zip file!"
+msgstr "请上传zip文件！"
+
+#: preset/models.py:218
+msgid "os"
+msgstr "系统"
+
+#: preset/models.py:224
+msgid "homepage"
+msgstr "首页"
+
+#: preset/models.py:225
+msgid "hotapps"
+msgstr "热门应用地址"
+
+#: preset/models.py:226
+msgid "tutorial"
+msgstr "功能介绍链接"
+
+#: preset/models.py:227
+msgid "about"
+msgstr ""
+
+#: preset/models.py:228
+msgid "more addon link"
+msgstr "更多插件地址"
+
+#: preset/models.py:229
+msgid "more theme link"
+msgstr "更多主题地址"
+
+#: preset/models.py:230
+msgid "check update link"
+msgstr "检查更新地址"
+
+#: preset/models.py:231
+msgid "show download translate"
+msgstr ""
+
+#: preset/models.py:232
+msgid "rate me link"
+msgstr "评分地址"
+
+#: preset/models.py:234
+msgid "gesture"
+msgstr "手势配置"
+
+#: preset/models.py:236
+msgid "platform"
+msgstr "平台"
+
+#: preset/models.py:246
+msgid "strategy number should be 1 or 2."
+msgstr "你只能选1个（正式）或2个（测试）"
+
+#: preset/models.py:249
+msgid "strategy test info should be true when there are 2 strategies."
+msgstr "当选2个strategy时，需保证其中有一个strategy test勾选而另一个没有勾选！"
+
+#: preset/models.py:251
+msgid "data and strategy test should not be true at the same time"
+msgstr ""
+"只有一个strategy时，是否用于测试字段跟strategy test字段不能同时为空（抱歉，不"
+"是我规定地～～）"
+
+#: preset/models.py:326 preset/models.py:327
+msgid "Preset"
+msgstr "预置数据"
+
+#: promotionlink/admin.py:41 promotionlink/models.py:116
+#: promotionlink/models.py:117
+msgid "PromotionLink"
+msgstr "推荐链接"
+
+#: promotionlink/models.py:27 skin/models.py:254
+msgid "URL"
+msgstr ""
+
+#: promotionlink/models.py:30
+msgid "Weight"
+msgstr "权重"
+
+#: promotionlink/models.py:32
+msgid "Images"
+msgstr ""
+
+#: promotionlink/models.py:33
+msgid "Pop"
+msgstr ""
+
+#: promotionlink/models.py:34 skin/models.py:83 skin/models.py:296
+#: skin/models.py:363
+msgid "Rule"
+msgstr "规则"
+
+#: promotionlink/models.py:36
+msgid "Subtitle"
+msgstr "子标题"
+
+#: promotionlink/models.py:38
+msgid "Valid Time"
+msgstr "生效时间"
+
+#: promotionlink/models.py:40
+msgid "Invalid Time"
+msgstr "失效时间"
+
+#: push/admin.py:129 push/models.py:61 push/models.py:73 push/models.py:88
+#: push/models.py:142 push/models.py:143 push/models.py:144 push/models.py:385
+#: push/models.py:386
+msgid "push messages"
+msgstr "推送消息"
+
+#: push/admin.py:172 push/models.py:20 search/admin.py:69
+msgid "search engine"
+msgstr "搜索引擎"
+
+#: push/models.py:17
+msgid "speeddial"
+msgstr "快捷方式"
+
+#: push/models.py:19
+msgid "engineswitch"
+msgstr "内核开关"
+
+#: push/models.py:21 push/models.py:134
+msgid "traffic_clean"
+msgstr "流量清理"
+
+#: push/models.py:22
+msgid "news home notify"
+msgstr "news home提醒"
+
+#: push/models.py:24
+msgid "switch off"
+msgstr "关闭内核"
+
+#: push/models.py:24
+msgid "switch on"
+msgstr "启动内核"
+
+#: push/models.py:25
+msgid "traffic_clean_disable"
+msgstr "关闭流量清理"
+
+#: push/models.py:25
+msgid "traffic_clean_enable"
+msgstr "开启流量清理"
+
+#: push/models.py:59 push/models.py:60 treasure/models.py:251
+#: treasure/models.py:252 websitesnav/models.py:50 websitesnav/models.py:51
+msgid "Item"
+msgstr "项"
+
+#: push/models.py:71 push/models.py:72
+msgid "Folder"
+msgstr "文件夹"
+
+#: push/models.py:86 push/models.py:87
+msgid "folder link item"
+msgstr "文件夹关联项"
+
+#: push/models.py:92
+msgid "StatusName"
+msgstr "状态名称"
+
+#: push/models.py:93
+msgid "SerialNumber"
+msgstr "编号"
+
+#: push/models.py:99 push/models.py:100
+msgid "EngineStatus"
+msgstr "内核状态"
+
+#: push/models.py:107
+msgid "operation"
+msgstr "操作类型"
+
+#: push/models.py:113
+msgid "search"
+msgstr "修改为"
+
+#: push/models.py:118
+msgid "enable deleted"
+msgstr "允许用户删除"
+
+#: push/models.py:119
+msgid "search engine unique name"
+msgstr "搜索引擎唯一标识"
+
+#: push/models.py:119
+msgid "required"
+msgstr "必选"
+
+#: push/models.py:121
+msgid "is default"
+msgstr "是否设为默认"
+
+#: push/models.py:123
+msgid "is force"
+msgstr "是否强制"
+
+#: push/models.py:125
+msgid "push rule"
+msgstr "推送规则"
+
+#: push/models.py:129
+msgid "EngineSwitch"
+msgstr "内核开关"
+
+#: push/models.py:131
+msgid "TargetStatus"
+msgstr "目标状态"
+
+#: push/models.py:135
+msgid "traffic_clean_search_engine"
+msgstr "搜索引擎"
+
+#: push/models.py:136
+msgid "partner_id_key"
+msgstr "合作伙伴标识"
+
+#: push/models.py:137
+msgid "partner_id_value"
+msgstr "合作伙伴代码"
+
+#: push/models.py:138
+msgid "traffic_clean_start_time"
+msgstr "开始时间"
+
+#: push/models.py:138 push/models.py:139
+msgid "only_valid_for_enable_traffic_clean"
+msgstr "若策略为关闭流量清理则不用设置此项"
+
+#: push/models.py:139
+msgid "traffic_clean_end_time"
+msgstr "结束时间"
+
+#: push/models.py:183
+msgid "engineswitch should be of a valid value"
+msgstr "内核开关设置不合法"
+
+#: push/models.py:185
+msgid "no target engine status is selected"
+msgstr "没有选中任何目标内核状态"
+
+#: push/models.py:204
+msgid "trafficclean_must_be_filled"
+msgstr "搜索引擎、合作伙伴标识和代码必须填写"
+
+#: push/models.py:207
+msgid "end_time_must_be_later"
+msgstr "结束时间必须大于开始时间"
+
+#: push/models.py:242
+msgid "trafficclean_must_be_chosen"
+msgstr "流量清理开启或关闭必选"
+
+#: push/models.py:254
+msgid "min version can't lower than 278, more info please chat with pm!"
+msgstr "最低版本限制不能小于278，详情可咨询pm!"
+
+#: push/models.py:256
+msgid "unique name can't be empty!"
+msgstr "搜索引擎唯一标识不能为空！"
+
+#: push/models.py:260
+msgid "you need point the target!"
+msgstr "你需要指定修改或新增内容！"
+
+#: push/models.py:343
+msgid "push type"
+msgstr "推送类型"
+
+#: push/models.py:345 push/models.py:347 push/models.py:349 push/models.py:351
+#: search/models.py:127
+msgid "Be sure in json format"
+msgstr "请确保是正确的json格式"
+
+#: resource/admin.py:22
+msgid "package"
+msgstr "包"
+
+#: resource/admin.py:101
+msgid "file resource"
+msgstr "文件资源"
+
+#: resource/models.py:50 resource/models.py:150
+#, python-format
+msgid "upload %s fail!"
+msgstr "上传%s失败！"
+
+#: resource/models.py:56 resource/models.py:156
+#, python-format
+msgid "warning: file %s not delete because file not uploaded"
+msgstr "警告，无法从线上删除%s因为文件没上传"
+
+#: resource/models.py:62 resource/models.py:162
+#, python-format
+msgid "delete %s fail"
+msgstr "删除%s失败！"
+
+#: resource/models.py:68 resource/models.py:168
+#, python-format
+msgid "warning: file %s not upload because file had been upload"
+msgstr ""
+
+#: resource/models.py:124 resource/models.py:140 resource/models.py:141
+msgid "file"
+msgstr "文件"
+
+#: resource/models.py:125 resource/models.py:185
+msgid "valid file name must be in [a-zA-Z0-9_]"
+msgstr "文件名只能包含［a-zA-Z0-9_］"
+
+#: resource/models.py:132
+msgid "width"
+msgstr "宽度"
+
+#: resource/models.py:132 resource/models.py:134
+msgid "please ignore,auto reconize"
+msgstr "自动识别"
+
+#: resource/models.py:134
+msgid "height"
+msgstr "高度"
+
+#: search/models.py:31 search/models.py:160
+msgid "1-7 is avaliable,and larger num mean higher priority"
+msgstr "可填写1-7,值越大表示优先级越高"
+
+#: search/models.py:32
+msgid "keyword"
+msgstr "关键词"
+
+#: search/models.py:34
+msgid "track info separated by ','."
+msgstr "请用',' '.'分隔"
+
+#: search/models.py:35
+msgid "is replace"
+msgstr "允许替换"
+
+#: search/models.py:87 search/models.py:88
+msgid "Keyword"
+msgstr "关键词"
+
+#: search/models.py:96 splashscreen/models.py:96 webapps/models.py:98
+msgid "color"
+msgstr "颜色"
+
+#: search/models.py:96
+msgid "Red is \"#FF0000\""
+msgstr "红色用\"#FF0000\"表示 "
+
+#: search/models.py:113 search/models.py:114
+msgid "Hotword"
+msgstr "热词"
+
+#: search/models.py:123
+msgid "suggest address"
+msgstr "搜索建议地址"
+
+#: search/models.py:124
+msgid "warning:please make sure this exactly as client give"
+msgstr "警告：务必确保此处与客户端DEV提供完全一致！"
+
+#: search/models.py:148 search/models.py:149
+msgid "Search"
+msgstr "搜索"
+
+#: search/models.py:155
+msgid "use in operation"
+msgstr "仅用于控制台"
+
+#: search/models.py:157
+msgid "display in client"
+msgstr "用于客户端显示"
+
+#: search/models.py:158
+msgid "layout"
+msgstr "类别"
+
+#: search/models.py:163
+msgid "manaul hot words"
+msgstr "人工更新热词"
+
+#: search/models.py:189
+msgid "not more than one default!"
+msgstr "默认搜索引擎不得超过1个"
+
+#: search/models.py:193
+msgid "order can't repeat"
+msgstr "序号不能重复"
+
+#: search/models.py:195
+msgid "at lease one default"
+msgstr "至少一个默认搜索引擎"
+
+#: search/models.py:241 search/models.py:242
+msgid "Search Category"
+msgstr "搜索引擎分类"
+
+#: skin/admin.py:69
+msgid "skin"
+msgstr "皮肤"
+
+#: skin/models.py:54
+msgid "UID"
+msgstr ""
+
+#: skin/models.py:55 skin/models.py:251
+msgid "Name"
+msgstr "名称"
+
+#: skin/models.py:57
+msgid "Compatible Version"
+msgstr "兼容版本"
+
+#: skin/models.py:59
+msgid "any number large than 0 mean manual set"
+msgstr ""
+
+#: skin/models.py:59
+msgid "Downloads"
+msgstr "下载量"
+
+#: skin/models.py:63
+msgid "Version"
+msgstr "版本"
+
+#: skin/models.py:65
+msgid "Badge"
+msgstr "标记"
+
+#: skin/models.py:66
+msgid "Promote"
+msgstr "推荐"
+
+#: skin/models.py:68 skin/models.py:294
+msgid "Description"
+msgstr "描述"
+
+#: skin/models.py:72
+msgid "unit is require!"
+msgstr ""
+
+#: skin/models.py:72
+msgid "Size"
+msgstr "文件大小"
+
+#: skin/models.py:74
+msgid "Theme Type"
+msgstr "主题类型"
+
+#: skin/models.py:77
+msgid "Upload User"
+msgstr "上传者"
+
+#: skin/models.py:79
+msgid "Tag"
+msgstr "标签"
+
+#: skin/models.py:82
+msgid "id and version will be set when save automally"
+msgstr ""
+
+#: skin/models.py:82
+msgid "Update File"
+msgstr "更新文件"
+
+#: skin/models.py:86
+msgid "Client Icon"
+msgstr "客户端图标"
+
+#: skin/models.py:93
+msgid "Style"
+msgstr "风格"
+
+#: skin/models.py:95
+msgid "Color"
+msgstr "颜色"
+
+#: skin/models.py:245 skin/models.py:246
+msgid "Skin"
+msgstr "皮肤"
+
+#: skin/models.py:255 skin/models.py:279 skin/models.py:280
+msgid "Screenshot File"
+msgstr "预览图"
+
+#: skin/models.py:288 skin/models.py:289
+msgid "Screenshot"
+msgstr "预览图"
+
+#: skin/models.py:356 skin/models.py:357
+msgid "Subject Skin"
+msgstr "皮肤专题"
+
+#: skin/models.py:366
+msgid "Action"
+msgstr "动作"
+
+#: skin/models.py:367
+msgid "Value"
+msgstr "值"
+
+#: skin/models.py:409 skin/models.py:410
+msgid "Banner Skin"
+msgstr "标语"
+
+#: sms/admin.py:48
+msgid "sms listen"
+msgstr "短信嗅探"
+
+#: sms/models.py:15
+msgid "only for operation"
+msgstr "用于控制台"
+
+#: sms/models.py:30 sms/models.py:48
+msgid "phone number"
+msgstr "号码"
+
+#: sms/models.py:30
+msgid "phone number for match"
+msgstr "用于客户端匹配的号码"
+
+#: sms/models.py:53 sms/models.py:62
+msgid "key words"
+msgstr "关键词"
+
+#: sms/models.py:53
+msgid "keyword for client match"
+msgstr "用于客户端匹配的关键字"
+
+#: sms/models.py:67
+msgid "msm collect switch"
+msgstr "禁用短信收集"
+
+#: sms/models.py:67 sms/models.py:69
+msgid "select mean disable"
+msgstr "选中表示禁用该功能"
+
+#: sms/models.py:69
+msgid "msm popup switch"
+msgstr "禁用短信提醒"
+
+#: sms/models.py:70
+msgid "main switch"
+msgstr "完全禁用"
+
+#: sms/models.py:71
+msgid "warning:select mean disable,and select this may not recover!"
+msgstr "提示：选中表示禁用，钩选并上线后客户端可能不会再启动了"
+
+#: sms/models.py:73
+msgid "client check interval"
+msgstr "更新间隔"
+
+#: sms/models.py:73
+msgid "adjust client check data frequency"
+msgstr "控制客户端更新数据频率"
+
+#: sms/models.py:75
+msgid "rules"
+msgstr "规则"
+
+#: sms/models.py:75
+msgid "detail manage rules"
+msgstr "精细匹配规则"
+
+#: sms/models.py:95
+msgid "msm filter"
+msgstr "短信嗅探配置"
+
+#: splashscreen/admin.py:37
+msgid "splash screen"
+msgstr "闪屏"
+
+#: splashscreen/models.py:22
+msgid "min width"
+msgstr "宽度底限"
+
+#: splashscreen/models.py:23
+msgid "max width"
+msgstr "宽度顶限"
+
+#: splashscreen/models.py:24
+msgid "min height"
+msgstr "高度底限"
+
+#: splashscreen/models.py:25
+msgid "max height"
+msgstr "高度顶限"
+
+#: splashscreen/models.py:28
+msgid "font picture"
+msgstr "主图"
+
+#: splashscreen/models.py:30
+msgid "load font only in wifi"
+msgstr "仅在wifi下加载主图"
+
+#: splashscreen/models.py:34 splashscreen/models.py:73
+msgid "background picture"
+msgstr "背景图"
+
+#: splashscreen/models.py:36
+msgid "load background only in wifi"
+msgstr "仅在wifi下加载背景图"
+
+#: splashscreen/models.py:45
+#, python-format
+msgid "screen: %s front or background pic missing!"
+msgstr ""
+
+#: splashscreen/models.py:65
+msgid "front picture"
+msgstr "主图"
+
+#: splashscreen/models.py:87
+msgid "version"
+msgstr "版本"
+
+#: splashscreen/models.py:135 splashscreen/models.py:136
+msgid "splash set"
+msgstr "闪屏配置"
+
+#: treasure/admin.py:69
+msgid "treasures"
+msgstr "百宝箱"
+
+#: treasure/models.py:61 treasure/models.py:62
+msgid "treasure set"
+msgstr "百宝箱配置"
+
+#: treasure/models.py:78 webapps/models.py:93
+msgid "promote"
+msgstr "推荐"
+
+#: treasure/models.py:139 treasure/models.py:140
+msgid "treasure section(for old)"
+msgstr "旧版百宝箱配置"
+
+#: treasure/models.py:169 treasure/models.py:170
+msgid "group"
+msgstr "组"
+
+#: treasure/models.py:226
+msgid "promotion"
+msgstr "推荐"
+
+#: treasure/models.py:228
+msgid "modified time"
+msgstr "修改时间"
+
+#: usermanagement/admin.py:10
+msgid "addition action(1)"
+msgstr "添加操作(1)"
+
+#: usermanagement/admin.py:11
+msgid "change action(2)"
+msgstr "修改操作(2)"
+
+#: usermanagement/admin.py:12
+msgid "deletion action(3)"
+msgstr "删除操作(3)"
+
+#: usermanagement/admin.py:13
+msgid "online(3)"
+msgstr "上线(4)"
+
+#: usermanagement/admin.py:14
+msgid "offline(4)"
+msgstr "下线(5)"
+
+#: usermanagement/admin.py:15
+msgid "login(5)"
+msgstr "登陆(6)"
+
+#: usermanagement/admin.py:88
+msgid "action flag"
+msgstr "操作标记"
+
+#: usermanagement/models.py:13
+msgid "object belong"
+msgstr ""
+
+#: usermanagement/models.py:17 usermanagement/models.py:26
+#: usermanagement/models.py:35
+msgid "User Management"
+msgstr "用户管理"
+
+#: usermanagement/models.py:18 usermanagement/models.py:19
+msgid "operator log"
+msgstr "操作日志"
+
+#: usermanagement/models.py:27
+msgid "Group"
+msgstr "组"
+
+#: usermanagement/models.py:28
+msgid "Groups"
+msgstr "组列表"
+
+#: usermanagement/models.py:36
+msgid "User"
+msgstr "用户"
+
+#: usermanagement/models.py:37
+msgid "Users"
+msgstr "用户列表"
+
+#: utils/sites.py:29
+msgid "login verification"
+msgstr "登陆验证"
+
+#: utils/sites.py:49
+msgid "login successfully!"
+msgstr ""
+
+#: utils/sites.py:69
+msgid "login fail! user isn't active!"
+msgstr ""
+
+#: utils/sites.py:72
+msgid "login fail! invalid user or password!"
+msgstr ""
+
+#: webapps/admin.py:68
+msgid "web application"
+msgstr "web应用"
+
+#: webapps/models.py:10
+msgid "unknown"
+msgstr "未知"
+
+#: webapps/models.py:11
+msgid "new"
+msgstr "新的"
+
+#: webapps/models.py:12
+msgid "hot"
+msgstr "热门"
+
+#: webapps/models.py:52 webapps/models.py:109 webapps/models.py:167
+msgid "larger num mean higher priority"
+msgstr "可填写1-7,值越大表示优先级越高"
+
+#: webapps/models.py:52
+msgid "priority"
+msgstr ""
+
+#: webapps/models.py:98
+msgid "example: \"#FF0000\""
+msgstr "红色用\"#FF0000\"表示 "
+
+#: webapps/models.py:101
+msgid "Promote order"
+msgstr "推荐次序"
+
+#: webapps/models.py:103
+msgid "category_order"
+msgstr "分类次序"
+
+#: webapps/models.py:111
+msgid "application tag"
+msgstr "应用标签"
+
+#: webapps/models.py:161
+msgid "banner"
+msgstr "banner"
+
+#: webapps/models.py:170
+msgid "subject tag"
+msgstr "专题标签"
+
+#: webapps/models.py:213
+msgid "subject"
+msgstr "专题"
+
+#: websitesnav/admin.py:36
+msgid "navigation"
+msgstr "网址导航"
+
+#: websitesnav/models.py:18
+msgid "site title"
+msgstr "网站标题"
+
+#: websitesnav/models.py:43
+#, python-format
+msgid " site %s's icon field is null"
+msgstr "网站%s的icon不能为空"
+
+#: websitesnav/models.py:57
+msgid "category name"
+msgstr "分类名"
+
+#: websitesnav/models.py:83
+#, python-format
+msgid "there should be 4 sites in %sth category"
+msgstr "第%s个分类中必须有4个站点"
+
+#: websitesnav/models.py:128
+#, python-format
+msgid "the number of the recommendsites in %sth strategy is less than 9"
+msgstr "第%s个组合中需要有至少9个推荐站点"
+
+#: websitesnav/models.py:131
+#, python-format
+msgid "the number of sites in %sth strategy is less than 4"
+msgstr "第%s个组合中需要有至少4个站点"
+
+#: websitesnav/models.py:156
+#, python-format
+msgid "the number of sitecategory in %dth strategy is less than 4"
+msgstr "第%d个组合中需要有至少4个分类站点"
+
+#~ msgid "trafficclean should be of a valid value"
+#~ msgstr "流量清理设置不合法"
+
+#~ msgid "Position"
+#~ msgstr "序号"
+
+#~ msgid "three or more searchengine needed!"
+#~ msgstr "至少三个搜索引擎"
+
+#~ msgid "Username:"
+#~ msgstr "用户名:"
+
+#~ msgid "Password:"
+#~ msgstr "密码:"
+
+#~ msgid "not assign target mongo tables"
+#~ msgstr "没有指明mongo表"
+
+#~ msgid "User: %(name)s upload data to %(server)s"
+#~ msgstr "用户：%(name)s 上传数据到 %(server)s "
+
+#~ msgid "upload %(item)s fail,fail reason is%(e)s"
+#~ msgstr "上传%(item)s失败，原因是%(e)s"
+
+#~ msgid "Error:Upload failed, %s!"
+#~ msgstr "上传失败，错误代码为 %s!"
+
+#~ msgid "Basic"
+#~ msgstr "基本"
+
+#~ msgid "Please enter verify code."
+#~ msgstr "请输入验证码"
+
+#~ msgid "Please enter a correct verify code."
+#~ msgstr "请输入正确的验证码"
+
+#~ msgid "Last Modified"
+#~ msgstr "上次更新时间"
+
+#~ msgid "Website"
+#~ msgstr "站点"
+
+#~ msgid "source"
+#~ msgstr "文件资源"
+
+#~ msgid "locale"
+#~ msgstr "本地"
+
+#~ msgid "display name"
+#~ msgstr "用于客户端显示"
+
+#~ msgid "total rules"
+#~ msgstr "规则"
+
+#~ msgid "applications"
+#~ msgstr "应用"
+
+#~ msgid "Delete"
+#~ msgstr "删除"
+
+#~ msgid "Error: All upload fail!"
+#~ msgstr "错误：没有任何被上传！"
+
+#~ msgid "Error: All Delete fail!"
+#~ msgstr "错误：没有任何被删除"
+
+#~ msgid "addon store"
+#~ msgstr "插件库"
+
+#~ msgid "hoting"
+#~ msgstr "热门"
+
+#~ msgid ""
+#~ "Warning: %s has been upload to local, please delete it from local first!"
+#~ msgstr "警告：%s 已经被上传到local，请先从local上删除！"
+
+#~ msgid ""
+#~ "Warning: %s has been upload to china, please delete it from china first!"
+#~ msgstr "警告： %s 已经被上传到china,请先从china上删除！"
+
+#~ msgid "Delete selected data from admin successfully!"
+#~ msgstr "成功从admin上删除所选数据！"
+
+#~ msgid "publish to local"
+#~ msgstr "上传到local"
+
+#~ msgid "publish to china"
+#~ msgstr "上传到china"
+
+#~ msgid "publish to ec2"
+#~ msgstr "上传到ec2"
+
+#~ msgid "delete from local"
+#~ msgstr "从local删除"
+
+#~ msgid "delete from china"
+#~ msgstr "从china删除"
+
+#~ msgid "delete from ec2"
+#~ msgstr "从ec2删除"
+
+#~ msgid "web page"
+#~ msgstr "网页"
+
+#~ msgid "novel"
+#~ msgstr "小说"
+
+#~ msgid "news"
+#~ msgstr "新闻"
+
+#~ msgid "shopping"
+#~ msgstr "购物"
+
+#~ msgid "normal search"
+#~ msgstr "普通搜索"
+
+#~ msgid "vertical search"
+#~ msgstr "垂直搜索"
+
+#~ msgid "manual"
+#~ msgstr "人工"
+
+#~ msgid "wallpaper"
+#~ msgstr "壁纸"
+
+#~ msgid "font"
+#~ msgstr "字体"
+
+#~ msgid "activity"
+#~ msgstr "活动"
+
+#~ msgid "App"
+#~ msgstr "应用"
+
+#~ msgid "WebApp"
+#~ msgstr "web应用"
+
+#~ msgid "builtin"
+#~ msgstr "预置数据"
+
+#~ msgid "webzine column"
+#~ msgstr "网络杂志专栏"
+
+#~ msgid "speed dial"
+#~ msgstr "快捷方式"
+
+#~ msgid "webapp"
+#~ msgstr "web应用"
+
+#~ msgid "builtin info"
+#~ msgstr "预置数据"
+
+#~ msgid "content"
+#~ msgstr "内容中心"
+
+#~ msgid "No items need to sync to mogodb"
+#~ msgstr "没有需要上传的项"
+
+#~ msgid "you have not selected any item "
+#~ msgstr "你需要先选中同步项"
+
+#~ msgid "Chinese"
+#~ msgstr "中国"
+
+#~ msgid "English"
+#~ msgstr "英语（国际）"
+
+#~ msgid "need sync"
+#~ msgstr "需要同步"
+
+#~ msgid "synced"
+#~ msgstr "已同步"
+
+#~ msgid "category app ship"
+#~ msgstr "专题包含的应用"
+
+#~ msgid "primary navigation"
+#~ msgstr "一级导航"
+
+#~ msgid "section"
+#~ msgstr "章节"
+
+#~ msgid "Section Link Category"
+#~ msgstr "章节包含的分类"
+
+#~ msgid "Category Link Item"
+#~ msgstr "专题关联的项"
+
+#~ msgid "search promotions"
+#~ msgstr "搜索推荐"
+
+#~ msgid "Category link Search"
+#~ msgstr "专题关联的搜索"
+
+#~ msgid "Category link Hotword"
+#~ msgstr "专题关联的热词"
+
+#~ msgid "faile to get uid and so on！the reason is %s"
+#~ msgstr "获取uid等信息失败,原因是%s"
+
+#~ msgid "theme relevent"
+#~ msgstr "主题相关"
+
+#~ msgid "promotion font icon for client"
+#~ msgstr "用于客户端展示的推荐字体icon"
+
+#~ msgid "Skin link Screenshot"
+#~ msgstr "皮肤关联的预览图"
+
+#~ msgid "subnavigation"
+#~ msgstr "二级导航"
+
+#~ msgid "suject app ship"
+#~ msgstr "专题包含的应用"
+
+#~ msgid "Android Novel"
+#~ msgstr "AosEn"
+
+#~ msgid "Page Link Category"
+#~ msgstr "页包含的分类"
+
+#~ msgid "Treasure Link Item"
+#~ msgstr "百宝箱项"
+
+#~ msgid "Section Link Group"
+#~ msgstr "章节包含的组"
+
+#~ msgid "Section Link Item"
+#~ msgstr "章节包含的项"
+
+#~ msgid "Group Link Category"
+#~ msgstr "组包含的分类"
+
+#~ msgid "Android Item"
+#~ msgstr "AosCn"
+
+#~ msgid "hotapps category"
+#~ msgstr "热门应用分类"
+
+#~ msgid "hotapps screenshot"
+#~ msgstr "热门应用截图"
+
+#~ msgid "hots Application"
+#~ msgstr "热门应用"
+
+#~ msgid "push message"
+#~ msgstr "推送消息"
+
+#~ msgid "IosCN"
+#~ msgstr "IosCn"
+
+#~ msgid "IosEN"
+#~ msgstr "IosEn"

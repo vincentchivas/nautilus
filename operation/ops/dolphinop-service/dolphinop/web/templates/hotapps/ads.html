@@ -1,0 +1,36 @@
+{% load i18n %}
+
+{% spaceless %}
+<div id='recommend'>
+    <h2><span></span>{% trans "Today's recommended" %}</h2>
+    <ul>
+        {% for app in recommend_list %}
+        <li>
+            <a href='{{ app.download_url }}' onclick="track(this, 'recommend', '{{ app.title|addslashes }}' , '{{ app.download_url }}');">
+                <img src='{{ app.favicon }}' />
+                <ul class='summary'>
+                    <li class='title'>{{ app.title }}</li>
+                    <li>{% trans 'Category: ' %}{{ app.category }}</li>
+                    <li>{% trans 'Type: ' %}{% trans app.price_type %}</li>
+                </ul>
+            </a>
+            <div class='clear'>
+                <strong>{% trans 'The recommendation reasons:'%}</strong>
+                {{ app.reason }}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<div id='sponsors'>
+    <ul>
+        {% for ad in ads_list %}
+        <li>
+            <a href='{{ ad.download_url }}' onclick="track(this, 'ad', '{{ ad.title|addslashes }}' , '{{ ad.download_url }}');">
+                <img class='ad' src='{{ ad.picture_url }}' /> 
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endspaceless %}
