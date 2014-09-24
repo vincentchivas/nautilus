@@ -244,3 +244,66 @@ class Permission(ModelBase):
             if perm:
                 permissions.append(perm)
         return permissions
+
+    @classmethod
+    def init_menu(uid):
+        assert uid
+        match_type = 1
+        perms = Permission.get_perms_by_uid(uid)
+        if perms:
+            menu = []
+            containers = []
+            apps = []
+            models = []
+            for perm in perms:
+                containers.append(perm.get('container'))
+            containers = list(set(containers))
+            con_index = 0
+            for container in containers:
+                container_alias = container.replace(' ', '-')
+                # get alias of container
+                menu.append(
+                    {'module': container,
+                     'display': container_alias,
+                     'items': []})
+                apps[:] = []
+                for perm in perms:
+                    if perm.get('container') == container:
+                        apps.append(perm.get('app_label'))
+                apps = list(set(apps))
+                app_index = 0
+                for app in apps:
+                    models[:] = []
+                    for perm in perms:
+                        if perm.get('app_label') == app:
+                            models.append(perm.get('model_label'))
+                    models = list(set(models))
+                    # app is equal to container  app_name type
+                    if not match_type:
+                        app_alias = app.replace(' ', '-')
+                        # get alias of app
+                        menu[con_index]['items'].append(
+                            {'module': app, 'display': app_alias, 'items': []})
+                        for model in models:
+                        # get alias of model
+                            model_alias = ''
+                            temp = {'model': model,
+                                    'display': model_alias,
+                                    'url': container + '/' + app + '/' + model}
+                            menu[con_index]['items'][
+                                app_index]['items'].append(temp)
+                    else:
+                        for model in models:
+                        # get alias of model
+                            model_alias = ''
+                            menu[con_index]['items'][
+                                app_index]['url'] = app + '/' + model
+                            menu[con_index]['items'][
+                                app_index]['model'] = app
+                            menu[con_index]['items'][app_index].pop('items')
+                            menu[con_index]['items'][app_index].pop('module')
+                    app_index = app_index + 1
+                con_index = con_index + 1
+                return menu
+        else:
+            return None
