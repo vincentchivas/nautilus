@@ -1,8 +1,11 @@
-from sqlalchemy import *
+from sqlalchemy import Column, UniqueConstraint
+from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+import logging
 import datetime
-from provider.db.database import engine
+from provider.db.database import engine, get_session
 
+_LOGGER = logging.getLogger('model')
 Base = declarative_base()
 
 
@@ -19,19 +22,21 @@ class BuildTask(Base):
     reason = Column(String(50))
     apk_uri = Column(String(200))
     log_uri = Column(String(200))
+    tag = Column(String(200))
     creattime = Column(DateTime, default=datetime.datetime.now)
     modifytime = Column(DateTime, default=datetime.datetime.now)
 
     __table_args__ = (UniqueConstraint('taskid', name='_taskid_uc'),)
-# status unbuild/building/builded
+# status unbuild/building/built/time-out
 
     def __init__(
-            self, taskid=None, appname='', appversion='', xml_link='',
+            self, taskid=None, appname='', appversion='', xml_link='', tag=''
     ):
         self.taskid = taskid
         self.appname = appname
         self.appversion = appversion
         self.xml_link = xml_link
+        self.tag = tag
 
 
 class XmlList(Base):
@@ -51,5 +56,49 @@ class XmlList(Base):
         self.appversion = appversion
         self.xml_link = xml_link
         self.md5code = md5code
+
+    @classmethod
+    def get_latest_xml(cls):
+        '''
+        get the newest  xmlfile from providerdb
+        '''
+        try:
+            sess = get_session()
+            latest_xml = sess.query(XmlList
+                                    ).order_by(XmlList.timestamp.desc()
+                                               ).first()
+            return latest_xml
+        except Exception, exception:
+            _LOGGER.info("get_latest_xml  occurred:%s" % str(exception))
+        finally:
+            sess.close()
+
+
+class TagList(Base):
+    __tablename__ = 'taglist'
+
+    id = Column(Integer, primary_key=True)
+    appversion = Column(String(50))
+    tagname = Column(String(300))
+
+    __table_args__ = (UniqueConstraint('appversion', name='_version_uc'),)
+
+    def __init__(self, appversion, tagname):
+        self.appversion = appversion
+        self.tagname = tagname
+
+    @classmethod
+    def get_taglist(cls):
+        '''
+        get taglist
+        '''
+        try:
+            sess = get_session()
+            results = sess.query(TagList)
+            return results
+        except Exception, exception:
+            _LOGGER.info("get_taglist occurred:%s" % str(exception))
+        finally:
+            sess.close()
 
 Base.metadata.create_all(engine)

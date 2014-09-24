@@ -69,7 +69,6 @@ def json_encode(data):
 
 
 def _json_response(status, data, msg=None):
-    import time
     d = {'status': status, 'data': data, 'msg': msg}
     content = simplejson.dumps(
         d, cls=DateTimeAwareJSONEncoder, ensure_ascii=False,
@@ -79,16 +78,13 @@ def _json_response(status, data, msg=None):
     # content_type='application/json; charset=utf-8')
     response = HttpResponse(
         content, content_type='application/json; charset=utf-8')
-    #response['Access-Control-Allow-Headers'] = 'Content-Type'
-    #response['Access-Control-Allow-Methods'] = '*'
-    #response['Access-Control-Allow-Origin'] = '*'
-    print "hanlder json data%s" % time.time()
+    # response['Access-Control-Allow-Headers'] = 'Content-Type'
+    # response['Access-Control-Allow-Methods'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
 def json_response_ok(data=None, msg=''):
-    import time
-    print "json_datatime:%s" % time.time()
     return _json_response(OK, data, msg)
 
 

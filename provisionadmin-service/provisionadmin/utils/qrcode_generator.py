@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
+"""
+@author: yqyu
+@date: 2014-07-15
+@description: create a QRcode
+"""
 
-import sys
 import qrcode
-from urllib import quote
-
-url = "http://www.baidu.com"
 
 
 def make_qr(url, path):
-    qr = qrcode.QRCode(
+    """
+    Create a QRcode
+    Parameters:
+        -url: The url for Need to create a QRcode,
+        -path: Qr code storage path
+    Return:
+        -1. None
+    """
+    new_qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
     )
-    # url = quote(url)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image()
+    new_qr.add_data(url)
+    new_qr.make(fit=True)
+    img = new_qr.make_image()
     img.save(path)
-
-
-if __name__ == "__main__":
-    make_qr(url)
-
-##需要安装qrcode和PIL，安装方法：
-##easy_install qrcode
-##easy_install PIL

@@ -29,6 +29,9 @@ DISPLAY_FIELDS = {
 
 
 def config(server, db, port=None):
+    '''
+    config pymongo connection
+    '''
     # check the server and db.
     assert server and db, 'Either "host" or "db" should not be None'
     global _db, _preset
@@ -41,10 +44,16 @@ def config(server, db, port=None):
 
 
 def get_preset(cond):
+    '''
+    get preset data by cond
+    '''
     preset = _db.preset.find_one(cond, fields=DISPLAY_FIELDS)
     return preset
 
 
 def get_presets(cond):
+    '''
+    get presets data by cond
+    '''
     colls = _db.preset.find(cond, fields=DISPLAY_FIELDS)
     return cursor_to_array(colls)

@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+@author: zhhfang
+@date: 2014-07-15
+@description: The response code of API
+"""
+
 OK = 0
 
 UNKNOWN_ERROR = 1

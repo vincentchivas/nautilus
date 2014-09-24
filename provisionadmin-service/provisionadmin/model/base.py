@@ -115,6 +115,8 @@ class ModelBase(dict):
     def find(
             cls, cond={}, fields=None, id_only=False, one=False,
             toarray=False):
+        print DBS
+        print cls.db
         _db = DBS[cls.db]
         if one:
             find = db.base_find_one
@@ -146,7 +148,7 @@ class ModelBase(dict):
                 logger.warning("check unique fails for data: %s", data)
                 return
         return db.base_insert(DBS[cls.db], cls.collection, data)
-            # return generated _id
+        # return generated _id
 
     @classmethod
     def update(cls, cond, data, replace=False):
@@ -157,6 +159,17 @@ class ModelBase(dict):
     @classmethod
     def remove(cls, cond):
         db.base_remove(DBS[cls.db], cls.collection, cond)
+
+    @classmethod
+    def save(cls, data, check_unique=True, extract=True):
+        if extract:
+            data = cls.extract(data)
+            logger.info("data %s" % data)
+        if check_unique:
+            cls.check_unique(data, extract=False)
+            logger.warning("check unique failed for data: %s" % data)
+            return 'unique-error'
+        return db.base_save(DBS[cls.db], cls.collection, data)
 
     @classmethod
     def find_id_by_unique(cls, cond=None, data=None):

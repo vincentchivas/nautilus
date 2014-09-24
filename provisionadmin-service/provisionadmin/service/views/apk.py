@@ -6,13 +6,14 @@ import subprocess
 # import traceback
 import logging
 from provisionadmin.utils.json import json_response_ok, json_response_error
-from provisionadmin.utils.respcode import DATA_ERROR 
+from provisionadmin.utils.respcode import DATA_ERROR
 from django.http import HttpResponse, HttpResponseNotFound
 from django.core.servers.basehttp import FileWrapper
 from provisionadmin.decorator import exception_handler
 from provisionadmin.settings import STATIC_ROOT, CUS_TEMPLATE_DIR
 from provisionadmin.service.utils.adapter import init_adapter
 from provisionadmin.service.utils.diff import diff_xml
+from provisionadmin.service.utils.organize_values import merge_xml
 
 logger = logging.getLogger('apk')
 
@@ -27,9 +28,11 @@ def upload(request):
     cur_time = int(time.time())
     apkfile = request.FILES['apkfile']
     xmlfile = request.FILES['xmlfile']
-    #check file validation
+    # check file validation
     if not apkfile.name.endswith('.apk') or not xmlfile.name.endswith('.zip'):
-        return json_response_error(DATA_ERROR, msg='upload file format error[%s %s]' % (apkfile.name, xmlfile.name)) 
+        return json_response_error(
+            DATA_ERROR, msg='upload file format error[%s %s]' % (
+                apkfile.name, xmlfile.name))
     apkfilepath = os.path.join(STATIC_ROOT, "apk_%s.apk" % cur_time)
     xmlfilepath = os.path.join(STATIC_ROOT, "xml_%s.zip" % cur_time)
     apkoutputfile = open(apkfilepath, "wb")
@@ -45,17 +48,17 @@ def upload(request):
     os.mkdir(apkfiledir)
     os.mkdir(xmlfiledir)
 
-    #firstly, de-compile apk file
+    # firstly, de-compile apk file
     logger.info("start to de-compile %s", apkfilepath)
     subprocess.call(
         "apktool d -s -f %s %s" % (apkfilepath, apkfiledir), shell=True)
 
-    #secondly, un-compress xml zip
+    # secondly, un-compress xml zip
     logger.info("start to un-compress the xml files %s", xmlfilepath)
     subprocess.call(
         "cd %s && unzip %s" % (xmlfiledir, xmlfilepath), shell=True)
 
-    #thirdly, call init adapter
+    # thirdly, call init adapter
     package_name, version_name = init_adapter(xmlfiledir, apkfiledir)
     package_path = os.path.join(STATIC_ROOT, package_name)
     if not os.path.exists(package_path):
@@ -64,13 +67,13 @@ def upload(request):
     if not os.path.exists(version_path):
         os.mkdir(version_path)
 
-    #mv origin file to version path
+    # mv origin file to version path
     subprocess.call(
         "mv %s %s/" % (apkfilepath, version_path), shell=True)
     subprocess.call(
         "mv %s %s/" % (xmlfilepath, version_path), shell=True)
 
-    #fourthly, rename xmlfiledir and apkfiledir
+    # fourthly, rename xmlfiledir and apkfiledir
     raw_format_apkfiledir = os.path.join(version_path, "raw_apk_data")
     logger.info('start to mv apkdir to %s', raw_format_apkfiledir)
     if os.path.exists(raw_format_apkfiledir):
@@ -86,7 +89,7 @@ def upload(request):
     subprocess.call(
         "mv %s %s" % (xmlfiledir, raw_format_xmlfiledir), shell=True)
 
-    #fithly, cp xmldir and apkdir
+    # fithly, cp xmldir and apkdir
     format_apkfiledir = os.path.join(version_path, "apk_data")
     logger.info('start to cp apkdir to %s', format_apkfiledir)
     if os.path.exists(format_apkfiledir):
@@ -100,24 +103,30 @@ def upload(request):
     if os.path.exists(format_xmlfiledir):
         subprocess.call(
             "rm -rf %s" % format_xmlfiledir, shell=True)
+    os.mkdir(format_xmlfiledir)
+    format_xmlfiledir = os.path.join(format_xmlfiledir, "res")
+    os.mkdir(format_xmlfiledir)
     subprocess.call(
-        "cp -r %s %s" % (raw_format_xmlfiledir, format_xmlfiledir),
+        "cp -r %s/* %s" % (raw_format_xmlfiledir, format_xmlfiledir),
         shell=True)
 
-    #sixthly, run diff logic to get miss xml to miss_xmlfiledir
+    # sixthly, run diff logic to get miss xml to miss_xmlfiledir
     miss_xmlfiledir = os.path.join(version_path, 'miss_xml_data')
     logger.info('start to diff xml file to %s', miss_xmlfiledir)
     if os.path.exists(miss_xmlfiledir):
         subprocess.call(
             "rm -rf %s" % miss_xmlfiledir, shell=True)
     os.mkdir(miss_xmlfiledir)
+    miss_xmlfiledir = os.path.join(miss_xmlfiledir, 'res-missing')
+    os.mkdir(miss_xmlfiledir)
     diff_xml(raw_format_xmlfiledir, miss_xmlfiledir)
-    '''
-    except Exception as e:
-        print e
-        print traceback.format_exc()
-        raise e
-    '''
+
+    # seventhly, cp miss xml to xml_file dir
+    new_res_filedir = os.path.join(miss_xmlfiledir, "values*")
+    subprocess.call(
+        "cp -r %s %s" % (new_res_filedir, format_xmlfiledir), shell=True)
+    new_xml_filedir = os.path.join(version_path, "xml_data")
+    merge_xml(new_xml_filedir)
     return json_response_ok({})
 
 

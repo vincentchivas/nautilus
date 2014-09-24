@@ -20,6 +20,9 @@ DISPLAY_FIELDS = {
 
 
 def config(server, db, port=None):
+    '''
+    config pymongo connection
+    '''
     # check the server and db.
     assert server and db, 'Either "host" or "db" should not be None'
     global _db
@@ -31,8 +34,15 @@ def config(server, db, port=None):
 
 
 def get_desktops(cond):
+    '''
+    get desktops from mongodb by cond
+    '''
     colls = _db.desktops.find(cond, fields=DISPLAY_FIELDS)
     return cursor_to_array(colls)
 
+
 def get_data(cond):
+    '''
+    get data by cond
+    '''
     return get_desktops(cond)

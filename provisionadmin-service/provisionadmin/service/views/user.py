@@ -1,38 +1,60 @@
 # -*- coding: utf-8 -*-
-# import datetime
+import os
+import simplejson
 from django.http import HttpResponse
 from provisionadmin.model.user import User, Group, Permission
 from provisionadmin.db import user
-# from django.shortcuts import render_to_response
 from provisionadmin.decorator import check_session, exception_handler
-from provisionadmin.utils import json, respcode
-import simplejson
+from provisionadmin.utils.json import json_response_error, json_response_ok
+from provisionadmin.utils import respcode
 from provisionadmin.settings import CUS_TEMPLATE_DIR
-import os
 
 
 @exception_handler()
 def login(req):
+    '''
+    login api is used for user to login in the system
+    and return the left navigation and permissions
+
+    Request URL: admin/login
+
+    HTTP Method: POST
+
+    Parameters:
+     --user_name:user name to login
+     --password:
+
+    Return:
+    {
+     "status":0
+     "data":{
+              "features":["aa","bb"] ,
+              "menu":{"items":[{"display":"Translation","model":"translate"}]},
+              "permissions":[{"action":"add","model":"translation"}]
+            }
+        }
+    '''
+
     if req.method == 'POST':
         name = req.POST.get('user_name')
         password = req.POST.get('password')
-        if (name and password):
+        if name and password:
             u = user.find_one_user({'user_name': name, 'password': password})
             if not u:
-                return json.json_response_error(
+                return json_response_error(
                     respcode.AUTH_ERROR, {}, msg='user_name or password error')
             else:
                 req.session["uid"] = u['_id']
                 uid = int(u['_id'])
                 permissions = user.init_menu_permissions(uid)
-                return json.json_response_ok(
+                return json_response_ok(
                     data=permissions, msg='get left navi menu')
         else:
-            return json.json_response_error(
+            return json_response_error(
                 respcode.PARAM_REQUIRED,
                 msg='user_name or password is not allowed  empty')
     else:
-        return json.json_response_error(
+        return json_response_error(
             respcode.METHOD_ERROR, msg="http method wrong")
 
 
@@ -41,7 +63,7 @@ def login(req):
 def logout(req):
     # session_key = req.session.session_key
     req.session.delete()
-    return json.json_response_ok(data={}, msg='logout success')
+    return json_response_ok(data={}, msg='logout success')
 
 
 @exception_handler()
@@ -57,275 +79,438 @@ def change_password(req):
         if usr.password == old_pwd:
             usr.password = new_pwd
             user.save_user(usr)
-            return json.json_response_ok(data={}, msg='password changed')
+            return json_response_ok(data={}, msg='password changed')
         else:
-            return json.json_response_error(
+            return json_response_error(
                 respcode.PASSWORD_UNMATCH, data={},
                 msg='old password is not match')
     else:
-        return json.json_response_error(
+        return json_response_error(
             respcode.PARAM_ERROR, data={},
             msg='user name error')
 
 
-@exception_handler()
-@check_session
-def user_list(req):
+def list_group(req):
+    '''
+    list api for show group list.
+
+    Request URL:  /auth/group/list
+
+    Http Method:  GET
+
+    Parameters : None
+
+    Return :
+    {
+     "status":0
+     "data":{
+              "items":[
+              {
+              "_id":"2",
+              "group_name":"admin",
+              "permission_list":[19,20,21,22]
+              },
+              {
+                "_id":4,
+                "group_name":"translator",
+                "permission_list":[22,23]
+              }
+              ]
+            }
+        }
+
+    '''
     if req.method == 'GET':
-        users = user.find_users()
-        return json.json_response_ok(data=users, msg='user list')
+        cond = {}
+        groups = Group.find_group(cond)
+        data = {}
+        data.setdefault("items", groups)
+        return json_response_ok(data, "get group list")
     else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
 
 
-@exception_handler()
-@check_session
-def user_detail_modify(req, user_id):
-    uid = int(user_id)
+def create_group(req):
+    '''
+    create api to add group.
+
+    Request URL:  /auth/group/add
+
+    Http Method:  POST
+
+    Parameters:
+        {
+           "group_name":"xxx",
+           "perm_list":[1,2,3,4]
+        }
+
+    Return :
+    {
+     "status":0
+     "data":{}
+     "msg":"add successfully"
+    }
+    '''
+    if req.method == 'POST':
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        group_name = temp_dict.get('group_name')
+        if not group_name:
+            return json_response_error(
+                respcode.PARAM_REQUIRED,
+                msg="parameter group_name invalid")
+        group_Perm_list = temp_dict.get('perm_list')
+        group = Group.new(group_name, group_Perm_list)
+        Group.save_group(group)
+        return json_response_ok({'info': group})
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg='http method error')
+
+
+def detail_modify_group(req, group_id):
+    '''
+    this api is used to view or modify one group
+
+    Request URL: /auth/group/{gid}
+
+    HTTP Method:GET
+    Parameters: None
+    Return
+     {
+     "status":0
+     "data":{
+              "item":[
+              {
+              "_id":"2",
+              "group_name":"admin",
+              "permission_list":[19,20,21,22]
+              }
+            }
+        }
+
+    HTTP Method:POST
+    Parameters:
+        {
+           "group_name":"xxx",
+           "perm_list":[1,2,3,4]
+        }
+    Return :
+     {
+     "status":0
+     "data":{}
+     "msg":"modify successfully"
+    }
+    '''
+    group_id = int(group_id)
+    if req.method == "GET":
+        cond = {"_id": group_id}
+        groups = Group.find_group(cond)
+        data = {}
+        if groups:
+            group = groups[0]
+            data.setdefault("item", group)
+            return json_response_ok(
+                data, msg="get group one group detail")
+        else:
+            return json_response_error(
+                respcode.PARAM_ERROR, msg="the id is not exist")
+    elif req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        group_name = temp_dict.get('group_name')
+        if not group_name:
+            return json_response_error(
+                respcode.PARAM_REQUIRED,
+                msg="parameter group_name invalid")
+        group_Perm_list = temp_dict.get('perm_list')
+        group = Group.new(group_name, group_Perm_list)
+        group["_id"] = group_id
+        Group.save_group(group)
+        return json_response_ok({'info': group})
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def delete_group(req):
+    '''
+    this api is used to delete group,when one group removed,the user who
+    in this group ,the group id will remove too.
+
+    Request URL: /auth/group/delete
+
+    HTTP Method: POST
+
+    Parameters:
+        {
+            "gids":[2,3]
+            }
+
+    Return:
+     {
+     "status":0
+     "data":{}
+     "msg":"delete successfully"
+     }
+    '''
+    if req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        gids = temp_dict.get("gids")
+        assert gids
+        ids = Group.del_group(gids)
+        if not ids:
+            return json_response_ok({}, msg="delete successfully")
+        else:
+            return json_response_error(
+                respcode.PARAM_ERROR, msg="ids:%s is invalid" % ids)
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def list_user(req):
+    '''
+        list api for show user list.
+
+        Request URL:  /auth/user/list
+
+        Http Method:  GET
+
+        Parameters : None
+
+        Return :
+        {
+        "status":0
+        "data":{
+                "items":[
+                {
+                "_id":"2",
+                "user_name":"admin",
+                "email":"xx@bainainfo.com",
+                "permission_list":[19,20,21,22]
+                },
+                {
+                    "_id":4,
+                    "user_name":"translator",
+                    "email":"xx@bainainfo.com",
+                    "permission_list":[22,23]
+                }
+                ]
+                }
+            }
+
+        '''
     if req.method == 'GET':
-        u = user.find_one_user({'_id': uid})
-        if u:
-            return json.json_response_ok(data=u, msg='one user detail')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data=u, msg='user id is not exist')
-    elif req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        u = user.find_one_user({'_id': user_id})
-        if u:
-            u.user_name = temp.get('user_name')
-            u.email = temp.get('email')
-            u.is_active = temp.get('is_active')
-            u.is_superuser = temp.get('is_superuser')
-            u.group_id = temp.get('group_id')
-            u.permission_list = temp.get('permission_list')
-            instance = user.save_user(u)
-            if instance:
-                return json.json_response_ok(
-                    data={}, msg='modify user success')
-            else:
-                return json.json_response_error(
-                    respcode.SAVE_ERROR, data={},
-                    msg='save modified user error')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data={}, msg='user id is not exist')
+        cond = {}
+        users = User.find_users(cond)
+        data = {}
+        data.setdefault("items", users)
+        return json_response_ok(data, "get user list")
     else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
 
 
-@exception_handler()
-@check_session
-def add_user(req):
+def create_user(req):
+    '''
+        create api to add user.
+
+        Request URL:  /auth/user/add
+
+        Http Method:  POST
+
+        Parameters:
+            {
+            "user_name":"xxx",
+            "password":"zxcf",
+            "email":"zxy@bainainfo.com"
+            "perm_list":[1,2,3,4]
+            }
+
+        Return :
+        {
+        "status":0,
+        "data":{},
+        "msg":"add successfully"
+        }
+        '''
     if req.method == 'POST':
-        temp = req.raw_post_data
-        user_name = temp.get('user_name')
-        u = User.new(user_name)
-        u.password = temp.get('password')
-        u.email = temp.get('email')
-        u.is_active = temp.get('is_active')
-        u.is_superuser = temp.get('is_superuser')
-        u.group_id = temp.get('group_id')
-        u.permission_list = temp.get('permission_list')
-        instance = user.save_user(u)
-        if instance:
-            return json.json_response_ok(data={}, msg='add user success')
-        else:
-            return json.json_response_error(
-                respcode.SAVE_ERROR, data={}, msg='save new user error')
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        required_list = ('user_name', 'password', 'email')
+        for required_para in required_list:
+            if not temp_dict.get(required_para):
+                return json_response_error(
+                    respcode.PARAM_REQUIRED,
+                    msg="parameter %s invalid" % required_para)
+        user_name = temp_dict.get('user_name')
+        password = temp_dict.get('password')
+        email = temp_dict.get('email')
+        # is_active = temp_dict.get('is_active')
+        # is_superuser = temp_dict.get('is_superuser')
+        # group_id = temp_dict.get('group_id')
+        # permission_list = temp_dict.get('permission_list')
+        user_instance = User.new(user_name, password, email)
+        # user_instance.group_id = group_id
+        # user_instance.permission_list = permission_list
+        User.save(user_instance)
+        return json_response_ok({"info": user_instance})
     else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
+        return json_response_error(
+            respcode.METHOD_ERROR, msg='http method error')
 
 
-@exception_handler()
-@check_session
-def del_user(req):
-    if req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        user_ids = temp.get('user_ids')
-        if not user_ids:
-            return json.json_response_error(
-                respcode.PARAM_ERROR, data={}, msg='userids must not be empty')
+def detail_modify_user(req, user_id):
+    '''
+        this api is used to view or modify one user
+
+        Request URL: /auth/user/{uid}
+
+        HTTP Method:GET
+        Parameters: None
+        Return
+        {
+        "status":0
+        "data":{
+                "item":[
+                {
+                "_id":"2",
+                "user_name":"xxx",
+                "permission_list":[19,20,21,22]
+                }
+                }
+            }
+
+        HTTP Method:POST
+        Parameters:
+            {
+            "group_name":"xxx",
+            "perm_list":[1,2,3,4]
+            }
+        Return :
+        {
+        "status":0
+        "data":{}
+        "msg":"modify successfully"
+        }
+        '''
+    user_id = int(user_id)
+    if req.method == "GET":
+        cond = {"_id": user_id}
+        users = User.find_users(cond)
+        data = {}
+        if users:
+            user = users[0]
+            data.setdefault("item", user)
+            return json_response_ok(
+                data, msg="get  one user detail")
         else:
-            count = user.del_user(user_ids)
-            return json.json_response_ok(
-                data={
-                    'passin_counts': len(user_ids), 'delete_counts': count},
-                msg='delete success')
+            return json_response_error(
+                respcode.PARAM_ERROR, msg="the user is not exist")
+    elif req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        required_list = ('user_name', 'password', 'email')
+        for required_para in required_list:
+            if not temp_dict.get(required_para):
+                return json_response_error(
+                    respcode.PARAM_REQUIRED,
+                    msg="parameter %s invalid" % required_para)
+        user_name = temp_dict.get('user_name')
+        password = temp_dict.get('password')
+        email = temp_dict.get('email')
+        # is_active = temp_dict.get('is_active')
+        # is_superuser = temp_dict.get('is_superuser')
+        group_id = temp_dict.get('group_id')
+        # permission_list = temp_dict.get('permission_list')
+        user_instance = User.new(user_name, password, email)
+        # user_instance.group_id = group_id
+        # user_instance.permission_list = permission_list
+        User.save(user_instance)
+        user_instance.group_id = group_id
+        return json_response_ok({'info': user_instance})
     else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
 
 
-@exception_handler()
-@check_session
-def group_list(req):
+def delete_user(req):
+    '''
+        this api is used to delete user.
+
+        Request URL: /auth/user/delete
+
+        HTTP Method: POST
+
+        Parameters:
+            {
+                "uids":[2,3]
+                }
+
+        Return:
+        {
+        "status":0
+        "data":{}
+        "msg":"delete successfully"
+        }
+    '''
+    if req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        uids = temp_dict.get("uids")
+        assert uids
+        ids = User.del_user(uids)
+        if not ids:
+            return json_response_ok({}, msg="delete successfully")
+        else:
+            return json_response_error(
+                respcode.PARAM_ERROR, msg="ids:%s is invalid" % ids)
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def list_perm(req):
+    '''
+    list api for show user perm.
+
+    Request URL:  /auth/perm/list
+
+    Http Method:  GET
+
+    Parameters : None
+
+    Return :
+    {
+    "status":0
+    "data":{
+            "items":[
+            {
+                "_id":"2",
+                "app_label":"translations-tool",
+                "model_label":"translations",
+                "operator":"add"
+            },
+            {
+                "_id":4,
+                "app_label":"translator-tool",
+                "model_label":"revsion",
+                "operator":"list"
+            }
+            ]
+            }
+        }
+
+    '''
     if req.method == 'GET':
-        groups = user.find_groups()
-        return json.json_response_ok(data=groups, msg='get group list')
+        cond = {}
+        perms = Permission.find_perm(cond)
+        data = {}
+        data.setdefault("items", perms)
+        return json_response_ok(data, "get permission list")
     else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def group_detail_modify(req, group_id):
-    gid = int(group_id)
-    if req.method == 'GET':
-        g = user.find_one_group({'_id': gid})
-        if g:
-            return json.json_response_ok(data=g, msg='get one group detail')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data={}, msg='group id is not exist')
-    elif req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        g = user.find_one_group({'_id': group_id})
-        if g:
-            g.group_name = temp.get('group_name')
-            g.permission_list = temp.get('permission_list')
-            user.save_group(g)
-            return json.json_response_ok(
-                {}, 'modify group permission_list')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data={}, msg='group id is not exist')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def add_group(req):
-    if req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        group_name = temp.get('group_name')
-        g = Group.new(group_name)
-        g.permission_list = temp.get('permission_list')
-        user.save_group(g)
-        return json.json_response_ok(data={}, msg='add group success')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def del_group(req):
-    if req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        group_ids = temp.get('group_ids')
-        if not group_ids:
-            return json.json_response_error(
-                respcode.PARAM_ERROR, data={},
-                msg='group_ids must not be empty')
-        else:
-            count = user.del_group(group_ids)
-            return json.json_response_ok(
-                data={'passin_counts': len(group_ids), 'delete_counts': count},
-                msg='delete success')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def perm_list(req):
-    if req.method == 'GET':
-        permissions = user.find_permissions()
-        return json.json_response_ok(permissions, 'get permission list')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def perm_add(req):
-    if req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        perm_name = temp.get('perm_name')
-        p = Permission.new(perm_name)
-        p.perm_profile = temp.get('perm_profile')
-        p.container = temp.get('container')
-        p.app_label = temp.get('app_label')
-        p.model_label = temp.get('model_label')
-        p.operator = temp.get('operator')
-        user.save_permission(p)
-        return json.json_response_ok('ok', 'add permission success')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def perm_del(req):
-    if req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        perm_ids = temp.get('perm_ids')
-        if not perm_ids:
-            return json.json_response_error(
-                respcode.PARAM_ERROR, data={},
-                msg='perm_ids must not be empty')
-        else:
-            count = user.del_permission(perm_ids)
-            return json.json_response_ok(
-                data={'passin_counts': len(perm_ids), 'delete_counts': count},
-                msg='delete success')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
-
-
-@exception_handler()
-@check_session
-def perm_detail_modify(req, perm_id):
-    pid = int(perm_id)
-    if req.method == 'GET':
-        p = user.find_one_permission({'_id': pid})
-        if p:
-            return json.json_response_ok({}, 'get one permission detail')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data={},
-                msg='permission id is not exist')
-    elif req.method == 'POST':
-        dict_strs = req.raw_post_data
-        temp = simplejson.loads(dict_strs)
-        p = user.find_one_permission({'_id': pid})
-        if p:
-            p.perm_name = temp.get('perm_name')
-            p.perm_profile = temp.get('perm_profile')
-            p.container = temp.get('container')
-            p.app_label = temp.get('app_label')
-            p.model_label = temp.get('model_label')
-            p.operator = temp.get('operator')
-            instance = user.save_permission(p)
-            if instance:
-                return json.json_response_ok(
-                    data={}, msg='modify permission success')
-            else:
-                return json.json_response_error(
-                    respcode.SAVE_ERROR, data={},
-                    msg='save modified permission error')
-        else:
-            return json.json_response_error(
-                respcode.PARAM_REQUIRED, data={},
-                msg='permission id is not exist')
-    else:
-        return json.json_response_error(
-            respcode.METHOD_ERROR, msg="http method wrong")
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")

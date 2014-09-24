@@ -6,6 +6,7 @@
 
 import logging
 import provisionadmin.db.models
+from provisionadmin.db.seqid import get_next_id
 # to trigger the db init action
 
 logger = logging.getLogger("db")
@@ -16,6 +17,13 @@ def base_insert(db, coll, data):
     # to avoid _id error
     data.pop('_id', None)
     return db[coll].insert(data)
+
+
+def base_save(db, coll, data):
+    logger.info("@base_save --- coll: %s; data: %s", coll, data)
+    if not data.get('_id'):
+        data['_id'] = get_next_id(coll)
+    return db[coll].save(data)
 
 
 def base_update(db, coll, cond, data, replace=False):

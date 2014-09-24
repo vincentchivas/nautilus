@@ -1,32 +1,35 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Copyright (c) 2012 Baina Info Inc. All rights reserved.
-# Created On September 12, 2012
-# @Author : Jun Wang
-# Email: jwang@bainainfo.com
-
+# @Author : Xiang Shu
+# Email: xshu@bainainfo.com
+'''
+preload API
+'''
 import logging
 import sys
 import random
+
 from django.views.decorators.http import require_GET
-from provision.service.exceptions import InternalError, ParamError 
+from provision.service.exceptions import InternalError, ParamError
 from provision.service.views import response_json, OPERATORS, OTHER
 from provision.utils.json import json_response_error, json_response_ok
-from provision.utils.respcode import PARAM_REQUIRED, DATA_NOTFOUND, LOCALE_ONLY
-from provision.service.errors import parameter_error, internal_server_error, resource_not_modified
+from provision.utils.respcode import DATA_NOTFOUND, LOCALE_ONLY
+from provision.service.errors import (parameter_error, internal_server_error,
+                                      resource_not_modified)
 from provision.decorator import match_location
 from provision.service.models import sharedb, desktopdb, presetdb
-from provision.service.utils.content import  RULE_ORIGINIZE, DESKTOP_PARAS, PRESET_PARAS, SHARE_PARAS
-from provision.service.utils.common_op import  get_valid_params, get_cond, filter_rule, get_smart_locale
+from provision.service.utils.content import (RULE_ORIGINIZE, DESKTOP_PARAS,
+                                             PRESET_PARAS, SHARE_PARAS)
+from provision.service.utils.common_op import (get_valid_params, get_cond,
+                                               filter_rule, get_smart_locale)
 
-logger = logging.getLogger('provision.service')
+_LOGGER = logging.getLogger('provision.service')
 
 DEFAULT_SOURCE = 'ofw'
 DEFAULT_ACTION = 'false'
 ALL_FLAG = 'all_condition'
 
 
-MODULES={
+MODULES = {
     'desktop': {
         'paras': DESKTOP_PARAS,
         'fields': ('pn', 'appvc', 'no', 'chn'),
@@ -43,70 +46,55 @@ MODULES={
     }
 }
 
-'''
-def get_desktop(query_dict):
-    try:
-        args = get_valid_params(query_dict, DESKTOP_PARAS)
-    except Exception, e:
-        logger.warn('check desktop\'s parameter exception![%s]' % e)
-        return [] 
-
-    fields = ('pn', 'appvc', 'no', 'chn')
-    if args['no'] not in OPERATORS:
-        args['no'] = OTHER
-    cond = get_cond(args, RULE_ORIGINIZE, fields)
-    logger.debug(cond)
-    desktop_infos = desktopdb.get_desktops(cond)
-    if not desktop_infos:
-        return [] 
-    logger.debug(desktop_infos)
-    desktop_infos = filter_rule(desktop_infos, {'sources':args['chn'], 'locales':args['lc'], 'operators':args['no']}, {'min_version':True})
-    if len(desktop_infos):
-        return desktop_infos['data']
-    return [] 
-'''
 
 def get_module(query_dict, module_name):
+    '''
+    get module data(speeddial, share) by client params with rule
+    '''
     module_option = MODULES.get(module_name)
     try:
         args = get_valid_params(query_dict, module_option['paras'])
     except Exception, e:
-        logger.warn('check %s\'s parameter exception![%s]' % (module_name, e))
-        return {'data': module_option['data_type'](),\
-                'first_created': None,\
+        _LOGGER.warn('check %s\'s parameter exception![%s]' % (module_name, e))
+        return {'data': module_option['data_type'](),
+                'first_created': None,
                 'last_modified': None}
 
     if args['no'] not in OPERATORS:
         args['no'] = OTHER
     cond = get_cond(args, RULE_ORIGINIZE, module_option['fields'])
-    logger.debug(cond)
+    _LOGGER.debug(cond)
     data_infos = module_option['db_conn'].get_data(cond)
     if not data_infos:
-        return {'data': module_option['data_type'](),\
-                'first_created': None,\
+        return {'data': module_option['data_type'](),
+                'first_created': None,
                 'last_modified': None}
-    logger.debug(data_infos)
-    data_infos = filter_rule(data_infos, {'sources':args['chn'], 'locales':args['lc'], 'operators':args['no']}, {'min_version':True})
+    _LOGGER.debug(data_infos)
+    data_infos = filter_rule(data_infos,
+                             {'sources': args['chn'],
+                              'locales': args['lc'],
+                              'operators': args['no']},
+                             {'min_version': True})
     if len(data_infos):
-        return {'data': data_infos[module_option['data_field']],\
-                'first_created': data_infos.get('first_created'),\
+        return {'data': data_infos[module_option['data_field']],
+                'first_created': data_infos.get('first_created'),
                 'last_modified': data_infos.get('last_modified')}
-    return {'data': module_option['data_type'](),\
-            'first_created': None,\
+    return {'data': module_option['data_type'](),
+            'first_created': None,
             'last_modified': None}
 
 
-'''
-get preset data by condition
-'''
 def get_preset(cond, no_default):
+    '''
+    get preset data by condition
+    '''
     try:
         presets = presetdb.get_presets(cond)
-        logger.debug(presets)
+        _LOGGER.debug(presets)
         preset_num = len(presets)
         if preset_num >= 2:
             if preset_num > 2:
-                logger.warning('preset data error')
+                _LOGGER.warning('preset data error')
             rand = random.randint(0, 1)
             preset = presets[rand]
             preset['strategy'] = preset['strategies'][0]
@@ -116,13 +104,13 @@ def get_preset(cond, no_default):
             strategies_num = len(strategies)
             if strategies_num >= 2:
                 if strategies_num > 2:
-                    logger.warning('preset strategy error')
+                    _LOGGER.warning('preset strategy error')
                 rand = random.randint(0, 1)
                 preset['strategy'] = strategies[rand]
             elif len(strategies) == 1:
                 preset['strategy'] = strategies[0]
             else:
-                logger.error('Preset Strategy is none')
+                _LOGGER.error('Preset Strategy is none')
                 preset['strategy'] = None
         elif preset_num == 0:
             preset = None
@@ -131,17 +119,20 @@ def get_preset(cond, no_default):
                 preset = presetdb.get_preset(cond)
                 if preset:
                     preset['strategy'] = preset['strategies'][0]
-        logger.debug(preset)
+        _LOGGER.debug(preset)
         if isinstance(preset, dict) and 'strategies' in preset:
             del preset['strategies']
     except Exception, e:
-        logger.exception(e)
+        _LOGGER.exception(e)
         raise InternalError('get_preset error')
 
     return preset
-     
+
 
 def get_preset_by_locale(args, no_default, smart_locale):
+    '''
+    get preset data by condition
+    '''
     cond = {
         'os': args['os'],
         'package': args['pn'],
@@ -153,36 +144,75 @@ def get_preset_by_locale(args, no_default, smart_locale):
             {'min_version': 0, 'max_version': 0}
         ]
     }
-    logger.debug(cond)
+    _LOGGER.debug(cond)
 
-    preset = get_preset(cond, no_default) 
-    return preset 
+    preset = get_preset(cond, no_default)
+    return preset
 
 
-
-'''
-preset API v2
-logic order
-1. check HTTP parameter, ang get the valid parameter
-2. check country_code, get smart_locale
-3. create condition
-4. get preset data by condition
-5. get desktop(speeddial) data by condition
-6. HTTP response by data
-'''
 @require_GET
 @match_location
 def show_preset_v2(request, country=None, svr_locale=None):
+    '''
+    preload API version 2
+    get preload data by client params
+
+    Logic order:
+        1. check HTTP parameter, ang get the valid parameter
+        2. check country_code, get smart_locale
+        3. create condition
+        4. get preset data by condition
+        5. get desktop/share data by condition
+        6. HTTP response by data
+
+    Request URL: api/2/provision.json
+
+    HTTP Method: GET
+
+    Parameters:
+        - os: os type，eg: android
+        - pn: package name
+        - chn: channel name, eg: ofw
+        - lc: locale, eg: en_US
+        - appvc: app version code, eg: 354
+        - appvn: app version name, eg: 11.1.2
+        - nd: no default flag
+        - debug: debug flag
+
+    Return:
+        1. found preload data which was updated
+            {
+                "status": 0
+                "data":{
+                    ...
+                }
+            }
+        2. not found preload data
+            {
+                "status": 4,
+                "data":{
+                    "smart_locale": "en_US"
+                }
+            }
+        3. found preload data which was not updated
+            {
+                "status": 10,
+                "data":{
+                    "smart_locale": "en_US"
+                }
+            }
+    '''
     data = request.GET
-    #for debug
+    # for debug
     is_debug = data.get('debug')
     try:
         args = get_valid_params(data, PRESET_PARAS)
         no_default = args['nd']
     except Exception, e:
-        logger.warn('check preset\'s parameter exception![%s]' % e)
+        _LOGGER.warn('check preset\'s parameter exception![%s]' % e)
         if isinstance(e, ParamError):
-            logger.error("URL:%s Exception:%s" % (request.build_absolute_uri(), e))
+            _LOGGER.error("URL:%s Exception:%s"
+                          % (request.build_absolute_uri(), e))
             return parameter_error(request, e)
         if isinstance(e, InternalError):
             return internal_server_error(request, e, sys.exc_info())
@@ -190,16 +220,18 @@ def show_preset_v2(request, country=None, svr_locale=None):
     smart_locales = get_smart_locale(country, svr_locale, args.get('lc'))
     preset = None
     if len(smart_locales) > 1:
-        possible_locale, recommended_locale = smart_locales[0], smart_locales[1]
+        possible_locale, recommended_locale = (smart_locales[0],
+                                               smart_locales[1])
         try:
             preset = get_preset_by_locale(args, no_default, possible_locale)
-            smart_locale = recommended_locale if not preset else possible_locale
+            smart_locale = recommended_locale\
+                if not preset else possible_locale
         except Exception, e:
             smart_locale = recommended_locale
     else:
         smart_locale = smart_locales[0]
-        
-    logger.info('smart locale:%s' % smart_locale)
+
+    _LOGGER.info('smart locale:%s' % smart_locale)
 
     if not preset:
         try:
@@ -216,7 +248,7 @@ def show_preset_v2(request, country=None, svr_locale=None):
 
     preset.update({"smart_locale": smart_locale})
 
-    #get desktop data
+    # get desktop data
     args.update({"lc": smart_locale})
     try:
         desktop_data = get_module(args, 'desktop')
@@ -224,7 +256,7 @@ def show_preset_v2(request, country=None, svr_locale=None):
     except Exception, e:
         return internal_server_error(request, e, sys.exc_info())
 
-    #get share data
+    # get share data
     try:
         share_data = get_module(args, 'share')
         preset.update({"shares": share_data['data']})
@@ -232,23 +264,28 @@ def show_preset_v2(request, country=None, svr_locale=None):
         return internal_server_error(request, e, sys.exc_info())
 
     enable_response = preset.get('enable_response')
-    if is_debug is None and args['appvc'] >= 354 and not enable_response:
-        #check modified time
-        if not has_modified(preset) and not has_modified(desktop_data) and not has_modified(share_data):
-            ext_msg = {'smart_locale': smart_locale}
-            return json_response_error(LOCALE_ONLY, ext_msg)
-    
+    if is_debug is None and args['appvc'] >= 354\
+            and not enable_response\
+            and not _has_modified(preset)\
+            and not _has_modified(desktop_data)\
+            and not _has_modified(share_data):
+        ext_msg = {'smart_locale': smart_locale}
+        return json_response_error(LOCALE_ONLY, ext_msg)
+
     if enable_response is not None:
-        del preset['enable_response'] 
+        del preset['enable_response']
     if preset.get('first_created') is not None:
-        del preset['first_created'] 
+        del preset['first_created']
     if preset.get('last_modified') is not None:
-        del preset['last_modified'] 
+        del preset['last_modified']
 
     return json_response_ok(preset)
 
 
-def has_modified(check_dict):
+def _has_modified(check_dict):
+    '''
+    internal function, check if the module data has been modified
+    '''
     first_created = check_dict.get('first_created')
     last_modified = check_dict.get('last_modified')
     if last_modified is not None:
@@ -257,43 +294,44 @@ def has_modified(check_dict):
         else:
             return True
 
-    return False 
-    
+    return False
 
-'''
-preset API v3 -- general preset API
-logic order
-1. check HTTP parameter, ang get the valid parameter
-2. check country_code, get smart_locale
-3. create condition
-4. get preset data by condition
-5. get desktop(speeddial) data by condition
-6. HTTP response by data
-'''
+
 @require_GET
 @match_location
 def show_preset_v3(request, country=None, svr_locale=None):
-    data = request.GET
-    try:
-        preset = {}
-    except Exception, e:
-        logger.error("URL:%s Exception:%s" % (request.build_absolute_uri(), e))
-        return parameter_error(request, e)
+    '''
+    preload API version 3
+    get preload data by client params
 
+    Logic order:
+        1. check HTTP parameter, ang get the valid parameter
+        2. check country_code, get smart_locale
+        3. create condition
+        4. get preset data by condition
+        5. get desktop(speeddial) data by condition
+        6. HTTP response by data
+
+    Not Implemented
+    '''
+    preset = {}
     return json_response_ok(preset)
 
 
-'''
-old API(deprecated), just for compatibility here
-
-API logic order:
-1. check HTTP parameter, ang get the valid parameter
-2. create condition
-3. get data by condition
-4. HTTP response by data
-'''
 @require_GET
 def show_preset_v1(request):
+    '''
+    preload API version 1
+    old API(deprecated), just for compatibility here
+
+    Logic order:
+        1. check HTTP parameter, ang get the valid parameter
+        2. create condition
+        3. get data by condition
+        4. HTTP response by data
+
+    Deprecated
+    '''
     data = request.GET
     try:
         os = data.get('os', '').lower()
@@ -308,7 +346,8 @@ def show_preset_v1(request):
         }
         no_default = bool_map[no_default_str]
     except Exception, e:
-        logger.debug("URL:%s Exception:%s" % (request.build_absolute_uri(), e))
+        _LOGGER.debug("URL:%s Exception:%s"
+                      % (request.build_absolute_uri(), e))
         return parameter_error(request, e)
     try:
         cond = {
@@ -322,9 +361,9 @@ def show_preset_v1(request):
                 {'min_version': 0, 'max_version': 0}
             ]
         }
-        logger.debug(cond)
+        _LOGGER.debug(cond)
 
-        preset = get_preset(cond, no_default) 
+        preset = get_preset(cond, no_default)
     except Exception, e:
         return internal_server_error(request, e, sys.exc_info())
 
@@ -333,10 +372,10 @@ def show_preset_v1(request):
 
     enable_response = preset.get('enable_response')
     if enable_response is not None:
-        del preset['enable_response'] 
+        del preset['enable_response']
     if preset.get('first_created') is not None:
-        del preset['first_created'] 
+        del preset['first_created']
     if preset.get('last_modified') is not None:
-        del preset['last_modified'] 
+        del preset['last_modified']
 
     return response_json(preset)

@@ -12,12 +12,19 @@
 import os
 import sys
 import time
+import logging
 import datetime
 import signal
-import json
 import setproctitle
+from common import log_handler
 
-now = datetime.datetime.now
+_NOW = datetime.datetime.now()
+LOG_FILE = '/var/app/log/provider-service/deamon.log'
+handler = log_handler(LOG_FILE)
+
+_LOGGER = logging.getLogger('deamon')
+_LOGGER.addHandler(handler)
+_LOGGER.setLevel(logging.DEBUG)
 
 
 class Daemon:
@@ -26,6 +33,7 @@ class Daemon:
 
     Usage: subclass the Daemon class and override the run() method
     """
+
     def __init__(
             self, pidfile=None, logfile=None, name=None,
             uid=None, gid=None, force=False, exitparent=True,
@@ -69,9 +77,9 @@ class Daemon:
             pass
 
     def change_user_grp(self):
-        #if self.uid is None and self.gid is None:
+        # if self.uid is None and self.gid is None:
         #    return
-        #else:
+        # else:
         #    uid = os.getuid() if self.uid is None else self.uid
         #    gid = os.getgid() if self.gid is None else self.gid
         try:
@@ -84,22 +92,22 @@ class Daemon:
             os.setgid(self.gid)
             # setgid should be excuted before setuid
             os.setuid(self.uid)
-        except (ValueError, OSError) as e:
-            sys.stderr.write(str(e))
+        except (ValueError, OSError) as exception:
+            sys.stderr.write(str(exception))
             sys.exit(1)
 
     def change_stdfds(self):
         try:
             original_stderr = sys.stderr
-            si = file(self.stdin, 'r')
-            so = file(self.stdout, 'a+')
-            se = file(self.stderr, 'a+', 0)
+            stdi = file(self.stdin, 'r')
+            stdo = file(self.stdout, 'a+')
+            stde = file(self.stderr, 'a+', 0)
             sys.stdout.flush()
             sys.stderr.flush()
-            print 'start to change stdfds'
-            os.dup2(si.fileno(), sys.stdin.fileno())
-            os.dup2(so.fileno(), sys.stdout.fileno())
-            os.dup2(se.fileno(), sys.stderr.fileno())
+            # print 'start to change stdfds'
+            os.dup2(stdi.fileno(), sys.stdin.fileno())
+            os.dup2(stdo.fileno(), sys.stdout.fileno())
+            os.dup2(stde.fileno(), sys.stderr.fileno())
         except OSError:
             original_stderr.write("can not establish std fd...\n")
             sys.exit(1)
@@ -109,7 +117,7 @@ class Daemon:
         signal.signal(signal.SIGINT, self.grace_exit)
 
     def grace_exit(self, signo=None, stack_frame=None):
-        msg = "pid %s exit... time: %s\n" % (self.pidno, now().isoformat())
+        msg = "pid %s exit... time: %s\n" % (self.pidno, _NOW.isoformat())
         if signo is not None:
             msg = "receive signal %s, %s" % (signo, msg)
         sys.stderr.write(msg)
@@ -132,9 +140,9 @@ class Daemon:
                 else:
                     return False
             self.change_proc_name()
-        except OSError, e:
+        except OSError, osexception:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (
-                e.errno, e.strerror))
+                osexception.errno, osexception.strerror))
             sys.exit(1)
 
         # Decouple from parent environment
@@ -148,12 +156,12 @@ class Daemon:
             if pid > 0:
                 # Exit from second parent
                 sys.exit(0)
-        except OSError, e:
+        except OSError, osexception:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (
-                e.errno, e.strerror))
+                osexception.errno, osexception.strerror))
             sys.exit(1)
 
-        print json.dumps(self.get_proc_info(), indent=1, ensure_ascii=False)
+        # print json.dumps(self.get_proc_info(), indent=1, ensure_ascii=False)
 
         self.pidno = os.getpid()
         if self.single:
@@ -180,9 +188,10 @@ class Daemon:
         try:
             file(self.pidfile, 'w+').write("%s\n" % pid)
             os.chown(self.pidfile, self.uid, self.gid)
-            stat = os.stat(self.pidfile)
-            print "chown file %s to %s %s finished\n" % (
-                self.pidfile, stat.st_uid, stat.st_gid)
+            os.stat(self.pidfile)
+            # stat = os.stat(self.pidfile)
+            # print "chown file %s to %s %s finished\n" % (
+            #   self.pidfile, stat.st_uid, stat.st_gid)
         except Exception as e:
             sys.stderr.write("pidfile creation failure...\n")
             sys.stderr.write(str(e))
@@ -191,7 +200,7 @@ class Daemon:
     def delpidfile(self):
         try:
             os.remove(self.pidfile)
-            print "remove pidfile %s" % self.pidfile
+            # print "remove pidfile %s" % self.pidfile
         except:
             sys.stderr.write("pidfile remove failure...")
             return False
@@ -202,9 +211,9 @@ class Daemon:
     def pid(self):
         # Check for a pidfile to see if the daemon already runs
         try:
-            pf = file(self.pidfile, 'r')
-            pid = int(pf.read().strip())
-            pf.close()
+            pidf = file(self.pidfile, 'r')
+            pid = int(pidf.read().strip())
+            pidf.close()
         except IOError:
             pid = None
         except SystemExit:
@@ -230,11 +239,12 @@ class Daemon:
         status = self.current_status
         if status:
             if self.single:
-                print '%s start/running, process %s' % (self.name, self.pid)
+                _LOGGER.info(
+                    '%s start/running, process %s' % (self.name, self.pid))
             else:
-                print '%s start/running.' % (self.name,)
+                _LOGGER.info('%s start/running.' % (self.name,))
         else:
-            print '%s stopped/waiting.' % (self.name,)
+            _LOGGER.info('%s stopped/waiting.' % (self.name,))
         return status
 
     def guard(self):
@@ -243,25 +253,25 @@ class Daemon:
             import psutil
             proc = psutil.Process(pid)
             status = proc.status
-            print '%s %s, process %s' % (self.name, status, pid)
+            # print '%s %s, process %s' % (self.name, status, pid)
             if status in (
                     psutil.STATUS_DEAD, psutil.STATUS_STOPPED,
                     psutil.STATUS_ZOMBIE):
-                self.logger.warn(
+                _LOGGER.warn(
                     '%s is in status of %s, restarting...', self.name, status)
                 try:
                     self.stop()
                     self.start()
-                except Exception, e:
-                    self.logger.exception('Failed to restart %s.', self.name)
-                    print e
+                except Exception, exception:
+                    _LOGGER.exception('Failed to restart %s.', self.name)
+                    _LOGGER.info('exception occurred :%s', str(exception))
             elif status in (psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING):
-                self.logger.info('%s is still running.', self.name)
+                _LOGGER.info('%s is still running.', self.name)
             else:
-                self.logger.info(
+                _LOGGER.info(
                     '%s is in unknown status %s.', self.name, status)
         else:
-            self.logger.info('%s stopped manually.', self.name)
+            _LOGGER.info('%s stopped manually.', self.name)
 
     def start(self):
         """
@@ -312,14 +322,13 @@ class Daemon:
             while 1:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)
-            print '%s stopped/waiting.' % (self.name,)
+            # print '%s stopped/waiting.' % (self.name,)
         except OSError, err:
             err = str(err)
             if err.find("No such process") > 0:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print str(err)
                 sys.exit(1)
 
     def restart(self):
@@ -335,4 +344,4 @@ class Daemon:
         It will be called after the process has been
         daemonized by start() or restart().
         """
-        raise NotImplemented()
+        raise NotImplementedError

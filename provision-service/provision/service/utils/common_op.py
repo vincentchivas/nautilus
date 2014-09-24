@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # coder yfhe
-
-import json
-import sys
-import httplib
 import logging
-import datetime
-from django.http import HttpResponse
-from provision.service.errors import parameter_error, internal_server_error
 from provision.service.utils.content import ALL_FLAG, ALL_WEIGHT, MATCH_WEIGHT
-from provision.service.exceptions import InternalError, ParamError 
+from provision.service.exceptions import InternalError, ParamError
+
 
 def get_logger(role):
+    '''
+    get logger
+    '''
     matchs = {
         'service': 'provision.service',
         'db': 'provision.db',
@@ -20,10 +17,13 @@ def get_logger(role):
     return logging.getLogger(matchs[role])
 
 
-LOGGER = get_logger('service')
+_LOGGER = get_logger('service')
 
 
 def get_cond(args, ORIGINIZE, fields):
+    '''
+    get condition for mongo
+    '''
     cond = {}
     for key, value in args.items():
         if key in ORIGINIZE and value is not None and key in fields:
@@ -37,6 +37,9 @@ def get_cond(args, ORIGINIZE, fields):
 
 
 def filter_gray_level(sections, mark):
+    '''
+    filter gray level
+    '''
     result = []
     for item in sections:
         min_mark = item['_rule'].get('min_mark', 1)
@@ -46,7 +49,7 @@ def filter_gray_level(sections, mark):
         except:
             mark = None
 
-        if mark != None and mark <= 100 and mark >= 1:
+        if mark is not None and mark <= 100 and mark >= 1:
             if mark >= max_mark or mark < min_mark:
                 continue
 
@@ -58,6 +61,9 @@ def filter_gray_level(sections, mark):
 
 
 def filter_operators(sections, op):
+    '''
+    filter operators
+    '''
     specials = []
     commons = []
     for item in sections:
@@ -69,10 +75,13 @@ def filter_operators(sections, op):
 
 
 def paras_sort(sections, paras_dic):
+    '''
+    paras sort
+    '''
     if not sections:
         return []
     for index, value in paras_dic.items():
-        sections.sort(key = lambda x:x['_rule'][index], reverse=value)
+        sections.sort(key=lambda x: x['_rule'][index], reverse=value)
         test_para = sections[0]['_rule'][index]
         results = []
         for section in sections:
@@ -85,8 +94,11 @@ def paras_sort(sections, paras_dic):
 
 
 def filter_rule(sections, dicts, paras_dic=None):
+    '''
+    filter rule
+    '''
     if 'operators' in dicts:
-        sections = filter_operators(sections, dicts.pop('operators') )
+        sections = filter_operators(sections, dicts.pop('operators'))
     for index, section in enumerate(sections):
         section['_rate_'] = 0
         for key, value in dicts.items():
@@ -101,17 +113,20 @@ def filter_rule(sections, dicts, paras_dic=None):
                     section['_rate_'] += ALL_WEIGHT
                     continue
             section['_rate_'] -= 1000
-    sections.sort(key= lambda x:x['_rate_'], reverse=True)
+    sections.sort(key=lambda x: x['_rate_'], reverse=True)
     max_rate = sections[0]['_rate_']
     results = [s for s in sections if s.pop('_rate_') == max_rate]
     if paras_dic:
-            sections = paras_sort(results, paras_dic)
+        sections = paras_sort(results, paras_dic)
     if max_rate < 0 or len(sections) == 0:
         return []
     return sections[0]
 
 
 def _convert_func(func):
+    '''
+    internal func
+    '''
     def wrapper(*args, **kwargs):
         if func == bool:
             return bool(int(*args, **kwargs))
@@ -120,6 +135,9 @@ def _convert_func(func):
 
 
 def get_valid_params(query_dict, keys):
+    '''
+    get valid params by params rule
+    '''
     try:
         result = {}
         for key in keys:
@@ -134,19 +152,19 @@ def get_valid_params(query_dict, keys):
                         raise ParamError(tmp1)
                     if tmp2 == 'notNeed' and not tmp:
                         continue
-                    if lenth > 2 and tmp == None:
+                    if lenth > 2 and tmp is None:
                         tmp = paras[2]
-                    if lenth > 3 and tmp != None:
+                    if lenth > 3 and tmp is not None:
                         try:
                             tmp = _convert_func(eval(paras[3]))(tmp)
                         except Exception, e:
-                            LOGGER.exception(e)
+                            _LOGGER.exception(e)
                             tmp = _convert_func(eval(paras[3]))(paras[2])
                             raise ParamError(tmp1)
                     result[tmp1] = tmp
         return result
     except Exception, e:
-        LOGGER.exception(e)
+        _LOGGER.exception(e)
         if not isinstance(e, ParamError):
             raise InternalError('get param error')
         else:
@@ -154,15 +172,23 @@ def get_valid_params(query_dict, keys):
 
 
 def get_smart_locale(svr_cc, svr_locale, cli_locale):
+    '''
+    get smart locale
+
+    Parameters:
+        svr_cc: country code specified by client ip
+        svr_locale: locale specified by client ip
+        cli_locale: locale transfered from client
+    '''
     if not cli_locale:
         return [svr_locale]
 
-    cli_args = cli_locale.split('_') 
+    cli_args = cli_locale.split('_')
     if len(cli_args) != 2:
-        return [svr_locale] 
+        return [svr_locale]
 
-    cli_lang, cli_cc = cli_args[0], cli_args[1] 
-    if svr_cc == None or svr_locale == None or cli_cc == svr_cc:
+    cli_lang, cli_cc = cli_args[0], cli_args[1]
+    if svr_cc is None or svr_locale is None or cli_cc == svr_cc:
         return [cli_locale]
 
     '''
@@ -170,8 +196,8 @@ def get_smart_locale(svr_cc, svr_locale, cli_locale):
     here we just use the svr_locale by REMOTE_IP,
     we can do more job here to specify the smart_locale later
     '''
-    #smart_locale = svr_locale 
-    LOGGER.warn('cli_locale[%s] not equal svr_locale[%s]' % (cli_locale, svr_locale))
+    _LOGGER.warn('cli_locale[%s] not equal svr_locale[%s]'
+                 % (cli_locale, svr_locale))
     '''
     here we define a new locale as candidate of smart_locale with svr_locale
     '''

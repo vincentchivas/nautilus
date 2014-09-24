@@ -5,14 +5,13 @@ EXCEPTION_DEBUG = False
 AUTH_DEBUG = True
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
 MANAGERS = ADMINS
 
-BUILD_SERVICE_URI = 'http://172.16.77.22:8080/buildservice/'
+BUILD_SERVICE_IP = '172.16.77.22:8080'
 
 DBS = {
     'default': {
@@ -21,7 +20,7 @@ DBS = {
         'USER': 'root',                      # Not used with sqlite3.
         'PASSWORD': '123456',                  # Not used with sqlite3.
         # Set to empty string for localhost. Not used with sqlite3.
-        'HOST': '172.16.7.14',
+        'HOST': '',
         # Set to empty string for default. Not used with sqlite3.
         'PORT': '3306',
     }
@@ -75,7 +74,7 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 CUS_TEMPLATE_DIR = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'templates')
 
-HOST = "172.16.7.14"
+# HOST = "172.16.7.14"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -109,7 +108,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'provider.middleware.LogMiddleware',
@@ -272,12 +271,17 @@ SECTION = 'provider-service'
 
 
 def _load_service_config(cp):
-    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG
+    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG, \
+        XML_URL, BUILD_URL, TAG_URL, STATUS_URL
     DB_CONN_STR = cp.get(SECTION, 'db_conn_str')
     LOGS_DIR = cp.get(SECTION, 'logs_dir')
     HOST = cp.get(SECTION, 'host')
     AUTH_DEBUG = cp.getboolean(SECTION, 'auth_debug_value')
     EXCEPTION_DEBUG = cp.getboolean(SECTION, 'exception_debug_value')
+    XML_URL = cp.get(SECTION, 'get_xml_url')
+    BUILD_URL = cp.get(SECTION, 'build_task_url')
+    TAG_URL = cp.get(SECTION, 'get_tag_url')
+    STATUS_URL = cp.get(SECTION, 'get_status_url')
 
     for k, v in LOGGING['handlers'].iteritems():
         if 'filename' in v:

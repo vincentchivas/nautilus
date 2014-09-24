@@ -24,7 +24,7 @@ class SessionStore(SessionBase):
             }
         })
 
-        if not mongo_session is None:
+        if mongo_session is not None:
             return self.decode(force_unicode(mongo_session['session_data']))
         else:
             self.create()
@@ -38,7 +38,7 @@ class SessionStore(SessionBase):
         if session is None:
             return False
         else:
-            # mongodb ttl invalidation runs only once per minute, delete manually
+            # mongodb ttl invalidation runs only once per minute,delete manually
             if session['creation_date'] <= self.get_expiration_date():
                 self.delete(session_key)
                 return self.exists(session_key)

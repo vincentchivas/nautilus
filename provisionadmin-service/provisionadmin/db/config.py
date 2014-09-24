@@ -6,10 +6,12 @@ Created on Jul 8, 2014
 import logging
 from pymongo import Connection
 from provisionadmin.db.mongodb_proxy import MongoProxy
+#from provisionadmin.db.i18ndb import _INDEXES
 from provisionadmin import settings
 
 
 _LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger("db")
 
 RAW_CONNS = {}
 CONNS = {}
@@ -30,16 +32,30 @@ def _config_db(conn_str):
         raise e
 
 
+def _config_index(db, coll, index_info):
+    unique = index_info.get("unique")
+    index_list = index_info.get("data")
+    logger.info(
+        "@base_create_index --- coll: %s; index_list: %s", coll, index_list)
+    db[coll].ensure_index(index_list, unique=unique)
+
+
 def config(module):
     dbname = module.__name__.split('.')[-1][:-2]
     # from userdb module get name user
     db_config = settings.DB_SETTINGS
+    _INDEXES = module._INDEXES
     if dbname in db_config:
+        print dbname
         raw_conn = _config_db(db_config[dbname].get('host'))
         RAW_CONNS[dbname] = raw_conn
         conn = MongoProxy(raw_conn, logger=_LOGGER, wait_time=10)
         CONNS[dbname] = conn
         DBS[dbname] = conn[db_config[dbname].get('name')]
+        #collection = db_index_config[dbname].get("collection")
+        for collection, value in _INDEXES.iteritems():
+            for index_info in value:
+                _config_index(DBS[dbname], collection, index_info)
         module._db = DBS[dbname]
 # eg: from config {"user": {"host": "xxhost", "name": "xxcoll"}} we can get
 # raw_conn_user ---> user_conn ---> USER_DB

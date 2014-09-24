@@ -1,6 +1,4 @@
 import re
-import logging
-from time import time
 from pymongo.connection import Connection
 
 _connections = {}
@@ -10,6 +8,9 @@ _CONN_RE = re.compile(
 
 
 def parse_conn_string(conn_str):
+    '''
+    parse mongodb connection string
+    '''
     m = _CONN_RE.search(conn_str)
     if m:
         if m.group('repls'):
@@ -56,31 +57,11 @@ def disconnect(host, port=None):
         conn.disconnect()
         del _connections[key]
 
-perf_logger = logging.getLogger('dolphinop.db')
-
-
-def dbperf_logging(func):
-    """
-    Record the performance of each method call.
-
-    Also catches unhandled exceptions in method call and response a 500 error.
-    """
-    def pref_logged(*args, **kwargs):
-        argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
-        fname = func.func_name
-        msg = 'DB - -> %s(%s)' % (fname, ','.join('%s=%s' %
-                                                  entry for entry in zip(argnames, args) + kwargs.items()))
-        startTime = time()
-        perf_logger.info('%s -> Start time: %d.' % (msg, 1000 * startTime))
-        retVal = func(*args, **kwargs)
-        perf_logger.info('%s -> End Start time: %d.' % (msg, 1000 * startTime))
-        endTime = time()
-        perf_logger.debug('%s <- %s ms.' % (msg, 1000 * (endTime - startTime)))
-        return retVal
-    return pref_logged
-
 
 def cursor_to_array(cursor, start=None, limit=None):
+    '''
+    convert pymongo cursor to list
+    '''
     if start >= 0 and limit >= 0:
         items = []
         le = 0

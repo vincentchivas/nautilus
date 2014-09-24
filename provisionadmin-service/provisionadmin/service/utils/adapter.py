@@ -10,7 +10,7 @@ ET.register_namespace('tools', 'http://schemas.android.com/tools')
 import xlrd
 from pymongo import Connection
 from provisionadmin.model.base import ModelBase
-from provisionadmin.model.i18n import LocalizationStrings, LocalizationTask 
+from provisionadmin.model.i18n import LocalizationStrings, LocalizationTask
 from provisionadmin.settings import ADAPTER_MAP_PATH
 from provisionadmin.utils.common import unix_time
 from provisionadmin.settings import DB_SETTINGS
@@ -330,9 +330,7 @@ def save_trans_string(trans_string):
     if obj:
         old_string = TranslationString(obj)
         if old_string.module_path == trans_string.module_path:
-            return old_string._id
-        else:
-            I18N_DB.localization_strings.update({'_id': old_string._id}, {'$set': {'module_path': trans_string.module_path}})
+            I18N_DB.localization_strings.update({'_id': old_string._id}, trans_string)
             return old_string._id
     else:
         obj_id = I18N_DB.localization_strings.save(trans_string)

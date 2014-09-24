@@ -89,7 +89,7 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 CUS_TEMPLATE_DIR = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'templates')
 
-HOST = "127.0.0.1"
+#HOST = "172.16.7.14"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -249,6 +249,14 @@ LOGGING = {
             'when': 'D',
             'backupCount': 7
         },
+        'view': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'formatter': 'detail',
+            'filename': '/tmp/view.log',
+            'when': 'D',
+            'backupCount': 7
+        },
     },
     'loggers': {
         'django.request': {
@@ -286,6 +294,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'view': {
+            'handlers': ['view', 'provisionadmin'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
 
@@ -300,12 +313,13 @@ SECTION = 'provisionadmin-service'
 
 
 def _load_service_config(cp):
-    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG
+    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG, PROVIDER_SITE
     DB_CONN_STR = cp.get(SECTION, 'db_conn_str')
     LOGS_DIR = cp.get(SECTION, 'logs_dir')
     HOST = cp.get(SECTION, 'host')
     AUTH_DEBUG = cp.getboolean(SECTION, 'auth_debug_value')
     EXCEPTION_DEBUG = cp.getboolean(SECTION, 'exception_debug_value')
+    PROVIDER_SITE = cp.get(SECTION, 'provider_site_str')
 
     for k, v in LOGGING['handlers'].iteritems():
         if 'filename' in v:
@@ -322,6 +336,10 @@ DB_SETTINGS = {
     'user': {'host': DB_CONN_STR, 'port': 27017, 'name': 'users'},
     'preset': {'host': DB_CONN_STR, 'name': 'preset'},
     'i18n': {'host': DB_CONN_STR, 'name': 'i18n'},
-    'provision_stat': {'host': '127.0.0.1', 'username': 'root', 'password': '123456', 'port': 3306, 'dbname': 'provision_stat'},
+    'provision_stat': {'host': '172.16.7.101', 'username': 'root', 'password': '123456', 'port': 3306, 'dbname': 'provision_stat'},
     'beluga_data': {'host': '172.16.77.4', 'username': 'xshu', 'password': 'Baina-shuxiang', 'port': 3306, 'dbname': 'app_id146'}
+}
+
+DB_INDEXES = {
+    'i18n': {'collection': "localization_strings"}
 }

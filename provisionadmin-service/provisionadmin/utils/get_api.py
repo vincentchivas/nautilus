@@ -6,33 +6,56 @@
 """
 
 import logging
-import simplejson as json
+from django.utils import simplejson
+from django.conf import settings
 import requests
-# from . import exception
+import os
 
-logger = logging.getLogger('getapi')
+STATIC_ROOT = settings.STATIC_ROOT
+HOST = settings.HOST
+PROVIDER_SITE = settings.PROVIDER_SITE
+
+_LOGGER = logging.getLogger('getapi')
 
 
 def get_json_api(url, params={}, default=None):
+    """
+    Send a GET request
+    Parameters:
+        -url: Request url address,
+        -params: request parameters,
+        -default: the implied return value,
+    Return:
+        -1. json data:The HTTP response body
+        -2. default
+    """
     try:
         res = requests.get(url, params=params)
         res.encoding = 'utf-8'
         if res.status_code != 200:
-            logger.warning(
+            _LOGGER.warning(
                 "get a non-200 status_code for %s and %s", url, params)
             return default
-        return json.loads(res.text)
-    except Exception as e:
-        logger.exception(e)
+        return simplejson.loads(res.text)
+    except Exception as error:
+        _LOGGER.exception(error)
         return default
 
 
 def get_file(url, params={}):
+    """
+    GET file
+    Parameters:
+        -url: Request url address,
+        -params: request parameters,
+    Return:
+        -1.The HTTP response body
+    """
     try:
         res = requests.get(url, params=params)
         return res.content
-    except Exception as e:
-        logger.exception(e)
+    except Exception as error:
+        _LOGGER.exception(error)
 
 
 def get_app_info_list(appname=None, appversion=None):
@@ -51,27 +74,40 @@ def get_app_info_list(appname=None, appversion=None):
     the returned items should be sorted according to version if we can tell
     which version is the later from appversion string
     """
-    url = "http://172.16.7.14/provider/latestxml"
+    url = "http://%s/provider/latestxml" % PROVIDER_SITE
     params = {}
     if appname is not None:
         params['appname'] = appname
     if appversion is not None:
         params['appversion'] = appversion
     data = get_json_api(url, params, default=[])
-    print "get data is: %s" % data
     return data
 
 
-def get_app_list():
+def get_app_tag_list(appname=None, appversion=None):
     """
-    get the app list, such as:
+    get the tag list of app, such as:
         [
-            'dolphin-browser',
-            'xxx'
+            {
+                'appname': 'xxx',
+                'appversion': 'yyy',
+                'latest_xml': {
+                    'md5': 'xxxx',
+                    'url': 'yyyy'
+                }
+            },
         ]
+    the returned items should be sorted according to version if we can tell
+    which version is the later from appversion string
     """
-    url = 'xxx'
-    return get_json_api(url, default=[])
+    url = "http://%s/provider/gettag" % PROVIDER_SITE
+    params = {}
+    if appname is not None:
+        params['appname'] = appname
+    if appversion is not None:
+        params['appversion'] = appversion
+    data = get_json_api(url, params, default=[])
+    return data
 
 
 def get_task_info(task_id):
@@ -84,8 +120,10 @@ def get_task_info(task_id):
 
     task_id is the id of relevant snap
     '''
-    url = 'xxx'
-    return get_json_api(url, default={})
+    url = "http://%s/provider/status" % PROVIDER_SITE
+    params = {}
+    params['snap_id'] = task_id
+    return get_json_api(url, params, default={})
 
 
 def get_xml_file(appname, appversion, url=None, md5=None):
@@ -102,25 +140,39 @@ def get_xml_file(appname, appversion, url=None, md5=None):
     return get_file(url, params)
 
 
-def get_apk_file(task_id):
-    task_info = get_task_info(task_id)
-    if not task_info or task_info['status'] != 'finished':
-        return
-    return get_file(task_info.gert('apk_url', ''))
-
-
-def upload_xml_file(xmlfile, appname, appversion, snap_id):
-    url = 'xxx'
+def upload_xml_file(appname, appversion, snap_id, xmlfile, tag):
+    """
+    upload xml file to provider service
+    Parameters:
+        -appname: package name,
+        -appversion: package version,
+        -snap_id: the id of build task,
+        -xmlfile: the down link of xml file,
+        -tag: the tag of package,
+    Return:
+        -1. True: upload success
+        -2. False: upload failed
+    """
+    url = "http://%s/provider/task" % PROVIDER_SITE
     if isinstance(xmlfile, basestring):
-        xmlfile = file(xmlfile)
-    data = {'appname': appname, 'appversion': appversion, 'snap_id': snap_id}
+        filename = os.path.join(
+            STATIC_ROOT, appname, appversion, "xml_%s.zip" % snap_id)
+        file_object = open(filename, 'w+')
+        file_object.write(xmlfile)
+        file_object.close()
+    xml_link = "http://%s/admin/upload/build/%s/%s/xml_%s.zip" % (
+        HOST, appname, appversion, snap_id)
+    data = {'appname': appname, 'appversion': appversion,
+            'snap_id': snap_id, "xml_link": xml_link, "tag": tag}
     try:
-        res = requests.post(url, data=data, fiels={'xml_file': xmlfile})
+        res = requests.post(url, data=data)
         if res.status_code != 200:
-            logger.warning(
+            _LOGGER.warning(
                 "upload xmlfile for appname: %s appversion: %s and snap_id: %s"
                 " failed", appname, appversion, snap_id)
             return False
-    except Exception as e:
-        logger.exception(e)
+        else:
+            return True
+    except Exception as error:
+        _LOGGER.exception(error)
         return False

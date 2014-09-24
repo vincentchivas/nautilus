@@ -5,6 +5,8 @@ from datetime import datetime
 import time
 from time import mktime
 from hashlib import md5
+import logging
+import logging.handlers
 # import exception
 
 _SALT = 'Do1phin'
@@ -73,3 +75,13 @@ def download_file(filestream, filepath):
                 f.write(chunk)
                 f.flush()
         f.close()
+
+
+def log_handler(log_file):
+    handler = logging.handlers.RotatingFileHandler(
+        log_file, maxBytes=1024 * 1024)
+    fmt = '%(asctime)s-%(filename)s-%(lineno)s-%(name)s-%(levelname)s-\
+        %(message)s'
+    formatter = logging.Formatter(fmt)
+    handler.setFormatter(formatter)
+    return handler

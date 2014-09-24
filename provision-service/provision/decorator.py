@@ -3,9 +3,7 @@
 # date:2011-11-19
 # email:kunli@bainainfo.com
 import re
-import urllib2
 import logging
-import simplejson
 from django.conf import settings
 try:
     from django.contrib.gis.geoip import GeoIP
@@ -13,19 +11,21 @@ except Exception, e:
     from django.contrib.gis.utils import GeoIP
 
 # FIXME: these info need persist in db and easy to update
-import time
 
-logger = logging.getLogger('provision.service')
+_LOGGER = logging.getLogger('provision.service')
 
 geoip = GeoIP(path='/usr/local/lib/python2.7/dist-packages/GeoLiteCity.dat')
 
 _SUPPORT_LOCALE = ['zh_CN', 'en_US', 'ja_JP']
 _RECOMMEND_LOCALE = {'zh': 'zh_CN', 'en': 'en_US', 'ja': 'ja_JP'}
 _DEFAULT_LOCALE = settings.DEFAULT_LANGUAGE
-_LOCALE_REG = re.compile('(\w+)[-_](\w+)')
+_LOCALE_REG = re.compile(r'(\w+)[-_](\w+)')
 
 
 def match_location(func):
+    '''
+    get Client conuntry by client ip, for smart locale
+    '''
 
     def get_country(*args, **kwargs):
         request = args[0]
@@ -37,24 +37,19 @@ def match_location(func):
         if ip != '0.0.0.0':
             try:
                 content_dict = geoip.city(ip)
-                '''
-                if not content_dict:
-                    content = urllib2.urlopen(
-                        'http://www.telize.com/geoip/%s?callback=getgeoip' % ip, timeout=5).read()
-                    content_filter = str(content[9:-3])
-                    content_dict = simplejson.loads(content_filter)
-                '''
                 if content_dict:
                     country_code = content_dict['country_code']
                     smart_locale = settings.LOCALE_MAP.get(country_code)
                     kwargs.update(
-                        {'country': content_dict['country_code'], 'svr_locale': smart_locale})
-                    logger.debug(
-                        'found ccc[%s] locale[%s] for remote ip:%s' % (country_code, smart_locale, ip))
+                        {'country': content_dict['country_code'],
+                         'svr_locale': smart_locale})
+                    _LOGGER.debug(
+                        'found ccc[%s] locale[%s] for remote ip:%s'
+                        % (country_code, smart_locale, ip))
                 else:
-                    logger.warn('not found GEO for remote ip:%s' % ip)
+                    _LOGGER.warn('not found GEO for remote ip:%s' % ip)
             except Exception, e:
-                logger.error(e)
+                _LOGGER.error(e)
 
         return func(*args, **kwargs)
     return get_country
@@ -84,33 +79,3 @@ def auto_match_locale(func):
             request.GET = query_dict
         return func(*args, **kwargs)
     return auto_match
-
-
-def perf_logging(func):
-    """
-    Record the performance of each method call.
-    Also catches unhandled exceptions in method call and response a 500 error.
-    """
-    def pref_logged(*args, **kwargs):
-        argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
-        fname = func.func_name
-        req = args[0]
-        msg = '%s %s -> %s(%s)' % (
-            req.method, req.META['PATH_INFO'], fname, ','.join(
-                '%s=%s' % entry for entry in zip(argnames[1:], args[1:]) +
-                kwargs.items() + req.GET.items()))
-        try:
-            startTime = time()
-            retVal = func(*args, **kwargs)
-            endTime = time()
-            pref_logger.debug('%s <- %s ms.' %
-                              (msg, 1000 * (endTime - startTime)))
-        except Exception, e:
-            # maybe it is not necessary to log exec time when exception occur
-            """
-            endTime = time()
-            logger.error('%s error in %s ms.' % (msg, endTime - startTime), exc_info=1)
-            """
-            return errors.server_error(e)
-        return retVal
-    return pref_logged

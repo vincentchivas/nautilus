@@ -20,6 +20,9 @@ _IP_LOOKUP_API_FORMAT = "http://int.dpool.sina.com.cn/iplookup/iplookup.php?form
 
 
 def _request_url(url):
+    '''
+    internal request to url
+    '''
     response = urllib2.urlopen(url)
     return response.read()
 

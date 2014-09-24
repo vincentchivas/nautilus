@@ -15,6 +15,9 @@ DISPLAY_FIELDS = {
 
 
 def config(server, db, port=None):
+    '''
+    config pymongo connection
+    '''
     # check the server and db.
     assert server and db, 'Either "host" or "db" should not be None'
     global _db
@@ -26,8 +29,15 @@ def config(server, db, port=None):
 
 
 def get_share(cond):
+    '''
+    get share data by cond
+    '''
     colls = _db.share.find(cond, fields=DISPLAY_FIELDS)
     return cursor_to_array(colls)
 
+
 def get_data(cond):
+    '''
+    get data by cond
+    '''
     return get_share(cond)

@@ -6,7 +6,9 @@
 """
 
 from provisionadmin.db.config import config
-from provisionadmin.db import i18ndb
+import i18ndb
+import userdb
 
 print 'init app db'
 config(i18ndb)
+config(userdb)

@@ -5,6 +5,8 @@ urlpatterns = patterns(
     'provider.api',
     (r'^submit', 'provider.submit_build'),
     (r'^downxml', 'provider.download_xml'),
+    (r'^downtag', 'provider.downtag'),
+    (r'^gettag', 'provider.get_tags'),
     (r'^latestxml', 'provider.get_latest_xml'),
     (r'^task', 'provider.submit_task'),
     (r'^status', 'provider.get_build_status'),
