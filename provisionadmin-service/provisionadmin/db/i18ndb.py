@@ -7,4 +7,6 @@
 
 _INDEXES = {
     "localization_strings": [
-        {"unique": True, "data": [('localization_info', 1), ('name', 1)]}]}
+        {"unique": True, "data": [('localization_info', 1), ('name', 1)]}],
+    "localization_picture": [
+        {"unique": True, "data": [('appname', 1), ('name', 1)]}]}

@@ -11,8 +11,10 @@ import re
 import glob
 import time
 import zipfile
+from bson import ObjectId
 from xml.etree import ElementTree as ET
 import subprocess
+import xlwt
 
 try:
     from cStringIO import StringIO
@@ -25,12 +27,31 @@ from provisionadmin.model.base import ModelBase
 from provisionadmin.utils.common import now_timestamp
 from provisionadmin.utils import exception, get_api
 from provisionadmin.utils.qrcode_generator import make_qr
+# from provisionadmin.service.views.views_add import _process_locales
 
 _LOGGER = logging.getLogger("model")
 STATIC_ROOT = settings.STATIC_ROOT
 HOST = settings.HOST
 _XMLNS_XLIFF = 'urn:oasis:names:tc:xliff:document:1.2'
 _XMLNS_TOOLS = 'http://schemas.android.com/tools'
+
+_UNTRANSLATED = 'Untranslated'
+_TRANSLATED = 'Translated'
+_TO_BE_CHECK = 'To be check'
+_FINISHED = 'Finished'
+_HISTORICAL_DOCUMENT = 'Historical document'
+
+_ADMIN = 2
+_COUNTRY_PM = 3
+_CHARGE = 5
+_TRANSLATOR = 4
+
+STRING_TAG_RE = r'^<string .*?name="(.*?)".*?>(.*?)</string>'
+string_tag_compile = re.compile(STRING_TAG_RE, re.S)
+ARRAY_TAG_RE = r'^<item.*?>(.*?)</item>'
+ARRAY_TAG_RE_BLANK = r'^<item.*?/>'
+array_tag_compile = re.compile(ARRAY_TAG_RE, re.S)
+array_tag_blank_compile = re.compile(ARRAY_TAG_RE_BLANK, re.S)
 
 ET.register_namespace('xliff', _XMLNS_XLIFF)
 ET.register_namespace('tools', _XMLNS_TOOLS)
@@ -46,7 +67,8 @@ class LocalizationStrings(ModelBase):
             "name": "home_add",
             "tag_name": "string",
             "alias": "home add",
-            "finished": true
+            "status": "Untranslated/Historical->Translated->
+            To be check->Finished/Untranslated"
         },
         the alias can also be:
             [
@@ -62,7 +84,8 @@ class LocalizationStrings(ModelBase):
         'module_path', 'localization_info', 'name', 'tag_name', 'alias',
         'xml_file')
     optional = (
-        ("finished", False),
+        ("status", "Untranslated"),
+        ("update", False),
         ('marked', '')
     )
 
@@ -72,7 +95,8 @@ class LocalizationStrings(ModelBase):
         r"^[^<>]*(<xliff:g[^<>]*>[^<>]*</xliff:g>[^<>]*)*[^<>]*$", re.M)
 
     @classmethod
-    def get_app_locale_count(cls, appname, appversion, locale, cond={}):
+    def get_app_locale_count(
+            cls, platform, appname, category, appversion, locale, cond={}):
         """
         Calculate the total number of the string
         in the collection localization_strings
@@ -80,7 +104,7 @@ class LocalizationStrings(ModelBase):
         return: the total number of the string
         """
         info_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         if not info_id:
             return 0
         cond['localization_info'] = info_id
@@ -163,7 +187,8 @@ class LocalizationStrings(ModelBase):
 
     @classmethod
     def set_default(
-            cls, appname, appversion, locale, module_path, name, save=True):
+            cls, platform, appname, category, appversion, locale,
+            module_path, name, save=True):
         """
         If the translation content is not in string collection
         insert a new data in the table
@@ -179,8 +204,10 @@ class LocalizationStrings(ModelBase):
             -string_item: the query result set of name
 
         """
-        info_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+        origin_cond = {
+            "appname": appname, "appversion": appversion, "locale": locale,
+            "platform": platform, "category": category}
+        info_id = LocalizationInfo.find_id_by_unique(origin_cond)
         if not info_id:
             _LOGGER.warn(
                 "localization_info not found for appname: %s; appversion: "
@@ -203,7 +230,8 @@ class LocalizationStrings(ModelBase):
                 orig_cond = dict(cond)
                 orig_cond['localization_info'] = \
                     LocalizationInfo.get_by_app_locale(
-                        appname, appversion, '', id_only=True)
+                        platform, appname, category,
+                        appversion, '', id_only=True)
                 string_item = cls.find(orig_cond, one=True)
                 string_item = cls.clear_alias(string_item)
             else:
@@ -217,7 +245,7 @@ class LocalizationStrings(ModelBase):
                 raise exception.UnknownError(
                     "can not find relevant orig_string_item")
             string_item['localization_info'] = info_id
-            string_item['finished'] = False
+            string_item['status'] = _UNTRANSLATED
             if save:
                 cls.insert(string_item)
         return cond, string_item
@@ -239,8 +267,8 @@ class LocalizationStrings(ModelBase):
 
     @classmethod
     def update_alias(
-            cls, appname, appversion, locale, module_path, name, alias,
-            modifier_id=1):
+            cls, platform, category, appname, appversion, locale, module_path,
+            name, alias, modifier_id=1):
             # lack of type check and value check
         """
         Update the value of the corresponding alias of
@@ -255,14 +283,16 @@ class LocalizationStrings(ModelBase):
         Return:
             -alias: the value of translated text,
         """
-        inc_or_desc = 0
         cond, string_item = cls.set_default(
-            appname, appversion, locale, module_path, name, save=True)
+            platform, appname, category, appversion, locale,
+            module_path, name, save=True)
         info_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         cls.update_alias_to_string(alias, string_item)
-        origin_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, '', id_only=True)
+        info_cond = {
+            "appname": appname, "appversion": appversion, "locale": "",
+            "platform": platform, "category": category}
+        origin_id = LocalizationInfo.find_id_by_unique(info_cond)
         origin_cond = {
             'localization_info': origin_id, 'name': name,
             'module_path': module_path}
@@ -282,27 +312,136 @@ class LocalizationStrings(ModelBase):
             else:
                 check_alias_res = True if string_item["alias"] else False
             string_item['alias'] = cls.delete_all_tag(string_item['alias'])
-        if string_item['finished'] and not check_alias_res:
-            string_item['finished'] = False
-            inc_or_desc = -1
-        elif not string_item['finished'] and check_alias_res:
-            string_item['finished'] = True
-            inc_or_desc = 1
-        if string_item['finished']:
+        if check_alias_res:
+            string_item['status'] = _TRANSLATED
+        else:
+            string_item['status'] = _UNTRANSLATED
+        if string_item['status'] != _UNTRANSLATED:
             string_item['marked'] = ""
         # the status check of array is left to improving
         _LOGGER.info("update the string: %s", string_item)
         cls.update(cond, string_item)
-        fields = {"name": 1, "finished": 1, "marked": 1, "_id": 0}
+        fields = {"name": 1, "status": 1, "marked": 1, "_id": 0}
         ret = cls.find(cond, fields, one=True)
-        if inc_or_desc:
-            LocalizationTask.update_finish_count(
-                info_id, inc_or_desc, modifier_id=modifier_id)
+        LocalizationTask.update_finish_count(
+            info_id, modifier_id=modifier_id)
+        return ret
+
+    @classmethod
+    def get_refer_id(cls, appname, appversion, platform, category):
+        """
+        get reference id to compare
+        """
+        origin_cond = {
+            "appname": appname, "appversion": appversion, "locale": "",
+            "platform": platform, "category": category}
+        origin_id = LocalizationInfo.find_id_by_unique(origin_cond)
+        origin_string_count = cls.find(
+            {"localization_info": origin_id}).count()
+        if origin_string_count < 1:
+            appinfo = LocalizationInfo.get_by_app_version(
+                appname, platform, category)
+            appversion_list = appinfo.get("appversion")
+            if len(appversion_list) < 2:
+                return None
+            else:
+                appversion = appversion_list[1]
+                origin_cond = {
+                    "appname": appname, "appversion": appversion, "locale": "",
+                    "platform": platform, "category": category}
+                origin_id = LocalizationInfo.find_id_by_unique(origin_cond)
+            return origin_id
+        else:
+            return origin_id
+
+    @classmethod
+    def check_origin_alias(cls, origin_id, string_item):
+        """
+        Check if the value of the corresponding alias of
+        name in the string collection is modified
+        Parameters::
+            -origin_id: package name,
+            -string_item: the value of translated text,
+        Return:
+            -True: the value of translated text,
+        """
+        name = string_item['name']
+        strings_origin_cond = {
+            'localization_info': origin_id, 'name': name}
+        origin_item = cls.find(strings_origin_cond, one=True)
+        if origin_item:
+            origin_alias = origin_item["alias"]
+            string_alias = string_item["alias"]
+            if type(origin_alias) is list:
+                origin_alias = \
+                    [i.encode('utf-8') for i in origin_alias]
+            else:
+                if type(origin_alias) is unicode:
+                    origin_alias = origin_alias.encode("utf-8")
+            if string_alias != origin_alias:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    @classmethod
+    def update_other_alias(
+            cls, appname, appversion, platform, category):
+        origin_cond = {
+            "appname": appname, "appversion": appversion, "locale": "",
+            "platform": platform, "category": category}
+        origin_id = LocalizationInfo.find_id_by_unique(origin_cond)
+
+        # name = string_item['name']
+        string_origin_cond = {
+            'localization_info': origin_id, 'update': True}
+        string_update = cls.find(
+            string_origin_cond,
+            {"name": 1, "_id": 0}, toarray=True)
+        string_update = [i["name"] for i in string_update]
+
+        other_info_cond = {
+            "appname": appname, "appversion": appversion,
+            "locale": {"$ne": ""}, "platform": platform, "category": category}
+        other_ids = LocalizationInfo.find(other_info_cond, id_only=True)
+        cond = {}
+        cond['localization_info'] = {'$in': other_ids}
+        cond['name'] = {'$in': string_update}
+        cls.update(cond, {"status": _UNTRANSLATED}, multi=True)
+
+    @classmethod
+    def update_string_status(cls, cond, name, modifier_id=1, str_pass=True):
+            # lack of type check and value check
+        """
+        Update the status of strings
+        Parameters::
+            -cond: package name,
+        Return:
+            -alias: the value of translated text,
+        """
+        info_id = LocalizationInfo.find(cond, {"_id": 1}, one=True).get("_id")
+        task_info = LocalizationTask.find({"target": info_id}, one=True)
+        if task_info.get("task_status") != "To be check":
+            return
+        update_cond = {'localization_info': info_id, 'name': name}
+        string_item = {}
+        if str_pass:
+            string_item['status'] = _FINISHED
+        else:
+            string_item['status'] = _UNTRANSLATED
+        _LOGGER.info("update the string: %s", string_item)
+        cls.update(update_cond, string_item)
+        fields = {"name": 1, "status": 1, "marked": 1, "_id": 0}
+        ret = cls.find(update_cond, fields, one=True)
+        LocalizationTask.update_finish_count(
+            info_id, modifier_id=modifier_id)
         return ret
 
     @classmethod
     def get_by_app_locale(
-            cls, appname, appversion, locale, cond={}, toarray=True, **kwargs):
+            cls, platform, appname, category, appversion, locale,
+            cond={}, toarray=True, **kwargs):
         """
         return locale information
         Parameters::
@@ -315,7 +454,7 @@ class LocalizationStrings(ModelBase):
             -return array of locale information
         """
         cond['localization_info'] = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         return cls.find(cond=cond, toarray=toarray, **kwargs)
         # ensure return array by default
 
@@ -378,7 +517,8 @@ class LocalizationStrings(ModelBase):
 
     @classmethod
     def generate_edit_data(
-            cls, appname, appversion, locale, module_path=None, name=None):
+            cls, appname, appversion, locale, platform, category,
+            module_path=None, name=None, store=True):
         """
         Get text need to be translated
         Parameters::
@@ -388,16 +528,12 @@ class LocalizationStrings(ModelBase):
             -module_path: the module path of string or string-array,
             -name: the name of the need to be translated text .
         Return:
-            -ret: All corresponding information of need to be translated text
+            -ret_content: All corresponding information of need
+            to be translated text
         """
 
         cond = {}
-        ret = {}
-        ret['appname'] = appname
-        ret['appversion'] = appversion
-        ret['locale'] = locale
         ret_content = []
-        ret['items'] = ret_content
         if module_path is not None:
             # ret_content.append({'module_path': module_path})
             cond['module_path'] = module_path
@@ -405,14 +541,15 @@ class LocalizationStrings(ModelBase):
             cond['name'] = name
 
         # get info, reference(locale)
-        info_id = LocalizationInfo.find_id_by_unique({
-            'appname': appname, 'appversion': appversion, 'locale': locale})
         info_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         task = LocalizationTask.find({'target': info_id}, one=True)
         if not task:
             raise exception.DataError(
                 "can not find relevant task for target %s" % info_id)
+
+        is_locked = task["is_locked"]
+
         if task.get('reference') is not None:
             reference_info = LocalizationInfo.find({
                 '_id': task['reference']}, one=True)
@@ -422,16 +559,17 @@ class LocalizationStrings(ModelBase):
 
         # get data of cur, rCN, origin and reference
         data = cls.strings_to_dict(cls.get_by_app_locale(
-            appname, appversion, locale, cond))
+            platform, appname, category, appversion, locale, cond))
         if reference_locale is not None:
             reference_data = cls.strings_to_dict(cls.get_by_app_locale(
-                appname, appversion, reference_locale, cond))
+                platform, appname, category, appversion,
+                reference_locale, cond))
         else:
             reference_data = {}
         china_data = cls.strings_to_dict(cls.get_by_app_locale(
-            appname, appversion, 'zh-rCN', cond))
+            platform, appname, category, appversion, 'zh-rCN', cond))
         origin_data = cls.strings_to_dict(cls.get_by_app_locale(
-            appname, appversion, '', cond))
+            platform, appname, category, appversion, '', cond))
         for name, orig_string in origin_data.iteritems():
             s_alias = orig_string['alias']
             ret_alias = []
@@ -490,13 +628,18 @@ class LocalizationStrings(ModelBase):
                     else:
                         new_alias_item[alias_name] = the_string['alias']
             orig_string['alias'] = ret_alias
-            orig_string['status'] = 'finished' if string and \
-                string.get('finished') else 'draft'
+            orig_string['status'] = string.get("status") if string and \
+                string.get('status') else _UNTRANSLATED
             orig_string['marked'] = string.get('marked') if string and \
                 string.get('marked') else ''
+            if store:
+                picture_info = LocalizationPicture.get_picture_by_appname(
+                    appname, orig_string["name"])
+                orig_string['picture_url'] = picture_info.get("pic_url")
+                orig_string['description'] = picture_info.get("description")
             ret_content.append(orig_string)
 
-        return ret
+        return is_locked, ret_content
 
     @classmethod
     def to_xml_element(cls, data, level=1, at_end=False):
@@ -552,7 +695,8 @@ class LocalizationStrings(ModelBase):
             "<xliff:g", "<xliff:g xmlns:xliff=\"%s\"" % _XMLNS_XLIFF)
 
     @classmethod
-    def refresh_app_strings(cls, appname, appversion, locale):
+    def refresh_app_strings(
+            cls, platform, appname, category, appversion, locale):
         """
         Refresh the corresponding content when initializing the database
         Parameters::
@@ -563,8 +707,10 @@ class LocalizationStrings(ModelBase):
             -result: {'add': 0, 'delete': 0, 'update': 0}
         """
         result = {'add': 0, 'delete': 0, 'update': 0}
-        strings = cls.get_by_app_locale(appname, appversion, locale)
-        orig_strings = cls.get_by_app_locale(appname, appversion, '')
+        strings = cls.get_by_app_locale(
+            platform, appname, category, appversion, locale)
+        orig_strings = cls.get_by_app_locale(
+            platform, appname, category, appversion, '')
         if not strings or not orig_strings:
             return result
         strings = cls.strings_to_dict(strings)
@@ -603,9 +749,9 @@ class LocalizationInfo(ModelBase):
     db = 'i18n'
     collection = "localization_info"
 
-    required = ('appname', 'appversion', 'locale')
+    required = ('appname', 'appversion', 'locale', "platform", "category")
     optional = (
-        ('created_at', now_timestamp),
+        ('creator_id', 1),
         ('creator_id', 1),
     )
 
@@ -632,7 +778,29 @@ class LocalizationInfo(ModelBase):
             return None
 
     @classmethod
-    def get_by_app_locale(cls, appname, appversion, locale, id_only=False):
+    def get_id_by_app(
+            cls, platform, appname, category, appversion):
+        """
+        Get app id information
+        Parameters:
+            -appname: package name,
+            -appname: package name,
+            -appversion: package version,
+            -locale: Country code,
+            -id_only: Only return the value of id
+        Return:
+            -array: the list of id information
+        """
+        info_cond = {
+            'platform': platform, 'category': category,
+            'appname': appname, 'appversion': appversion}
+        info_ids = cls.find(info_cond, id_only=True)
+        return info_ids
+
+    @classmethod
+    def get_by_app_locale(
+            cls, platform, appname, category, appversion,
+            locale, id_only=False):
         """
         Get information by app locale from the database
         Parameters:
@@ -644,7 +812,9 @@ class LocalizationInfo(ModelBase):
             -array: the list of information
             or id
         """
-        cond = {'appname': appname, 'appversion': appversion, 'locale': locale}
+        cond = {
+            'platform': platform, 'appname': appname, 'category': category,
+            'appversion': appversion, 'locale': locale}
         if id_only:
             return cls.find_id_by_unique(cond)
         else:
@@ -652,7 +822,7 @@ class LocalizationInfo(ModelBase):
         # ensure return one info item or one info id
 
     @classmethod
-    def get_by_app_version(cls, appname):
+    def get_by_app_version(cls, appname, platform=None, category=None):
         """
         Get appversion information by appname from the database
         Parameters:
@@ -661,6 +831,11 @@ class LocalizationInfo(ModelBase):
             -ret: the information of appversion and appname
         """
         cond = {'appname': appname, 'locale': ''}
+        if platform:
+            cond['platform'] = platform
+        if category:
+            cond["category"] = category
+
         find_list = cls.find(cond).sort('appversion', -1)
         ret = {}
         appversion = []
@@ -675,7 +850,8 @@ class LocalizationInfo(ModelBase):
 
     @classmethod
     def check_info(
-            cls, appname, appversion=None, locale=None, raise_exception=True):
+            cls, platform, appname, category, appversion=None,
+            locale=None, raise_exception=True):
         """
         Check the database for this appname information
         Parameters:
@@ -688,7 +864,7 @@ class LocalizationInfo(ModelBase):
             or false: the appname not in  database
             or exception info
         """
-        cond = {'appname': appname}
+        cond = {'platform': platform, 'appname': appname, 'category': category}
         if appversion is not None:
             cond['appversion'] = appversion
         if locale is not None:
@@ -713,15 +889,20 @@ class LocalizationTask(ModelBase):
             "target": 41241,
             "reference": 42343,
             "creator_id": 1,
+            "assign_id": 1,
+            "translator_id": [1],
             "created_at": 1404460438,
             "last_built_at": 1404460540,
             "autofill": true
             "is_send_email": false
+            "is_locked": false
+            "task_status": "Created/Translating/To be check/Finished"
             "strings": {
                 "modified_at": 1404460538,
+                "modified_id": 1,
                 "total": 1231,
-                "finished": 123,
-                "status": "draft"
+                "uncheck: 123,
+                "untranslated": 123,
             }
         }
     """
@@ -732,10 +913,15 @@ class LocalizationTask(ModelBase):
     required = ('target',)
     optional = (
         ('creator_id', 1),
+        ('assign_id', 1),
+        ('translator_id', []),
         ('created_at', now_timestamp),
         ('autofill', False),
+        ('task_status', 'Created'),
         ('is_send_email', False),
-        # ('modified_at', now_timestamp),
+        ('is_locked', False),
+        ('modified_at', now_timestamp),
+        ('modifier_id', 1),
         ('last_built_at', 0),
         ('reference', 0),
         ('strings', {})
@@ -745,8 +931,8 @@ class LocalizationTask(ModelBase):
 
     @classmethod
     def get_by_app_locale(
-            cls, appname, appversion, locale, id_only=False,
-            explain_refer=False):
+            cls, platform, appname, category, appversion, locale,
+            id_only=False, explain_refer=False):
         """
         Get information by app locale from the database
         Parameters:
@@ -763,7 +949,7 @@ class LocalizationTask(ModelBase):
             # if only fetch id then we need not explain refer and we only need
             # id of target info
         info = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=id_only)
+            platform, appname, category, appversion, locale, id_only=id_only)
         if not info:
             return
         if id_only:
@@ -786,18 +972,22 @@ class LocalizationTask(ModelBase):
         Return:
             -The results of the insert data
         """
+        platform = data['platform']
         appname = data['appname']
+        category = data['category']
         appversion = data['appversion']
         locale = data['locale']
         target = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         if not target:
             _LOGGER.warning("invalid target: %s", data['locale'])
             raise exception.DataError("invalid target")
         creator_id = data.get('creator_id', 1)
+        assign_id = data.get('assign_id', 1)
         if data.get("reference") is not None:
             reference = LocalizationInfo.get_by_app_locale(
-                appname, appversion, data['reference'], id_only=True)
+                platform, appname, category, appversion,
+                data['reference'], id_only=True)
             if not reference:
                 _LOGGER.warning("invalid reference: %s", data['reference'])
                 raise exception.DataError("invalid reference")
@@ -807,17 +997,27 @@ class LocalizationTask(ModelBase):
         # fulfill the actual target/reference
         task_data = {
             'target': target, 'reference': reference,
-            'creator_id': creator_id, "autofill": autofill}
+            "assign_id": assign_id, 'creator_id': creator_id,
+            "autofill": autofill}
 
         # fulfill the strings
+        finished = LocalizationStrings.find(
+            {"localization_info": target, "status": _FINISHED}).count()
+        historical = LocalizationStrings.find(
+            {"localization_info": target,
+                "status": _HISTORICAL_DOCUMENT}).count()
+
         strings = {'modified_at': now_timestamp(), 'modifier_id': creator_id}
         strings['total'] = LocalizationStrings.get_app_locale_count(
-            appname, appversion, '')
-        strings['finished'] = LocalizationStrings.get_app_locale_count(
-            appname, appversion, locale, {'finished': True})
-        strings['status'] = 'draft' if strings['total'] > strings['finished'] \
-            else 'finished'
+            platform, appname, category, appversion, '')
+        strings["uncheck"] = LocalizationStrings.find(
+            {"localization_info": target, "status": _TO_BE_CHECK}).count()
+        strings['untranslated'] = strings["total"] - finished \
+            - historical - strings["uncheck"]
         task_data['strings'] = strings
+
+        task_data['modified_at'] = now_timestamp()
+        task_data['modifier_id'] = creator_id
 
         if cls.find({'target': target}, one=True, id_only=True):
             raise Exception("this task has existed")
@@ -827,7 +1027,98 @@ class LocalizationTask(ModelBase):
         return ModelBase.insert.im_func(cls, task_data, get=get)
 
     @classmethod
-    def update_finish_count(cls, target, finished, inc=True, modifier_id=1):
+    def assign_task(cls, target_cond, assign_id, role, translator_info):
+        """
+        assign task to translator
+        Parameters:
+            -data: the information of task,
+        Return:
+            -The results of the insert data
+        """
+        target = LocalizationInfo.find_id_by_unique(target_cond)
+        if not target:
+            _LOGGER.warning("invalid target: %s", target_cond['locale'])
+            raise exception.DataError("invalid target")
+        if role == _ADMIN:
+            task_data = cls.find({"target": target}, {"_id": 0}, one=True)
+        else:
+            task_data = cls.find(
+                {"target": target, "assign_id": assign_id},
+                {"_id": 0}, one=True)
+        if not task_data:
+            _LOGGER.warning("invalid target: %s", target)
+            raise exception.DataError("invalid target")
+        if task_data["is_locked"]:
+            return False
+        task_data["translator_id"] = translator_info
+        task_data["task_status"] = "Translating"
+        cls.update({"target": target}, task_data)
+        return True
+
+    @classmethod
+    def lock_task(cls, data):
+        """
+        locak task
+        Parameters:
+            -data: the information of task,
+        Return:
+        """
+        target_cond = data
+        operation = data.get("operation")
+
+        target_cond.pop("operation")
+
+        info_id = LocalizationInfo.find_id_by_unique(target_cond)
+        if not info_id:
+            _LOGGER.warning("invalid info: %s", data['locale'])
+            raise exception.DataError("invalid info")
+        task_data = cls.find({"target": info_id}, {"_id": 0}, one=True)
+        if not task_data:
+            _LOGGER.warning("invalid target: %s", info_id)
+            raise exception.DataError("invalid target")
+        if operation == "lock":
+            task_data["is_locked"] = True
+        else:
+            task_data["is_locked"] = False
+        cls.update({"target": info_id}, task_data)
+
+    @classmethod
+    def check_task_by_cpm(cls, target_cond, cpm_id, role):
+        """
+        assign task to translator
+        Parameters:
+            -data: the information of task,
+        Return:
+            -The results of the insert data
+        """
+        target = LocalizationInfo.find_id_by_unique(target_cond)
+        if not target:
+            _LOGGER.warning("invalid target: %s", target_cond['locale'])
+            raise exception.DataError("invalid target")
+        if role == _ADMIN:
+            task_data = cls.find({"target": target}, {"_id": 0}, one=True)
+        elif role == _COUNTRY_PM:
+            task_data = cls.find(
+                {"target": target, "creator_id": cpm_id},
+                {"_id": 0}, one=True)
+        else:
+            return
+        if not task_data:
+            _LOGGER.warning("invalid target: %s", target)
+            raise exception.DataError("invalid target")
+        if task_data["task_status"] == "To be check" and \
+                task_data["strings"]["uncheck"] != 0:
+            return False
+        if task_data["strings"]["untranslated"]:
+            task_data["task_status"] = "Translating"
+        else:
+            task_data["task_status"] = _FINISHED
+            task_data["is_locked"] = True
+        cls.update({"target": target}, task_data)
+        return task_data
+
+    @classmethod
+    def update_finish_count(cls, target, modifier_id=1):
         """
         update the number of target's finished count
         in localization_task collection
@@ -840,58 +1131,121 @@ class LocalizationTask(ModelBase):
             -The results of the update data
         """
         cond = {'target': target}
-        task_item = cls.find(cond, one=True)
-        task_item_strings = task_item['strings']
-        if inc:
-            task_item_strings['finished'] += finished
-        else:
-            task_item_strings['finished'] = finished
-        total = task_item_strings['total']
-        finished = LocalizationStrings.find(
-            {"localization_info": target, "finished": True}).count()
-        task_item_strings['finished'] = finished
-        if finished > total:
-            finished = total
-            task_item_strings['finished'] = finished
-        if finished == total:
-            task_item_strings['status'] = 'finished'
-        else:
-            task_item_strings['status'] = 'draft'
-        task_item['modified_at'] = now_timestamp()
-        task_item['modifier_id'] = modifier_id
+        task = cls.find(cond, one=True)
+        if task is None:
+            return
+        strings = {}
+        strings["total"] = task["strings"]["total"]
+        strings['untranslated'] = LocalizationStrings.find(
+            {"localization_info": target, "status": _UNTRANSLATED}).count()
+        strings['uncheck'] = 0
+        if task["task_status"] == "To be check":
+            strings['uncheck'] = LocalizationStrings.find(
+                {"localization_info": target, "status": _TO_BE_CHECK}).count()
+        strings["modified_at"] = now_timestamp()
+        strings["modifier_id"] = modifier_id
+        count = LocalizationStrings.find({"localization_info": target}).count()
+        strings['untranslated'] += strings["total"] - count
+        task["strings"] = strings
+        task['modified_at'] = now_timestamp()
+        task['modifier_id'] = modifier_id
+        if task["task_status"] == _FINISHED:
+            task["task_status"] = "Translating"
+            task["is_send_email"] = False
         _LOGGER.info(
-            "update finish count of task: %s with finished value: %s "
-            "and inc %s", task_item, finished, inc)
-        cls.update(cond, task_item)
+            "update finish count of task: %s ", task)
+        cls.update(cond, task)
+
+    @classmethod
+    def update_old_data_count(cls, target):
+        """
+        update the number of target's finished count
+        in localization_task collection
+        Parameters:
+            -target: the target task of needed to update,
+            -finished: Whether translated: 1 or 0 or -1,
+            -inc: whether the number of finished count to add and subtract one,
+            -modifier_id: the id of modifier,
+        Return:
+            -The results of the update data
+        """
+        cond = {'target': target}
+        task = cls.find(cond, one=True)
+        if task is None:
+            return
+        if task["strings"].get("status") is None:
+            return
+        if task["strings"]["status"] == "finished":
+            task["task_status"] = "Finished"
+        elif task["strings"]["status"] == "not_validated":
+            task["task_status"] = "To be check"
+        else:
+            task["task_status"] = "Translating"
+        strings = {}
+        strings['untranslated'] = LocalizationStrings.find(
+            {"localization_info": target, "status": _UNTRANSLATED}).count()
+        strings['uncheck'] = 0
+        if task["task_status"] == "To be check":
+            strings['uncheck'] = LocalizationStrings.find(
+                {"localization_info": target, "status": _TO_BE_CHECK}).count()
+        strings["modified_at"] = task["strings"]["modified_at"]
+        if task["strings"].get("modified_id") is None:
+            strings["modified_id"] = task["creator_id"]
+        else:
+            strings["modified_id"] = task["strings"]["modified_id"]
+        strings["total"] = task["strings"]["total"]
+        count = LocalizationStrings.find({"localization_info": target}).count()
+        strings['untranslated'] += strings["total"] - count
+        task["strings"] = strings
+        task["assign_id"] = task["creator_id"]
+        task["translator_id"] = []
+        task["translator_id"].append(task["creator_id"])
+        task['autofill'] = True if task.get("reference") else False
+        if task["task_status"] == "Finished" or \
+                task["task_status"] == "To be check":
+            task['is_send_email'] = True
+        else:
+            task['is_send_email'] = False
+        task["is_locked"] = True if task["task_status"] == "Finished" \
+            else False
+
+        _LOGGER.info(
+            "update finish count of task: %s ", task)
+        cls.update(cond, task)
 
     @classmethod
     def get_all_task(
-            cls, appname=None, appversion=None,
-            status=None, explain_refer=True, sort=None):
+            cls, platform, category, appname, appversion, uid=None, role=2,
+            status='', explain_refer=True, sort=None):
         """
-        information for all of the task
+        information for all of the            task
         Parameters:
+            -platform: the platform of package,
             -appname: package name,
+            -category: the category of package,
             -appversion: package version,
             -status: the status of task,
             -explain_refer: explain the refer id as specific information
-            -sort: According to the date to sort,
+            -sort: According to the creating time sorting,
         Return:
             -ret_tasks: The array of information for all of the task
         """
-        if appname is None:
-            appname = 'mobi.mgeek.TunnyBrowser'
-        if appversion is None:
-            lastest_info = LocalizationInfo.get_lastest_info(appname)
-            appversion = lastest_info["appversion"]
-
-        info_ids = LocalizationInfo.find(
-            {'appname': appname, 'appversion': appversion}, id_only=True)
+        info_ids = LocalizationInfo.get_id_by_app(
+            platform, appname, category, appversion)
         cond = {}
         cond['target'] = {'$in': info_ids}
-        if status is not None:
-            if status != '':
-                cond["strings.status"] = status
+
+        if role == _TRANSLATOR:
+            cond["translator_id"] = uid
+        elif role == _CHARGE:
+            cond["assign_id"] = uid
+        elif role == _COUNTRY_PM:
+            cond["creator_id"] = uid
+
+        if status == "Translating":
+            cond["task_status"] = {'$in': ["Created", "Translating"]}
+        elif status == "To be check" or status == "Finished":
+            cond["task_status"] = status
 
         ret_tasks = []
         tasks = cls.find(cond)
@@ -933,7 +1287,9 @@ class LocalizationTask(ModelBase):
         return cls.get_all_task(appname, appversion)
 
     @classmethod
-    def get_candidate_locales(cls, appname, appversion, locale_only=False):
+    def get_candidate_locales(
+            cls, platform, category, appname, appversion,
+            countrys, locale_only=False):
         """
         return the list of locales which have not been added to tasks
         Parameters:
@@ -952,9 +1308,9 @@ class LocalizationTask(ModelBase):
         """
         ret = []
         cur_locales = cls.get_in_task_locales(
-            appname, appversion, locale_only=True)
+            platform, category, appname, appversion, locale_only=True)
         locales = LocalizationConfig.get_app_locales(
-            appname, appversion, locale_only=locale_only)
+            appname, appversion, countrys, locale_only=locale_only)
         for item_l in locales:
             temp_l = item_l['locale']
             if item_l if locale_only else temp_l not in cur_locales and temp_l:
@@ -965,7 +1321,8 @@ class LocalizationTask(ModelBase):
 
     @classmethod
     def get_in_task_locales(
-            cls, appname, appversion, status=None, cond={}, locale_only=False):
+            cls, platform, category, appname, appversion,
+            status=None, cond={}, locale_only=False):
         """
         can receive cond such as strings.status to filter locales of specified
         tasks
@@ -978,14 +1335,14 @@ class LocalizationTask(ModelBase):
         Return:
             -The array of locale information of the task:
         """
-        info_ids = LocalizationInfo.find(
-            {'appname': appname, 'appversion': appversion}, id_only=True)
+        info_ids = LocalizationInfo.get_id_by_app(
+            platform, appname, category, appversion)
         cond = {}
         cond['target'] = {'$in': info_ids}
         if status is not None:
             cond["strings.status"] = status
         cur_targets = [t['target'] for t in cls.get_all_task(
-            appname, appversion, status)]
+            platform, category, appname, appversion, status=status)]
         cur_locales = [t['locale'] for t in cur_targets]
         if locale_only:
             return cur_locales
@@ -1050,6 +1407,7 @@ class LocalizationTask(ModelBase):
             """
             tag_name = ele.tag
             content = "<%s>%s</%s>" % (tag_name, content, tag_name)
+
             content = LocalizationStrings.adjust_alias(content)
             new_ele = ET.fromstring(content)
             new_ele.attrib = ele.attrib
@@ -1097,8 +1455,8 @@ class LocalizationTask(ModelBase):
 
     @classmethod
     def organize_strings(
-            cls, appname, appversion, locale, md5, missing_only=True,
-            strings=None, inc_only=False):
+            cls, platform, appname, category, appversion, locale, md5,
+            missing_only=True, strings=None, inc_only=False):
         """
         organize strings to element
         Parameters:
@@ -1117,7 +1475,7 @@ class LocalizationTask(ModelBase):
 
         if strings is None:
             info_id = LocalizationInfo.get_by_app_locale(
-                appname, appversion, locale, id_only=True)
+                platform, appname, category, appversion, locale, id_only=True)
             if not info_id:
                 _LOGGER.warning(
                     "can not find relevant info for appname: %s; appversion: "
@@ -1203,7 +1561,222 @@ class LocalizationTask(ModelBase):
         return ret
 
     @classmethod
-    def to_snapshot(cls, appname, appversion, locale=None):
+    def check_string_in_ele(cls, string, ele, locale=None):
+        """
+        Update the corresponding value of string in the XML file
+        Parameters:
+            -string: the information of string,
+            -ele: element in xml file,
+            -locale: Country code
+        Return:
+            -new_ele: updated element
+        """
+
+        tag_name = ele.tag
+        alias = string['alias']
+        if tag_name == 'string-array':
+            item_list = []
+            for sub_ele in ele:
+                match_group = array_tag_compile.match(
+                    ET.tostring(sub_ele, encoding='utf-8'))
+                if not match_group:
+                    match_blank = array_tag_blank_compile.match(
+                        ET.tostring(sub_ele, encoding='utf-8'))
+                    if not match_blank:
+                        _LOGGER.warn(
+                            'string-array item not match regex![%s]' %
+                            ET.tostring(sub_ele, encoding='utf-8'))
+                        continue
+                    else:
+                        item_list.append('')
+                else:
+                    item_list.append(match_group.group(1))
+            temp_alias = []
+            for alias_item in alias:
+                if type(alias_item) is unicode:
+                    alias_item = alias_item.encode('utf-8')
+                    temp_alias.append(alias_item)
+            alias = temp_alias
+
+            if item_list == alias:
+                return True
+            else:
+                return False
+        else:
+            match_group = string_tag_compile.match(
+                ET.tostring(ele, encoding='utf-8'))
+            if not match_group:
+                _LOGGER.warn(
+                    'string tag not match regex![%s]' %
+                    ET.tostring(ele, encoding='utf-8'))
+            content = match_group.group(2)
+            if type(alias) is unicode:
+                alias = alias.encode('utf-8')
+            if content == alias:
+                return True
+            else:
+                return False
+
+    @classmethod
+    def update_diff_strings(
+            cls, platform, appname, category, appversion, locale, md5):
+        """
+        update diff strings status
+        Parameters:
+            -platform: the platform of package,
+            -appname: package name,
+            -category: the category of package,
+            -appversion: package version,
+            -locale: Country code
+            -md5: The MD5 value of the XML file,
+        Return:
+            -None
+        """
+        temp_ret = {}
+        info_id = LocalizationInfo.get_by_app_locale(
+            platform, appname, category, appversion, locale, id_only=True)
+        if not info_id:
+            _LOGGER.warning(
+                "can not find relevant info for appname: %s; appversion: "
+                "%s and locale: %s", appname, appversion, locale)
+            return None
+        strings = LocalizationStrings.find(
+            {'localization_info': info_id}, toarray=True)
+
+        for string in strings:
+            cur_key = string['xml_file']
+            # raw strings --- aggregate according to exact xml file
+            if cur_key in temp_ret:
+                temp_ret[cur_key].append(string)
+            else:
+                temp_ret[cur_key] = [string]
+            # as we will use source xml file for example, we generate xml
+            # elements together to avoid frequent xml file load
+
+        for k, v in temp_ret.iteritems():
+            if md5:
+                the_xml_dir = "xml_%s" % md5
+            else:
+                the_xml_dir = "xml_data"
+            middle_dir = "res"
+
+            values_dir = 'values' if locale == '' else "values-%s" % locale
+            xml_file_path = os.path.join(
+                STATIC_ROOT, appname, appversion, the_xml_dir,
+                middle_dir, values_dir, k)
+            _LOGGER.info(
+                "begin to process: %s, %s, %s, %s. xml_file_path is %s",
+                appname, appversion, locale, k, xml_file_path)
+            if not os.path.exists(xml_file_path):
+                _LOGGER.warning(
+                    "cann't find xml file %s for appname %s appversion %s "
+                    "locale %s, continue ...", xml_file_path, appname,
+                    appversion, locale)
+                continue
+            tree = ET.parse(xml_file_path, parser=CommentedTreeBuilder())
+            root = tree.getroot()
+
+            for string in v:
+                cur_tagname = string['tag_name']
+                cur_name = string['name']
+                ele_index, ele = cls.find_ele_in_root(
+                    root, cur_tagname, cur_name)
+                if ele is None:
+                    continue
+                else:
+                    string_flag = cls.check_string_in_ele(string, ele, locale)
+                    if string_flag:
+                        string_status = {"update": False}
+                    else:
+                        string_status = {"update": True}
+                    update_cond = {
+                        "localization_info": info_id,
+                        "name": cur_name}
+                    LocalizationStrings.update(update_cond, string_status)
+
+    @classmethod
+    def generate_diff_strings(
+            cls, platform, appname, category, appversion, locale, md5):
+        ret = {}
+        temp_ret = {}
+        info_id = LocalizationInfo.get_by_app_locale(
+            platform, appname, category, appversion, locale, id_only=True)
+        if not info_id:
+            _LOGGER.warning(
+                "can not find relevant info for appname: %s; appversion: "
+                "%s and locale: %s", appname, appversion, locale)
+            return None
+        strings = LocalizationStrings.find(
+            {'localization_info': info_id, "update": True}, toarray=True)
+        for string in strings:
+            cur_key = string['xml_file']
+            # raw strings --- aggregate according to exact xml file
+            if cur_key in temp_ret:
+                temp_ret[cur_key].append(string)
+            else:
+                temp_ret[cur_key] = [string]
+            # as we will use source xml file for example, we generate xml
+            # elements together to avoid frequent xml file load
+
+        for k, v in temp_ret.iteritems():
+            cur_names = [s['name'] for s in v]
+            if md5:
+                the_xml_dir = "xml_%s" % md5
+            else:
+                the_xml_dir = "xml_data"
+            middle_dir = "res"
+
+            values_dir = 'values' if locale == '' else "values-%s" % locale
+            xml_file_path = os.path.join(
+                STATIC_ROOT, appname, appversion, the_xml_dir,
+                middle_dir, values_dir, k)
+            _LOGGER.info(
+                "begin to process: %s, %s, %s, %s. xml_file_path is %s",
+                appname, appversion, locale, k, xml_file_path)
+            if not os.path.exists(xml_file_path):
+                _LOGGER.warning(
+                    "cann't find xml file %s for appname %s appversion %s "
+                    "locale %s, continue ...", xml_file_path, appname,
+                    appversion, locale)
+                continue
+            tree = ET.parse(xml_file_path, parser=CommentedTreeBuilder())
+            root = tree.getroot()
+            eles_to_delete = []
+            _LOGGER.info(
+                "before remove: %s children in orig_root" %
+                len(root.getchildren()))
+            for child in root.getchildren():
+                name = child.attrib.get("name")
+                if name:
+                    if child.attrib['name'] not in cur_names:
+                        eles_to_delete.append(child)
+            for ele in eles_to_delete:
+                root.remove(ele)
+            _LOGGER.info(
+                "after remove according to cur_names: %s children in "
+                "orig_root" % len(root.getchildren()))
+            # like list, you'd better do not remove its element while
+            # itering it
+
+            for string in v:
+                cur_tagname = string['tag_name']
+                cur_name = string['name']
+                ele_index, ele = cls.find_ele_in_root(
+                    root, cur_tagname, cur_name)
+                if ele is None:
+                    continue
+                else:
+                    new_ele = cls.update_string_to_ele(string, ele, locale)
+                    if ele is None:
+                        root.append(new_ele)
+                    else:
+                        root[ele_index] = new_ele
+
+            ret[k] = tree
+        return ret
+
+    @classmethod
+    def to_snapshot(cls, platform, appname, category, appversion, locale=None):
         ret = []
         if locale is None:
             locale = LocalizationConfig.get_app_locales(
@@ -1213,10 +1786,10 @@ class LocalizationTask(ModelBase):
         for l in locale:
             item = {}
             task = cls.get_by_app_locale(
-                appname, appversion, l, explain_refer=True)
+                platform, appname, category, appversion, l, explain_refer=True)
             item['task'] = task
             info = LocalizationInfo.get_by_app_locale(
-                appname, appversion, l)
+                platform, appname, category, appversion, l)
             item['locale'] = l
             item['info'] = info
             strings = {}
@@ -1230,34 +1803,60 @@ class LocalizationTask(ModelBase):
         return ret
 
     @classmethod
-    def refresh_task(cls, appname, appversion, locale):
-        update_content = {
-            'strings.finished': LocalizationStrings.get_app_locale_count(
-                appname, appversion, locale, cond={'finished': True})}
+    def refresh_task(cls, platform, appname, category, appversion, locale):
+        finished = LocalizationStrings.get_app_locale_count(
+            platform, appname, category, appversion,
+            locale, cond={'status': _FINISHED})
+        uncheck = LocalizationStrings.get_app_locale_count(
+            platform, appname, category, appversion,
+            locale, cond={'status': _TO_BE_CHECK})
+        historical = LocalizationStrings.get_app_locale_count(
+            platform, appname, category, appversion,
+            locale, cond={'status': _HISTORICAL_DOCUMENT})
         cur_task_id = cls.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         if not cur_task_id:
             _LOGGER.warning(
                 "can not find task for appname: %s, appversion: %s and "
                 "locale: %s", appname, appversion, locale)
             return
-        origin_task = cls.get_by_app_locale(appname, appversion, '')
+        origin_task = cls.get_by_app_locale(
+            platform, appname, category, appversion, '')
         if not origin_task:
             _LOGGER.error(
                 "origin task for appname: %s, appversion: %s, locale: %s "
                 "not found", appname, appversion, locale)
             raise exception.DataError("origin task not found")
-        update_content['strings.total'] = origin_task['strings']['total']
+
+        total = origin_task['strings']['total']
+        update_content = {'strings.total': total}
+        update_content['strings.untranslated'] = total - \
+            finished - uncheck - historical
+        update_content['strings.uncheck'] = uncheck
         cls.update({'_id': cur_task_id}, update_content)
 
     @classmethod
-    def clear_task_strings(cls, appname, appversion, locale):
+    def clear_task_strings(
+            cls, platform, appname, category, appversion, locale):
+        """
+        Remove strings information from localization_strings
+        by appname & appversion& locale
+        and update task info
+        Parameters:
+            -appname: package name,
+            -appversion: package version,
+            -locale: Country code,
+        Return:
+            -task: the information of locale
+        """
         info_id = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            platform, appname, category, appversion, locale, id_only=True)
         if not info_id:
             return
+        """
         else:
             LocalizationStrings.remove({'localization_info': info_id})
+        """
         update_content = {'finished': 0}
         if locale == '':
             update_content['total'] = 0
@@ -1390,6 +1989,7 @@ class LocalizationSnap(ModelBase):
         ('task', ''),
         ('reason', ''),
         ('log_url', ''),
+        ('lint_url', ''),
         ('apk_url', ''),
         ('qrcode_url', ''),
         ('status', 'new')
@@ -1397,9 +1997,9 @@ class LocalizationSnap(ModelBase):
 
     @classmethod
     def create_snap(
-            cls, appname, appversion, tag, locale=None, creator_id=1,
-            comments="", with_items=True):
-        LocalizationInfo.check_info(appname, appversion)
+            cls, platform, appname, category, appversion, tag, locale=None,
+            creator_id=1, comments="", with_items=True):
+        LocalizationInfo.check_info(platform, appname, category, appversion)
         new_snap = {
             'appname': appname, 'appversion': appversion, "tag": tag,
             'creator_id': creator_id, 'comments': comments}
@@ -1408,18 +2008,18 @@ class LocalizationSnap(ModelBase):
                 appname, appversion, locale)['_id']
         if with_items:
             new_snap['items'] = LocalizationTask.to_snapshot(
-                appname, appversion)
+                platform, appname, category, appversion)
         return cls.insert(new_snap, check_unique=False)
         # return generated _id
 
     @classmethod
-    def fulfill_snap(cls, snap_id):
+    def fulfill_snap(cls, platform, category, snap_id):
         new_snap = cls.find({'_id': snap_id}, one=True)
         if not new_snap:
             raise exception.DataError(
                 "can not find the snap with id %s", snap_id)
         new_snap['items'] = LocalizationTask.to_snapshot(
-            new_snap['appname'], new_snap['appversion'])
+            platform, new_snap['appname'], category, new_snap['appversion'])
         return cls.update({'_id': snap_id}, new_snap)
 
     @classmethod
@@ -1435,8 +2035,8 @@ class LocalizationSnap(ModelBase):
 
     @classmethod
     def submit_project(
-            cls, appname, appversion, tag, locale=None,
-            creator_id=1, comment="", missing_only=True):
+            cls, appname, appversion, tag, locale=None, platform="Android",
+            category="Trunk", creator_id=1, comment="", missing_only=True):
         count = 1
         while count < 6:
             if cls.find({
@@ -1454,18 +2054,19 @@ class LocalizationSnap(ModelBase):
             raise exception.UniqueCheckError(
                 "there exists another new snap task")
         new_snap_id = cls.create_snap(
-            appname, appversion, tag, locale, creator_id, comment,
-            with_items=False)
+            platform, appname, category, appversion, tag, locale,
+            creator_id, comment, with_items=False)
         try:
             if not new_snap_id:
                 raise exception.UnknownError("snap creation failure")
-            cls.fulfill_snap(new_snap_id)
+            cls.fulfill_snap(platform, category, new_snap_id)
             xmlfile = LocalizationApps.generate_xml_file(
-                appname, appversion, md5=None, missing_only=missing_only)
+                platform, appname, category, appversion, locale='all',
+                md5=None, missing_only=missing_only)
             upload_data = get_api.upload_xml_file(
                 appname, appversion, new_snap_id, xmlfile, tag)
             if upload_data:
-                cls.update({'_id': new_snap_id}, {'status': 'building'})
+                cls.update({'_id': new_snap_id}, {'status': 'waiting'})
                 return True
             else:
                 return False
@@ -1474,7 +2075,8 @@ class LocalizationSnap(ModelBase):
             raise e
 
     @classmethod
-    def update_status(cls, snap_id, status, apk_url, reason, log_url):
+    def update_status(
+            cls, snap_id, status, apk_url, reason, log_url, lint_url, items):
         '''
         update the status of snaps with current status 'building'
         notice that if you want to call the method from view you should know
@@ -1484,28 +2086,38 @@ class LocalizationSnap(ModelBase):
         if not snap_simple:
             return
         snap_status = snap_simple['status']
+        if snap_status == "cancel":
+            return
         appname = snap_simple['appname']
         appversion = snap_simple['appversion']
-        if snap_status == 'building':
-            if status == 2:
-                snap_status = "finished"
-                if apk_url == '':
-                    update_data = {
-                        "status": snap_status, "reason": reason,
-                        "log_url": log_url}
-                else:
-                    qrcode_url = cls.writeback_apk(
-                        appname, appversion, snap_id, apk_url)
-                    update_data = {
-                        "status": snap_status, "apk_url": apk_url,
-                        "qrcode_url": qrcode_url}
-                cls.update({'_id': snap_id}, update_data)
-            elif status == 3:
-                snap_status = "timeout"
-                update_data = {"status": snap_status}
-                cls.update({'_id': snap_id}, update_data)
+        if status == 1:
+            snap_status = "building"
+            update_data = {"status": snap_status}
+            cls.update({'_id': snap_id}, update_data)
+        if status == 2:
+            snap_status = "finished"
+            if apk_url:
+                qrcode_url = cls.writeback_apk(
+                    appname, appversion, snap_id, apk_url)
+                update_data = {
+                    "status": snap_status, "apk_url": apk_url,
+                    "qrcode_url": qrcode_url}
             else:
-                return None
+                update_data = {
+                    "status": snap_status, "reason": reason,
+                    "log_url": log_url, "lint_url": lint_url}
+            print "123update data"
+            print update_data
+            print "123update data"
+            cls.update({'_id': snap_id}, update_data)
+        elif status == 3:
+            snap_status = "timeout"
+            update_data = {"status": snap_status}
+            cls.update({'_id': snap_id}, update_data)
+        if items:
+            LocalizationErrorlog.store_error_message(snap_id, items)
+        else:
+            return None
 
     @classmethod
     def get_snap_info(cls, uid=1):
@@ -1519,30 +2131,21 @@ class LocalizationSnap(ModelBase):
                     snap_item["status"] = "finished"
                 else:
                     snap_item["status"] = "failed"
-                    snap_item["qrcode_url"] = ""
-                    snap_item["apk_url"] = ""
-            elif snap_item.get("status") == "building":
-                snap_item["status"] = "ongoing"
-                snap_item["qrcode_url"] = ""
-                snap_item["apk_url"] = ""
-            elif snap_item.get("status") == "cancel":
-                snap_item["status"] = "cancel"
-                snap_item["qrcode_url"] = ""
-                snap_item["apk_url"] = ""
-            else:
-                snap_item["status"] = "timeout"
-                snap_item["qrcode_url"] = ""
-                snap_item["apk_url"] = ""
             snap_item["time"] = time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(
                     snap_item.get('created_at')))
+            if snap_item.get("lint_url") is None:
+                snap_item["lint_message"] = False
+            else:
+                snap_item["lint_message"] = True if snap_item["lint_url"] \
+                    else False
             snap_item["id"] = str(snap_item["_id"])
-            if snap_item.get("reason") is not None:
-                snap_item.pop("reason")
             snap_item.pop("created_at")
             snap_item.pop("_id")
             if snap_item.get("log_url") is not None:
                 snap_item.pop("log_url")
+            if snap_item.get("lint_url") is not None:
+                snap_item.pop("lint_url")
         return snap_info
 
     @classmethod
@@ -1594,19 +2197,29 @@ class LocalizationConfig(ModelBase):
     unique = ('type',)
 
     @classmethod
-    def get_app_locales(cls, appname="", appversion="", locale_only=False):
+    def get_app_locales(
+            cls, appname="", appversion="", country=[], locale_only=False):
         # "" allows a common locales-config used widely
-        locales = cls.find({'type': "available_locales"}, one=True)['items']
-        for item in locales:
+        locales = []
+        country = list(country)
+        temp_locales = cls.find(
+            {'type': "available_locales"}, one=True)['items']
+        for item in temp_locales:
             if item['appname'] == "" and item['appversion'] == "":
                 # left to ...
-                locales = item['locales']
+                temp_locales = item['locales']
                 break
         else:
             _LOGGER.warning(
                 "can not find the locales of appname %s and appversion %s",
                 appname, appversion)
             return
+        if not country:
+            locales = temp_locales
+        else:
+            for i in temp_locales:
+                if i["country"] in country:
+                    locales.append(i)
         if locale_only:
             return [l['locale'] for l in locales]
         else:
@@ -1766,7 +2379,7 @@ class LocalizationApps(ModelBase):
 
     @classmethod
     def generate_xml_file(
-            cls, appname, appversion, locale='all',
+            cls, platform, appname, category, appversion, locale='all',
             md5=None, missing_only=True):
         """
         generate/return the xml zip file (bytes format) according to the
@@ -1791,16 +2404,16 @@ class LocalizationApps(ModelBase):
         ret_sio = StringIO()
         ret_zip = zipfile.ZipFile(ret_sio, 'w')
         if missing_only:
-            if appname == 'mobi.mgeek.TunnyBrowser':
+            if flag_app:
                 the_xml_dir = "miss_xml_%s" % md5
             else:
                 the_xml_dir = "miss_xml_data"
             middle_dir = "res-missing"
         else:
-            if appname == 'mobi.mgeek.TunnyBrowser':
-                the_xml_dir = "miss_xml_%s" % md5
+            if flag_app:
+                the_xml_dir = "xml_%s" % md5
             else:
-                the_xml_dir = "miss_xml_data"
+                the_xml_dir = "xml_data"
             middle_dir = "res"
 
         for l in locales:
@@ -1810,7 +2423,8 @@ class LocalizationApps(ModelBase):
                 middle_dir, values_dir)
 
             l_strings = LocalizationTask.organize_strings(
-                appname, appversion, l, md5, missing_only=missing_only)
+                platform, appname, category, appversion, l, md5,
+                missing_only=missing_only)
 
             if os.path.exists(xml_dir_path):
                 files = os.listdir(xml_dir_path)
@@ -1831,6 +2445,124 @@ class LocalizationApps(ModelBase):
                 # to adapt to standard of client side
                 filepath = os.path.join(
                     middle_dir, "values-%s" % l if l else 'values', k)
+                sio = StringIO()
+                v.write(sio, encoding='utf-8', xml_declaration=True)
+                ret_zip.writestr(filepath, sio.getvalue())
+
+        ret_zip.close()
+        return ret_sio.getvalue()
+
+    @classmethod
+    def generate_xls_file(
+            cls, platform, appname, category, appversion, locale='all'):
+        """
+        generate/return the xls file (bytes format) according to the
+        current strings in db.
+        """
+        locales = []
+        if locale == 'all':
+            locales = LocalizationTask.get_in_task_locales(
+                platform, category, appname, appversion)
+        else:
+            app_info = LocalizationConfig.get_locale_info(
+                appname, appversion, locale)
+            language = app_info.get("language")
+            i = {"locale": locale, "language": language}
+            locales.append(i)
+        print "123locales"
+        print locales
+        strings = []
+        for locale_item in locales:
+            string = {}
+            locale = locale_item.get("locale")
+            language = locale_item.get("language")
+            string["display"] = "%s(%s)" % (language, locale)
+            string["items"] = LocalizationStrings.generate_edit_data(
+                appname, appversion, locale, platform,
+                category, store=False)[1]
+            string["filename"] = "values-%s" % locale if locale else 'values'
+            strings.append(string)
+        filepath = os.path.join(STATIC_ROOT, appname, appversion)
+        return cls.store_xml_file(strings, filepath)
+
+    @classmethod
+    def store_xml_file(cls, strings, filepath):
+        file = xlwt.Workbook(encoding='utf-8')
+        style = xlwt.XFStyle()
+        font = xlwt.Font()
+        font.name = 'Times New Roman'
+        font.bold = True
+        style.font = font
+        alignment = xlwt.Alignment()
+        alignment.horz = xlwt.Alignment.HORZ_CENTER
+        style.alignment = alignment
+        for string_item in strings:
+            temp_strings = [
+                "name", "Chinese(Simplified)", "English",
+                "Translation Language:%s" % string_item["display"]]
+            table = file.add_sheet(
+                string_item["filename"], cell_overwrite_ok=True)
+            for col_i in range(4):
+                table.col(col_i).width = 15000
+            for i, string in enumerate(temp_strings):
+                table.write(0, i, string, style)
+            string_content = string_item["items"]
+            for i, string in enumerate(string_content):
+                table.write(i + 1, 0, string["name"])
+                table.write(i + 1, 1, string["alias"][0]["zh-rCN"])
+                table.write(i + 1, 2, string["alias"][0]["en-US"])
+                content = string["alias"][0]["content"] if \
+                    string["alias"][0]["content"] \
+                    else string["alias"][0]["reference"]
+                table.write(i + 1, 3, content)
+        xml_file_path = os.path.join(filepath, "xml.xls")
+        file.save(xml_file_path)
+        return xml_file_path
+
+    @classmethod
+    def generate_diff_xml(
+            cls, platform, appname, category, appversion, locale='all',
+            md5=None):
+        """
+        generate/return the xml zip file (bytes format) according to the
+        current strings in db.
+        you can specified a md5 or use the latest one in db.
+        generate two types of xml file: total or only the missing part
+        """
+        app = cls.get_by_app(appname, appversion)
+        locales = []
+        if not app:
+            flag_app = False
+        else:
+            flag_app = True
+        if flag_app:
+            if md5 is None:
+                md5 = cls.get_xml_info(appname, appversion)['md5']
+        if locale == 'all':
+            locales = LocalizationTask.get_in_task_locales(
+                platform, category, appname, appversion, locale_only=True)
+        else:
+            locales.append(locale)
+        if locale == "all":
+            locales.remove("")
+        ret_sio = StringIO()
+        ret_zip = zipfile.ZipFile(ret_sio, 'w')
+        middle_dir = "res"
+        for l in locales:
+            LocalizationTask.update_diff_strings(
+                platform, appname, category, appversion, l, md5)
+
+        for l in locales:
+
+            l_strings = LocalizationTask.generate_diff_strings(
+                platform, appname, category, appversion, l, md5)
+
+            for k, v in l_strings.iteritems():
+                # to adapt to standard of client side
+                diff_filename = "%s_diff%s" % tuple(os.path.splitext(k))
+                filepath = os.path.join(
+                    middle_dir, "values-%s" % l if l else 'values',
+                    diff_filename)
                 sio = StringIO()
                 v.write(sio, encoding='utf-8', xml_declaration=True)
                 ret_zip.writestr(filepath, sio.getvalue())
@@ -2000,10 +2732,12 @@ class LocalizationHistory(ModelBase):
 
     @classmethod
     def insert_history(
-            cls, appname, appversion, locale, module_path, name, alias,
-            tag_name, xml_file, modifier_id=1):
-        target = LocalizationInfo.get_by_app_locale(
-            appname, appversion, locale, id_only=True)
+            cls, platform, category, appname, appversion, locale, module_path,
+            name, alias, tag_name, xml_file, modifier_id=1):
+        target_cond = {
+            'appname': appname, 'appversion': appversion,
+            'platform': platform, 'category': category, 'locale': locale}
+        target = LocalizationInfo.find_id_by_unique(target_cond)
         if not target:
             _LOGGER.warning("invalid target: %s", locale)
             raise exception.DataError("invalid target")
@@ -2034,18 +2768,19 @@ class LocalizationHistory(ModelBase):
 
     @classmethod
     def get_history_by_userid(
-            cls, cond, appname, appversion, locale, sort=None):
+            cls, cond, platform, category, appname,
+            appversion, locale, sort=None):
         """
         get history info by user_id
         """
-        if appname and appversion and locale:
-            target_cond = {
-                'appname': appname, 'appversion': appversion, 'locale': locale}
-            target = LocalizationInfo.find_id_by_unique(target_cond)
-            if not target:
-                _LOGGER.warning("invalid target: %s", locale)
-                raise exception.DataError("invalid target")
-            cond["target"] = target
+        target_cond = {
+            'appname': appname, 'appversion': appversion,
+            'platform': platform, 'category': category, 'locale': locale}
+        target = LocalizationInfo.find_id_by_unique(target_cond)
+        if not target:
+            _LOGGER.warning("invalid target: %s", locale)
+            raise exception.DataError("invalid target")
+        cond["target"] = target
         fields = {"modified_at": 1, "name": 1, "alias": 1, "_id": 0}
         data = [{
             'time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
@@ -2056,6 +2791,103 @@ class LocalizationHistory(ModelBase):
         f = lambda x, y: x if y in x else x + [y]
         data = reduce(f, [[], ] + data)
         return data
+
+
+class LocalizationErrorlog(ModelBase):
+
+    """
+    examples:
+        {
+            "name": "share_page",
+            "message": "123456",
+            'target': ObjectId('53d771d9bc3dcaf6979f2890')
+        }
+    """
+
+    db = 'i18n'
+    collection = 'localization_errorlog'
+
+    required = ('target', 'name', 'message')
+
+    @classmethod
+    def store_error_message(cls, target_id, items):
+        items = list(items)
+        if not isinstance(target_id, ObjectId):
+            target_id = ObjectId(target_id)
+        for error_item in items:
+            name = error_item.get("string_name")
+            message = error_item.get("error_msg")
+            error_log_info = {
+                'target': target_id, "name": name, "message": message}
+            cls.save(error_log_info)
+
+    @classmethod
+    def get_errorlog_by_target(cls, target):
+        """
+        get history info by user_id
+        """
+        if not isinstance(target, ObjectId):
+            target_id = ObjectId(target)
+        fields = {"_id": 0, "target": 0}
+        target_info = cls.find({'target': target_id}, fields, toarray=True)
+        if not target_info:
+            raise exception.DataError(
+                "can not find the error log info with target %s", target)
+        return target_info
+
+
+class LocalizationPicture(ModelBase):
+
+    """
+    examples:
+        {
+            "appname": "mobi.mgeek.TunnyBrowser",
+            "name": "share_page",
+            "picture_id": "1.1.1.png",
+            'description': ''
+        }
+    """
+
+    db = 'i18n'
+    collection = 'localization_picture'
+
+    required = ('appname', 'name', 'picture_id')
+    optional = (('description', ''),)
+
+    @classmethod
+    def store_picture_info(cls, appname, picture_info):
+        picture_info['appname'] = appname
+        obj = cls.find(
+            {'appname': appname,
+                'name': picture_info.get("name")}, one=True)
+        if obj:
+            _id = obj.get("_id")
+            cls.update({'_id': _id}, picture_info)
+        else:
+            cls.save(picture_info)
+
+    @classmethod
+    def get_picture_by_appname(cls, appname, name):
+        """
+        get history info by user_id
+        """
+        fields = {"_id": 0, "appname": 0}
+        picture_info = cls.find(
+            {'appname': appname, "name": name}, fields, one=True)
+        if not picture_info:
+            picture_info = {}
+            picture_info["pic_url"] = ""
+            picture_info["description"] = ""
+            _LOGGER.warn(
+                "localization_picture not found for appname: %s; name: "
+                "%s", appname, name)
+        pic_id = picture_info.get("picture_id", "")
+        if pic_id:
+            picture_info["pic_url"] = "http://%s/admin/media/%s/%s" % (
+                HOST, appname, pic_id)
+        else:
+            picture_info["pic_url"] = ""
+        return picture_info
 
 
 class CommentedTreeBuilder(ET.XMLTreeBuilder):

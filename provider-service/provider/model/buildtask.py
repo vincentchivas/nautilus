@@ -101,4 +101,35 @@ class TagList(Base):
         finally:
             sess.close()
 
+
+class Lint_Result(Base):
+    __tablename__ = 'lint_result'
+
+    id = Column(Integer, primary_key=True)
+    taskid = Column(String(100), nullable=False)
+    string_name = Column(String(100))
+    error_msg = Column(String(1000))
+    create_time = Column(DateTime, default=datetime.datetime.now)
+
+    def __init__(self, taskid="", string_name="", error_msg=""):
+        self.taskid = taskid
+        self.string_name = string_name
+        self.error_msg = error_msg
+
+    @classmethod
+    def get_lint_results(cls, taskid):
+        '''
+        get lint results
+        '''
+        try:
+            sess = get_session()
+            results = sess.query(
+                Lint_Result).filter(Lint_Result.taskid == taskid)
+            return results
+        except Exception, expt:
+            _LOGGER.info("get Lint_Result occurred:%s" % str(expt))
+        finally:
+            sess.close()
+
+
 Base.metadata.create_all(engine)

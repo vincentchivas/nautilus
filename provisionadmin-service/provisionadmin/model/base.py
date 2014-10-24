@@ -115,8 +115,6 @@ class ModelBase(dict):
     def find(
             cls, cond={}, fields=None, id_only=False, one=False,
             toarray=False):
-        print DBS
-        print cls.db
         _db = DBS[cls.db]
         if one:
             find = db.base_find_one
@@ -151,9 +149,10 @@ class ModelBase(dict):
         # return generated _id
 
     @classmethod
-    def update(cls, cond, data, replace=False):
+    def update(cls, cond, data, replace=False, multi=False):
         db.base_update(
-            DBS[cls.db], cls.collection, cond, data, replace=replace)
+            DBS[cls.db], cls.collection, cond, data,
+            replace=replace, multi=multi)
         # DBS[cls.db][cls.collection].update(cond, data)
 
     @classmethod
@@ -161,7 +160,7 @@ class ModelBase(dict):
         db.base_remove(DBS[cls.db], cls.collection, cond)
 
     @classmethod
-    def save(cls, data, check_unique=True, extract=True):
+    def save(cls, data, check_unique=False, extract=False):
         if extract:
             data = cls.extract(data)
             logger.info("data %s" % data)

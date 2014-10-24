@@ -22,7 +22,7 @@ def _get_app_container(appid):
     if app.get("type") == 1:
         ret.setdefault("container", app.get("app_name"))
     else:
-        ret.setdefault("container", app.get("container"))
+        ret.setdefault("container", app.get("container_name"))
     return ret
 
 

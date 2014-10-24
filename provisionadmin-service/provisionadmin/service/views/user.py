@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import os
 import simplejson
-from django.http import HttpResponse
-from provisionadmin.model.user import User, Group, Permission
-from provisionadmin.db import user
+import time
+from provisionadmin.model.user import User, Group, Permission, UserLog
 from provisionadmin.decorator import check_session, exception_handler
 from provisionadmin.utils.json import json_response_error, json_response_ok
 from provisionadmin.utils import respcode
-from provisionadmin.settings import CUS_TEMPLATE_DIR
+from provisionadmin.utils.common import unixto_string
 
 
 @exception_handler()
@@ -39,14 +37,16 @@ def login(req):
         name = req.POST.get('user_name')
         password = req.POST.get('password')
         if name and password:
-            u = user.find_one_user({'user_name': name, 'password': password})
-            if not u:
+            user_check = User.find_one_user(
+                {'user_name': name, 'password': password})
+            if not user_check:
                 return json_response_error(
-                    respcode.AUTH_ERROR, {}, msg='user_name or password error')
+                    respcode.AUTH_ERROR, {},
+                    msg='Look like that is not right. Give it another try?')
             else:
-                req.session["uid"] = u['_id']
-                uid = int(u['_id'])
-                permissions = user.init_menu_permissions(uid)
+                req.session["uid"] = user_check['_id']
+                uid = int(user_check['_id'])
+                permissions = Permission.init_menu(uid)
                 return json_response_ok(
                     data=permissions, msg='get left navi menu')
         else:
@@ -68,28 +68,27 @@ def logout(req):
 
 @exception_handler()
 def change_password(req):
-    if req.method == 'GET':
-        return HttpResponse(file(
-            os.path.join(CUS_TEMPLATE_DIR, 'changepwd.html')).read())
-    old_pwd = req.POST.get('old_pwd')
-    new_pwd = req.POST.get('new_pwd')
-    uname = req.POST.get('user_name')
-    usr = user.find_one_user({'user_name': uname})
-    if usr:
-        if usr.password == old_pwd:
-            usr.password = new_pwd
-            user.save_user(usr)
-            return json_response_ok(data={}, msg='password changed')
-        else:
-            return json_response_error(
-                respcode.PASSWORD_UNMATCH, data={},
-                msg='old password is not match')
+    if req.method == 'POST':
+        old_pwd = req.POST.get('old_pwd')
+        new_pwd = req.POST.get('new_pwd')
+        uid = req.session["uid"]
+        usr = User.find_one_user({'_id': uid})
+        if usr:
+            if usr.password == old_pwd:
+                usr.password = new_pwd
+                User.save_user(usr)
+                return json_response_ok(data={}, msg='password changed')
+            else:
+                return json_response_error(
+                    respcode.PASSWORD_UNMATCH, data={},
+                    msg='old password is not match')
     else:
         return json_response_error(
-            respcode.PARAM_ERROR, data={},
-            msg='user name error')
+            respcode.METHOD_ERROR, data={},
+            msg='http request method error')
 
 
+@exception_handler()
 def list_group(req):
     '''
     list api for show group list.
@@ -122,9 +121,15 @@ def list_group(req):
     '''
     if req.method == 'GET':
         cond = {}
-        groups = Group.find_group(cond)
+        raw_results = Group.find_group(cond)
+        group_list = []
+        for result in raw_results:
+            group_dict = {"id": result.get("_id"),
+                          "role_name": result.get("alias"),
+                          "origin": result.get("alias")}
+            group_list.append(group_dict)
         data = {}
-        data.setdefault("items", groups)
+        data.setdefault("items", group_list)
         return json_response_ok(data, "get group list")
     else:
         return json_response_error(
@@ -155,18 +160,42 @@ def create_group(req):
     if req.method == 'POST':
         temp_strs = req.raw_post_data
         temp_dict = simplejson.loads(temp_strs)
-        group_name = temp_dict.get('group_name')
+        group_name = temp_dict.get('rolename')
         if not group_name:
             return json_response_error(
                 respcode.PARAM_REQUIRED,
-                msg="parameter group_name invalid")
-        group_Perm_list = temp_dict.get('perm_list')
-        group = Group.new(group_name, group_Perm_list)
-        Group.save_group(group)
-        return json_response_ok({'info': group})
+                msg="parameter role_name invalid")
+        group = Group.new(group_name, permission_list=[])
+        group_id = Group.save_group(group)
+        data = {}
+        data["id"] = group_id
+        data["role_name"] = group_name
+        data["origin"] = group_name
+        return json_response_ok(data, msg="add success")
     else:
         return json_response_error(
             respcode.METHOD_ERROR, msg='http method error')
+
+
+def _get_user_list(cond={}):
+    users = []
+    fields = {
+        "user_name": 1,
+        "group_id": 1,
+        "department": 1,
+        "is_active": 1,
+        "last_login": 1,
+        "total_login": 1,
+        "mark": 1}
+    raw_results = User.find_users(cond, fields)
+    for user in raw_results:
+        user["last_login"] = unixto_string(user.get("last_login"))
+        user["id"] = user.get("_id")
+        user.pop("_id")
+        user["role"] = _get_group_name_list(user.get("group_id"))
+        user.pop("group_id")
+        users.append(user)
+    return users
 
 
 def detail_modify_group(req, group_id):
@@ -207,10 +236,10 @@ def detail_modify_group(req, group_id):
     if req.method == "GET":
         cond = {"_id": group_id}
         groups = Group.find_group(cond)
-        data = {}
         if groups:
-            group = groups[0]
-            data.setdefault("item", group)
+            data = {}
+            users = _get_user_list(cond={"group_id": group_id})
+            data.setdefault("item", users)
             return json_response_ok(
                 data, msg="get group one group detail")
         else:
@@ -219,16 +248,19 @@ def detail_modify_group(req, group_id):
     elif req.method == "POST":
         temp_strs = req.raw_post_data
         temp_dict = simplejson.loads(temp_strs)
-        group_name = temp_dict.get('group_name')
+        group_name = temp_dict.get('role_name')
         if not group_name:
             return json_response_error(
                 respcode.PARAM_REQUIRED,
                 msg="parameter group_name invalid")
-        group_Perm_list = temp_dict.get('perm_list')
-        group = Group.new(group_name, group_Perm_list)
-        group["_id"] = group_id
-        Group.save_group(group)
-        return json_response_ok({'info': group})
+        cond = {"_id": group_id}
+        upt_dict = {"alias": group_name}
+        Group.update_group(cond, upt_dict)
+        data = {}
+        data["id"] = group_id
+        data["role_name"] = group_name
+        data["origin"] = group_name
+        return json_response_ok(data, msg='update success')
     else:
         return json_response_error(
             respcode.METHOD_ERROR, msg="http method error")
@@ -271,6 +303,44 @@ def delete_group(req):
             respcode.METHOD_ERROR, msg="http method error")
 
 
+def _get_group_list_by_ids(array=[]):
+    role_list = []
+    if not array:
+        return []
+    else:
+        for gid in array:
+            groups = Group.find_group({"_id": gid})
+            group = groups[0]
+            role_dict = {"display_value": group.get("alias"),
+                         "value": group.get("group_name"),
+                         "selected": True}
+            role_list.append(role_dict)
+        return role_list
+
+
+def _get_group_name_list(array=[]):
+    name_list = []
+    if not array:
+        return []
+    else:
+        for gid in array:
+            groups = Group.find_group({"_id": gid})
+            group = groups[0]
+            name_list.append(group.get("group_name"))
+        return name_list
+
+
+def _get_group_ids(name_list):
+    gids = []
+    if not name_list:
+        return []
+    else:
+        for name in name_list:
+            groups = Group.find_group({"group_name": name})
+            gids.append(groups[0].get("_id"))
+        return gids
+
+
 def list_user(req):
     '''
         list api for show user list.
@@ -304,10 +374,11 @@ def list_user(req):
 
         '''
     if req.method == 'GET':
-        cond = {}
-        users = User.find_users(cond)
+        users = _get_user_list()
         data = {}
         data.setdefault("items", users)
+        filters = User.get_filters()
+        data.setdefault("filters", filters)
         return json_response_ok(data, "get user list")
     else:
         return json_response_error(
@@ -324,10 +395,10 @@ def create_user(req):
 
         Parameters:
             {
-            "user_name":"xxx",
-            "password":"zxcf",
-            "email":"zxy@bainainfo.com"
-            "perm_list":[1,2,3,4]
+            "user_name":"zxy@bainainfo.com",
+            "group_id":[1],
+            "mark":"new user",
+            "department":"server"
             }
 
         Return :
@@ -340,24 +411,28 @@ def create_user(req):
     if req.method == 'POST':
         temp_strs = req.raw_post_data
         temp_dict = simplejson.loads(temp_strs)
-        required_list = ('user_name', 'password', 'email')
+        required_list = ('user_name',)
         for required_para in required_list:
             if not temp_dict.get(required_para):
                 return json_response_error(
                     respcode.PARAM_REQUIRED,
                     msg="parameter %s invalid" % required_para)
         user_name = temp_dict.get('user_name')
-        password = temp_dict.get('password')
-        email = temp_dict.get('email')
-        # is_active = temp_dict.get('is_active')
-        # is_superuser = temp_dict.get('is_superuser')
-        # group_id = temp_dict.get('group_id')
-        # permission_list = temp_dict.get('permission_list')
-        user_instance = User.new(user_name, password, email)
-        # user_instance.group_id = group_id
-        # user_instance.permission_list = permission_list
+        group_names = temp_dict.get('roles')
+        password = User.calc_password_hash("123456")
+        group_id = _get_group_ids(group_names)
+        department = temp_dict.get('department')
+        mark = temp_dict.get('mark')
+        user_instance = User.new(user_name, password)
+        user_instance.group_id = group_id
+        user_instance.department = department
+        user_instance.mark = mark
         User.save(user_instance)
         return json_response_ok({"info": user_instance})
+    elif req.method == 'GET':
+        data = {}
+        data["departments"] = User.get_departments()
+        return json_response_ok(data, "get departments")
     else:
         return json_response_error(
             respcode.METHOD_ERROR, msg='http method error')
@@ -400,11 +475,23 @@ def detail_modify_user(req, user_id):
     user_id = int(user_id)
     if req.method == "GET":
         cond = {"_id": user_id}
-        users = User.find_users(cond)
-        data = {}
-        if users:
-            user = users[0]
-            data.setdefault("item", user)
+        fields = {
+            "user_name": 1,
+            "group_id": 1,
+            "department": 1,
+            "mark": 1}
+        raw_result = User.find_users(cond, fields)
+        if raw_result:
+            user = raw_result[0]
+            user["id"] = user.get("_id")
+            user.pop("_id")
+            user["roles"] = _get_group_list_by_ids(user.get("group_id"))
+            data = {}
+            group_id_list = user.get("group_id")
+            user.pop("group_id")
+            data["departments"] = User.get_departments(
+                user.get("department"), group_id_list)
+            data.setdefault("user", user)
             return json_response_ok(
                 data, msg="get  one user detail")
         else:
@@ -413,25 +500,24 @@ def detail_modify_user(req, user_id):
     elif req.method == "POST":
         temp_strs = req.raw_post_data
         temp_dict = simplejson.loads(temp_strs)
-        required_list = ('user_name', 'password', 'email')
+        required_list = ('user_name',)
         for required_para in required_list:
             if not temp_dict.get(required_para):
                 return json_response_error(
                     respcode.PARAM_REQUIRED,
                     msg="parameter %s invalid" % required_para)
         user_name = temp_dict.get('user_name')
-        password = temp_dict.get('password')
-        email = temp_dict.get('email')
-        # is_active = temp_dict.get('is_active')
-        # is_superuser = temp_dict.get('is_superuser')
-        group_id = temp_dict.get('group_id')
-        # permission_list = temp_dict.get('permission_list')
-        user_instance = User.new(user_name, password, email)
-        # user_instance.group_id = group_id
-        # user_instance.permission_list = permission_list
-        User.save(user_instance)
-        user_instance.group_id = group_id
-        return json_response_ok({'info': user_instance})
+        group_names = temp_dict.get('roles')
+        group_id = _get_group_ids(group_names)
+        department = temp_dict.get('department')
+        mark = temp_dict.get('mark')
+        cond = {"_id": user_id}
+        upt_dict = {"user_name": user_name,
+                    "group_id": group_id,
+                    "department": department,
+                    "mark": mark}
+        User.update_user(cond, upt_dict)
+        return json_response_ok({'info': "save use info successfully"})
     else:
         return json_response_error(
             respcode.METHOD_ERROR, msg="http method error")
@@ -511,6 +597,128 @@ def list_perm(req):
         data = {}
         data.setdefault("items", perms)
         return json_response_ok(data, "get permission list")
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def user_active(req):
+    if req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        uid = temp_dict.get("id")
+        status = temp_dict.get("status")
+        User.update_user(
+            {"_id": uid}, {"is_active": status})
+        return json_response_ok({}, msg="update active success")
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def group_perm_list(req):
+    if req.method == "GET":
+        grant_id = req.GET.get("roleid")
+        # uid = req.session["uid"]
+        uid = 3
+        models = Permission.user_perm_list(uid, group_id=int(grant_id))
+        features = Permission.user_perm_feature(uid, group_id=int(grant_id))
+        data = {}
+        feature_dict = {}
+        feature_dict["title"] = "Feature"
+        feature_dict["items"] = features
+        data["feature"] = feature_dict
+        data["items"] = models
+        return json_response_ok(data, "get group perm list")
+    elif req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        gid = temp_dict.get("roleid")
+        perm_list = temp_dict.get("permissions")
+        Group.update_group(
+            {"_id": gid}, {"permission_list": perm_list})
+        return json_response_ok({}, "grant group perm list")
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def user_perm_list(req):
+    if req.method == "GET":
+        grant_id = req.GET.get("userid")
+        # uid = req.session["uid"]
+        uid = 3
+        models = Permission.user_perm_list(uid, grant_id=int(grant_id))
+        features = Permission.user_perm_feature(uid, grant_id=int(grant_id))
+        data = {}
+        feature_dict = {}
+        feature_dict["title"] = "Feature"
+        feature_dict["items"] = features
+        data["feature"] = feature_dict
+        data["items"] = models
+        return json_response_ok(data, "get user perm list")
+    elif req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        uid = temp_dict.get("userid")
+        perm_list = temp_dict.get("permissions")
+        User.update_user(
+            {"_id": uid}, {"permission_list": perm_list})
+        return json_response_ok({}, msg="grant user perm list")
+    else:
+        return json_response_error(
+            respcode.METHOD_ERROR, msg="http method error")
+
+
+def action_log_list(req):
+    if req.method == "POST":
+        temp_strs = req.raw_post_data
+        temp_dict = simplejson.loads(temp_strs)
+        department = temp_dict.get("department")
+        group_name = temp_dict.get("role")
+        if department and group_name:
+            print "search"
+            group = Group.find_group({"group_name": group_name})[0]
+            group_id = group.get("_id")
+            user_name = temp_dict.get("user_name")
+            start_time = temp_dict.get("start")
+            start = time.mktime(time.strptime(start_time, '%Y-%m-%d'))
+            end_time = temp_dict.get("end")
+            end = time.mktime(time.strptime(end_time, '%Y-%m-%d'))
+            cond = {"modified": {"$gte": start, "$lte": end}}
+            raw_results = UserLog.search_log_info(cond)
+            logs = []
+            cond_for_users = {"department": department, "group_id": group_id}
+            if user_name:
+                cond_for_users["user_name"] = {"$regex": user_name}
+            user_list = User.find_users(cond, {"user_name": 1, "_id": 0})
+            for result in raw_results:
+                if result.get("uid") in user_list:
+                    log_dict = {}
+                    log_dict["time"] = unixto_string(result.get("modified"))
+                    log_dict["id"] = result.get("_id")
+                    log_dict["actions"] = result.get(
+                        "perm_name").replace('-', ' ')
+                    log_dict["user_name"] = result.get("user_name")
+                    logs.append(log_dict)
+            data = {}
+            data["items"] = logs
+            return json_response_ok(data, "filter user log")
+        else:
+            print "list"
+            raw_results = UserLog.search_log_info()
+            logs = []
+            for result in raw_results:
+                log_dict = {}
+                log_dict["time"] = unixto_string(result.get("modified"))
+                log_dict["id"] = result.get("_id")
+                log_dict["actions"] = result.get("perm_name").replace('-', ' ')
+                log_dict["user_name"] = result.get("user_name")
+                logs.append(log_dict)
+            data = {}
+            data["items"] = logs
+            data["filters"] = User.get_filters()
+            return json_response_ok(data, "get user log")
     else:
         return json_response_error(
             respcode.METHOD_ERROR, msg="http method error")

@@ -14,11 +14,15 @@ list_filters = {
             "display_value": "All",
         },
         {
-            "value": "draft",
-            "display_value": "Draft",
+            "value": "Translating",
+            "display_value": "Translating",
         },
         {
-            "value": "finished",
+            "value": "To be check",
+            "display_value": "To be check",
+        },
+        {
+            "value": "Finished",
             "display_value": "Finished",
         }
     ]

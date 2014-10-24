@@ -80,7 +80,7 @@ def create_project(request, user):
          }
     """
     if request.method == 'GET':
-        uid = user._id
+        uid = user.get("_id")
         required_list = ('appname', 'appversion', 'tag')
         for required_para in required_list:
             para_data = request.GET.get(required_para)
@@ -91,6 +91,12 @@ def create_project(request, user):
         appname = request.GET.get('appname')
         appversion = request.GET.get('appversion')
         tag = request.GET.get("tag")
+
+        if tag == 'new':
+            tag_array = LocalizationApps.get_tag_by_app(
+                appname, appversion).get("tag")
+            tag = tag_array[-1]
+
         miss_only = False
 
         temp_data = LocalizationSnap.submit_project(
@@ -155,8 +161,7 @@ def _get_project_list():
 
 
 @exception_handler()
-@check_session
-def init_tag(request, user):
+def init_tag(request):
     """
     init all app tag
     Parameters:

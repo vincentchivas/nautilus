@@ -55,7 +55,7 @@ def loadStrings(projectDir, options):
     #resourceMap.extractString('pref_development_ua_choices', 1, 'pref_development_ua_desktop', 'settings_strings.xml')
     #resourceMap.extractString('pref_development_ua_choices', 4, 'pref_development_ua_custom', 'settings_strings.xml')
     if options.reportStat:
-         resourceMap.describeTranslationStats()
+        resourceMap.describeTranslationStats()
     if options.describeMissing:
         resourceMap.describeMissingTranslations()
     if options.doOrganize:
@@ -85,9 +85,9 @@ def _parse_arguments(fakeArgs):
     organize_group.add_option('--test-run', dest='testRun', action="store_true", help='Perform a test run and write result to a separate directory.')
     organize_group.add_option('-d', '--update-default', dest='updateDefault', action="store_true", help='Also update default translation.')
     organize_group.add_option('--dump-missing', dest='dumpMissing', action="store_true", help='Also dump missing translations.')
-    organize_group.add_option('-T', '--trim-extras', dest='trimExtras',action="store_true",help='Trim extra translations that should\'t be translated or not exists in default translation.')
-    organize_group.add_option('--gen-ids', dest='generateIds',action="store_true", help='Generate string ids.')
-    organize_group.add_option('-r', '--remove', '--trim', dest='trimStrings', action="append",default=[], metavar='NAME',help='Trim extra translations with specified name.')
+    organize_group.add_option('-T', '--trim-extras', dest='trimExtras', action="store_true", help='Trim extra translations that should\'t be translated or not exists in default translation.')
+    organize_group.add_option('--gen-ids', dest='generateIds', action="store_true", help='Generate string ids.')
+    organize_group.add_option('-r', '--remove', '--trim', dest='trimStrings', action="append", default=[], metavar='NAME', help='Trim extra translations with specified name.')
 
     return parser.parse_args(fakeArgs)
 
@@ -95,10 +95,7 @@ def _parse_arguments(fakeArgs):
 def merge_xml(xml_path):
     fakeArgs = ['-o']
     fakeArgs.append(xml_path)
-    print "yyyyyyy%s" % fakeArgs
     options, args = _parse_arguments(fakeArgs)
-    print options
-    print args
 
     for arg in args:
         oragnizeStrings(arg, options)

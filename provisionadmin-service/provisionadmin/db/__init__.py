@@ -26,7 +26,7 @@ def base_save(db, coll, data):
     return db[coll].save(data)
 
 
-def base_update(db, coll, cond, data, replace=False):
+def base_update(db, coll, cond, data, replace=False, multi=False):
     logger.info(
         "@base_update --- coll: %s; cond: %s; data: %s: ",
         coll, cond, data)
@@ -36,7 +36,7 @@ def base_update(db, coll, cond, data, replace=False):
         data = {'$set': data}
     else:
         data['$set'].pop('_id', None)
-    return db[coll].update(cond, data)
+    return db[coll].update(cond, data, multi=multi)
 
 
 def base_find_one(db, coll, cond, fields, toarray=False):

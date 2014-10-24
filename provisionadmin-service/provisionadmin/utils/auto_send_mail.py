@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'provisionadmin.settings'
+import logging
 from provisionadmin.model.i18n import LocalizationInfo, MailConfig
 from provisionadmin.utils.util_mail import send_message
 import datetime
+
+LOG_FILE = '/var/app/log/provisionadmin-service/mail.log'
+handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1024 * 1024)
+fmt = '%(asctime)s-%(filename)s-%(lineno)s-%(name)s-%(levelname)s-%(message)s'
+formatter = logging.Formatter(fmt)
+handler.setFormatter(formatter)
+
+_LOGGER = logging.getLogger('auto_send')
+_LOGGER.addHandler(handler)
+_LOGGER.setLevel(logging.DEBUG)
 
 
 def trans_need():
@@ -23,6 +34,7 @@ def trans_need():
     mail_cc.append('shjmi@bainainfo.com')
     mail_cc.append('lyliu@bainainfo.com')
     mail_cc.append('ghyang@bainainfo.com')
+    _LOGGER.info("mail_to:%s, mail_cc:%s" % (mail_to, mail_cc))
     send_message(
         subject, template, mail_to, mail_cc, False, None, combine,
         str(threeday))
@@ -30,7 +42,6 @@ def trans_need():
 
 if __name__ == '__main__':
     try:
-        result = trans_need()
-        print result
-    except Exception, e:
-        print e
+        trans_need()
+    except Exception, exception:
+        _LOGGER.info("send auto mail occurred exception:%s" % str(exception))

@@ -26,6 +26,8 @@ def upload(request):
         return HttpResponse(file(
             os.path.join(CUS_TEMPLATE_DIR, "upload.html")).read())
     cur_time = int(time.time())
+    platform = request.POST.get("platform", "Android")
+    category = request.POST.get("category", "Branch")
     apkfile = request.FILES['apkfile']
     xmlfile = request.FILES['xmlfile']
     # check file validation
@@ -33,6 +35,8 @@ def upload(request):
         return json_response_error(
             DATA_ERROR, msg='upload file format error[%s %s]' % (
                 apkfile.name, xmlfile.name))
+    if platform == "IOS":
+        return json_response_error(DATA_ERROR, msg="data error")
     apkfilepath = os.path.join(STATIC_ROOT, "apk_%s.apk" % cur_time)
     xmlfilepath = os.path.join(STATIC_ROOT, "xml_%s.zip" % cur_time)
     apkoutputfile = open(apkfilepath, "wb")
@@ -59,7 +63,12 @@ def upload(request):
         "cd %s && unzip %s" % (xmlfiledir, xmlfilepath), shell=True)
 
     # thirdly, call init adapter
-    package_name, version_name = init_adapter(xmlfiledir, apkfiledir)
+    if platform == "Android":
+        package_name, version_name = init_adapter(
+            platform, category, xmlfiledir, apkfiledir)
+    else:
+        return json_response_error(DATA_ERROR, msg="data error")
+
     package_path = os.path.join(STATIC_ROOT, package_name)
     if not os.path.exists(package_path):
         os.mkdir(package_path)

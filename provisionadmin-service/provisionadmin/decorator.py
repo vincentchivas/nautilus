@@ -5,13 +5,14 @@ from django.http import HttpResponse
 import logging
 # from django.http import HttpResponse
 from django.conf import settings
-from provisionadmin.db import user
+from provisionadmin.model.user import User, Permission, UserLog
 from provisionadmin.utils import json, respcode, exception
+from provisionadmin.utils.perm_list import Perm_Sys
 
 
 EXCEPTION_DEBUG = settings.EXCEPTION_DEBUG and settings.DEBUG
 AUTH_DEBUG = settings.DEBUG and settings.AUTH_DEBUG
-logger = logging.getLogger('provisionadmin')
+_LOGGER = logging.getLogger('provisionadmin')
 
 EXCEPTION_CODE_PAIRS = (
     (respcode.AUTH_ERROR, exception.AuthFailureError,),
@@ -44,7 +45,7 @@ def exception_handler(as_json=True):
                     return json.json_response_ok({}, 'can cross-domain')
                 return func(request, *args, **kwargs)
             except Exception as e:
-                logger.exception(e)
+                _LOGGER.exception(e)
                 if EXCEPTION_DEBUG:
                     raise e
                 else:
@@ -57,18 +58,61 @@ def exception_handler(as_json=True):
     return e_wrapper
 
 
+def _check_has_perm(uid, perm_name_list):
+    assert perm_name_list
+    perm_names = []
+    perms_model = Permission.get_perms_by_uid(uid)
+    # default get the user's permissions of the type "model"
+    if perms_model:
+        for perm in perms_model:
+            perm_names.append(perm.get("perm_name"))
+        perms_feature = Permission.init_features(uid)
+        perm_names = perm_names + perms_feature
+        if set(perm_name_list) < set(perm_names):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def _save_to_log(usr, perms):
+    assert perms
+    for perm in perms:
+        uid = usr.get("_id")
+        uname = usr.get("user_name")
+        log = UserLog.new(uid, uname, perm)
+        UserLog.save_log(log)
+
+
 def check_session(func):
     '''
-     check user session
+    check user session
     '''
     def wrapper(req, *args, **kv):
         check = False
         uid = req.session.get('uid')
+        uid = int(uid)
         if uid:
-            u = user.find_one_user({'_id': uid})
-            kv.update({'user': u})
-            if u.is_active:  # 可以加上鉴权
-                check = True
+            usr = User.find_one_user({'_id': uid})
+            kv.update({'user': usr})
+            _LOGGER.info("user %s check_session" % usr.get("user_name"))
+            if usr.get("is_active"):
+                    # to check the user has the permission
+                    # add the operator the user will do
+                req_method = req.method
+                func_name = func.__name__
+                module_name = func.__module__
+                last_name = module_name.split('.')[-1]
+                api_name = last_name + "_" + func_name
+                if hasattr(Perm_Sys, api_name):
+                    perms_dict = getattr(Perm_Sys, api_name)
+                    perm_names_list = perms_dict.get(req_method)
+                    check = _check_has_perm(uid, perm_names_list)
+                    _LOGGER.info(
+                        "user %s perms_check" % usr.get("user_name"))
+                    if check:
+                        _save_to_log(usr, perm_names_list)
         if check or AUTH_DEBUG:
             return func(req, *args, **kv)
         else:

@@ -5,23 +5,25 @@
 @description: the page of strings list
 """
 
-from provisionadmin.utils.respcode import PARAM_REQUIRED, \
+from provisionadmin.utils.respcode import PARAM_REQUIRED, DATA_ERROR, \
     METHOD_ERROR
 from provisionadmin.utils.json import json_response_error, json_response_ok
 from provisionadmin.decorator import check_session, exception_handler
-from provisionadmin.model.i18n import LocalizationStrings, LocalizationHistory
+from provisionadmin.model.i18n import LocalizationStrings, \
+    LocalizationHistory, LocalizationInfo, LocalizationTask
 from provisionadmin.utils import exception
 from provisionadmin.service.views.all_json import edit_filters
 import simplejson as json
 from xml.etree import ElementTree as ET
 
 
+_UNTRANSLATED = 'Untranslated'
 _XMLNS_XLIFF = 'urn:oasis:names:tc:xliff:document:1.2'
 
 
 @exception_handler()
 @check_session
-def edit(request, user):
+def get_strings(request, user):
     """
     GET: Get string need to be translated
     Parameters:
@@ -50,29 +52,48 @@ def edit(request, user):
     """
     if request.method == 'GET':
         data = {}
-        required_list = ('appname', 'appversion', 'locale')
+        required_list = (
+            'platform', 'appname', 'category', 'appversion', 'locale')
         for required_para in required_list:
             para_data = request.GET.get(required_para)
             if not para_data:
                 return json_response_error(
                     PARAM_REQUIRED,
                     msg="parameter '%s' invalid" % required_para)
-        appname = request.GET.get('appname')
-        appversion = request.GET.get('appversion')
-        locale = request.GET.get("locale")
+        platform = data['platform'] = request.GET.get("platform")
+        appname = data["appname"] = request.GET.get('appname')
+        category = data["category"] = request.GET.get("category")
+        appversion = data["appversion"] = request.GET.get('appversion')
+        locale = data["locale"] = request.GET.get("locale")
         modulepath = request.GET.get('module')
         name = request.GET.get("name")
-        data = LocalizationStrings.generate_edit_data(
-            appname, appversion, locale, modulepath, name)
+        temp_list = LocalizationStrings.generate_edit_data(
+            appname, appversion, locale, platform, category, modulepath, name)
         data["filters"] = edit_filters
+        data["is_locked"] = temp_list[0]
+        data["items"] = temp_list[1]
         return json_response_ok(data)
-    elif request.method == 'POST':
-        uid = user._id
+    else:
+        return json_response_error(METHOD_ERROR, msg="http method wrong")
+
+
+@exception_handler()
+@check_session
+def save_strings(request, user):
+    if request.method == 'POST':
+        uid = user.get("_id")
         dict_str = request.raw_post_data
         temp_dict = json.loads(dict_str)
+        platform = temp_dict["platform"]
         appname = temp_dict["appname"]
+        category = temp_dict["category"]
         appversion = temp_dict["appversion"]
         locale = temp_dict["locale"]
+        info_id = LocalizationInfo.get_by_app_locale(
+            platform, appname, category, appversion, locale, id_only=True)
+        task_info = LocalizationTask.find({"target": info_id}, one=True)
+        if task_info["is_locked"]:
+            return json_response_error(DATA_ERROR, msg="The task is locked")
         string_items = temp_dict['items']
         data = {}
         item_list = []
@@ -87,18 +108,14 @@ def edit(request, user):
                 content = alias_item.get("content")
                 check_content(content)
             items = LocalizationStrings.update_alias(
-                appname, appversion, locale, module_path, name, alias,
+                platform, category, appname, appversion,
+                locale, module_path, name, alias,
                 modifier_id=uid)
-            if items["finished"]:
-                items["status"] = "finished"
-            else:
-                items["status"] = "draft"
-            items.pop("finished")
             item_list.append(items)
 
             LocalizationHistory.insert_history(
-                appname, appversion, locale, module_path, name, alias,
-                tag_name, xml_file, modifier_id=uid)
+                platform, category, appname, appversion, locale, module_path,
+                name, alias, tag_name, xml_file, modifier_id=uid)
         data["items"] = item_list
         return json_response_ok(data)
     else:
@@ -186,13 +203,25 @@ def mark_cope(request, user):
         dict_mark = request.raw_post_data
         temp_dict = json.loads(dict_mark)
         cond = {}
+        platform = temp_dict["platform"]
         appname = temp_dict["appname"]
+        category = temp_dict["category"]
         appversion = temp_dict["appversion"]
         locale = temp_dict["locale"]
+
+        info_id = LocalizationInfo.get_by_app_locale(
+            platform, appname, category, appversion, locale, id_only=True)
+        task_info = LocalizationTask.find({"target": info_id}, one=True)
+        if task_info["is_locked"]:
+            return json_response_error(DATA_ERROR, msg="The task is locked")
+
         module_path = temp_dict["module_path"]
         name = temp_dict["name"]
         cond, string_item = LocalizationStrings.set_default(
-            appname, appversion, locale, module_path, name)
+            platform, appname, category, appversion, locale, module_path, name)
+        if string_item["status"] != _UNTRANSLATED:
+            return json_response_error(DATA_ERROR, msg="string is not draft")
+
         string_item["marked"] = temp_dict["marked"]
         LocalizationStrings.update(cond, string_item)
         return json_response_ok()

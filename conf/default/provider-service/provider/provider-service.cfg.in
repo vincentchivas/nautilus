@@ -1,7 +1,7 @@
 [provider-service]
 debug       = %(cfg_debug)s
 db_conn_str = %(cfg_db_conn_str)s
-logs_dir    = %(log_dir_base)s/provisionadmin-service
+logs_dir    = %(log_dir_base)s/provider-service
 host = %(url)s
 auth_debug_value = %(auth_debug)s
 exception_debug_value = %(exception_debug)s

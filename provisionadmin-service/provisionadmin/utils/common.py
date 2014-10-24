@@ -21,6 +21,11 @@ def unix_time(value=None):
         return None
 
 
+def unixto_string(value):
+    locale_time = time.localtime(value)
+    return time.strftime('%Y-%m-%d %H:%M:%S', locale_time)
+
+
 def flatten_dict(dct):
     if not dct:
         return None
@@ -30,6 +35,11 @@ def flatten_dict(dct):
 def md5digest(string=None):
     salted_str = string + _SALT
     return md5(salted_str.encode('utf-8')).hexdigest().upper()
+
+
+def md5_string(string):
+    md5_object = md5(string)
+    return md5_object.hexdigest()
 
 
 def random_string(length):

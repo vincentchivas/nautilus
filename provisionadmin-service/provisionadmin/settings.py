@@ -313,13 +313,15 @@ SECTION = 'provisionadmin-service'
 
 
 def _load_service_config(cp):
-    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG, PROVIDER_SITE
+    global DB_CONN_STR, LOGS_DIR, HOST, AUTH_DEBUG, EXCEPTION_DEBUG, \
+        PROVIDER_SITE, PROVISION_STAT
     DB_CONN_STR = cp.get(SECTION, 'db_conn_str')
     LOGS_DIR = cp.get(SECTION, 'logs_dir')
     HOST = cp.get(SECTION, 'host')
     AUTH_DEBUG = cp.getboolean(SECTION, 'auth_debug_value')
     EXCEPTION_DEBUG = cp.getboolean(SECTION, 'exception_debug_value')
     PROVIDER_SITE = cp.get(SECTION, 'provider_site_str')
+    PROVISION_STAT = cp.get(SECTION, 'provision_stat_conn')
 
     for k, v in LOGGING['handlers'].iteritems():
         if 'filename' in v:
@@ -336,7 +338,7 @@ DB_SETTINGS = {
     'user': {'host': DB_CONN_STR, 'port': 27017, 'name': 'users'},
     'preset': {'host': DB_CONN_STR, 'name': 'preset'},
     'i18n': {'host': DB_CONN_STR, 'name': 'i18n'},
-    'provision_stat': {'host': '172.16.7.101', 'username': 'root', 'password': '123456', 'port': 3306, 'dbname': 'provision_stat'},
+    'provision_stat': {'host': PROVISION_STAT, 'username': 'root', 'password': '123456', 'port': 3306, 'dbname': 'provision_stat'},
     'beluga_data': {'host': '172.16.77.4', 'username': 'xshu', 'password': 'Baina-shuxiang', 'port': 3306, 'dbname': 'app_id146'}
 }
 

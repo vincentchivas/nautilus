@@ -54,11 +54,9 @@ def query_results(module_name, class_name, cond, first=True):
         querystr = 'sess.query(%s).filter(%s).all()' % (class_name, cond)
     try:
         results = eval(querystr)
-    except Exception, e:
+    except:
         sess.rollback()
-        _LOGGER.info(
-            "@database_query---table:%s", class_name)
-        raise e
+        _LOGGER.info("@database_query---table:%s", class_name)
     finally:
         sess.close()
-    return results
+        return results

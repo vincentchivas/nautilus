@@ -1,8 +1,11 @@
+# -*- coding: UTF-8 -*-
 import logging
 import time
 import os
 import re
 import requests
+import json
+from xml.etree import ElementTree as ET
 from ..utils.jsons import json_response_error, json_response_ok
 from ..utils.respcode import UNKNOWN_ERROR, METHOD_ERROR, PARAM_ERROR
 from ..utils.buildstatus import BUILT
@@ -10,7 +13,7 @@ from ..utils.md5tool import md5web, md5sum
 from ..settings import STATIC_ROOT, HOST, STATUS_URL
 from ..decorator import exception_handler
 from ..db.database import save, query_results
-from ..model.buildtask import XmlList, BuildTask, TagList
+from ..model.buildtask import XmlList, BuildTask, TagList, Lint_Result
 from ..utils.common import download_file
 
 _LOGGER = logging.getLogger('provider')
@@ -26,21 +29,58 @@ def _path_to_url(xpath):
     return '/'.join(array_for_url)
 
 
-def _send_status(task):
+def _send_status(task, lint_result_url):
     '''
-    send task status for i18n studio
+    send status to i18n studio through http request
     '''
     parameters = {}
-    parameters['taskid'] = task.taskid
-    parameters['status'] = task.status
-    parameters['apk_uri'] = task.apk_uri
-    parameters['reason'] = task.reason
-    parameters['log_uri'] = task.log_uri
-    r = requests.post(STATUS_URL, data=parameters)
-    if r.status_code < 300 and r.status_code > 199:
+    parameters["taskid"] = task.taskid
+    parameters["status"] = task.status
+    parameters["apk_uri"] = task.apk_uri
+    parameters["reason"] = task.reason
+    parameters["log_uri"] = task.log_uri
+    parameters["lint_url"] = lint_result_url
+    lints = []
+    raw_results = Lint_Result.get_lint_results(task.taskid)
+    if raw_results:
+        for result in raw_results:
+            lint_dict = {
+                "string_name": result.string_name,
+                "error_msg": result.error_msg}
+            lints.append(lint_dict)
+    parameters["lint_result"] = lints
+    headers = {"Content-type": "application/json", "Accept": "text/plain"}
+    req = requests.post(
+        STATUS_URL, data=json.dumps(parameters), headers=headers)
+    if req.status_code < 300 and req.status_code > 199:
         _LOGGER.info("_send_status:send request success")
     else:
         _LOGGER.info("_send_status:error occurred")
+
+
+def _save_lint_result(taskid, lint_result_url):
+    rev = requests.get(lint_result_url, stream=True)
+    filename = lint_result_url.split('/')[-1]
+    file_path = os.path.join(STATIC_ROOT, 'lint_result', filename)
+    download_file(rev, file_path)
+    root = ET.parse(file_path).getroot()
+    results = root.findall("issue")
+    if results:
+        patt = '<string name=\"(.+)\">'
+        for item in results:
+            error = item.get("errorLine1")
+            group = re.search(patt, error)
+            string_name = group.group(1)
+            error_msg = item.get("message")
+            result = Lint_Result(
+                taskid=taskid,
+                string_name=string_name,
+                error_msg=error_msg)
+            save(result)
+            # callback url to send the lint_result to i18n, will be here
+            _LOGGER.info("taskid:%s saved lint" % taskid)
+    else:
+        _LOGGER.info("taskid:%s has no lint errors" % taskid)
 
 
 @exception_handler()
@@ -56,6 +96,7 @@ def submit_build(request):
      - result: the builed result,it has 'BUILD_COMPLETE', 'error'
      - log: the log url
      - apk: the apk url
+     - lint_result: check the lint error
 
      Return:
       1.built task finished, and it returns a parameter of 'error'
@@ -77,6 +118,12 @@ def submit_build(request):
         task = query_results('provider.model.buildtask', 'BuildTask', cond)
         pass_tag = request.POST.get('result')
         task.status = BUILT
+        lint_result = request.POST.get("lint_result")
+        if lint_result:
+            _save_lint_result(taskid, lint_result)
+        else:
+            lint_result = ""
+        # save lint_result to table
         if pass_tag == 'error':
             task.reason = request.POST.get('reason')
             log_uri = request.POST.get('log')
@@ -90,7 +137,7 @@ def submit_build(request):
             download_file(r, log_path)
             task.log_uri = _path_to_url(log_path)
             save(task)
-            _send_status(task)
+            _send_status(task, lint_result)
             return json_response_ok({'info': 'handle error'})
         elif pass_tag == 'BUILD_COMPLETE':
             task.result = 'buildsuccess'
@@ -104,10 +151,10 @@ def submit_build(request):
             download_file(r, apk_path)
             task.apk_uri = _path_to_url(apk_path)
             save(task)
-            _send_status(task)
+            _send_status(task, lint_result)
             return json_response_ok({'info': 'handle correct'})
         else:
-            json_response_error(
+            return json_response_error(
                 UNKNOWN_ERROR, msg='neither gives error or complete')
     else:
         return json_response_error(METHOD_ERROR, msg='http method error')

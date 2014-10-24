@@ -6,4 +6,5 @@ host = %(url)s
 auth_debug_value = %(auth_debug)s
 exception_debug_value = %(exception_debug)s
 provider_site_str = %(provider_site)s
+provision_stat_conn=%(provision_stat)s
 #data_dir   = %(data_dir_base)s/provision-service
