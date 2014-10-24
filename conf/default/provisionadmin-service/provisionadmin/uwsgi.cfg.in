@@ -11,6 +11,6 @@ harakiri = 300
 daemonize = %(log_dir_base)s/provisionadmin-service/uwsgi.log
 master = true
 # pidfile = %(log_dir_base)s/provisionadmin-service/uwsgi.pid
-listen = 1000
+listen = 100
 env = DJANGO_SETTINGS_MODULE=provisionadmin.settings
 module = django.core.handlers.wsgi:WSGIHandler()
