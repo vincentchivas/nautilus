@@ -1,4 +1,5 @@
 import os
+import json
 from ConfigParser import ConfigParser
 # Django settings for provisionadmin project.
 SESSION_ENGINE = 'provisionadmin.utils.session'
@@ -327,7 +328,9 @@ def _load_service_config(cp):
         if 'filename' in v:
             v['filename'] = os.path.join(
                 LOGS_DIR, os.path.basename(v['filename']))
-
+global MODELS
+f = file(os.path.join(SITE_ROOT, "models.json"))
+MODELS = json.load(f)
 
 cp = ConfigParser()
 cp.read([os.path.join(SITE_ROOT, "provisionadmin-service.cfg")])

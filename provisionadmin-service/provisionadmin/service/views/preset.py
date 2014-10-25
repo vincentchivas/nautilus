@@ -7,9 +7,9 @@ from provisionadmin.model.preset import config
 def bookmark_add(req):
     Bookmark = config("bookmark")
     temp_dict = {}
-    temp_dict["name"] = "new1"
+    temp_dict["name"] = "new123"
     temp_dict["url"] = "www.baidu.com"
     item = Bookmark.insert(temp_dict)
     data = {}
-    data["item"] = string(item)
+    data["item"] = item
     return json_response_ok(data, msg="add book mark success")
