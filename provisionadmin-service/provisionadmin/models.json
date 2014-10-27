@@ -4,6 +4,6 @@
     "collection":"bookmark",
     "required":["name", "url"],
     "optional":[["time","1234"]],
-    "unique":[["name"]],
+    "unique":[["name"]]
     }
 }

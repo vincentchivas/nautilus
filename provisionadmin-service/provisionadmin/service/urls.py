@@ -74,5 +74,5 @@ urlpatterns = patterns(
     (r'^changepwd', 'user.change_password'),
     (r'^provision-service/provision_analysis', stat_report.report_locale),
     (r'^provision-service/detail_analysis', stat_report.get_detail_data),
-    (r'^bookmark/add', 'preset.bookmark_add')
+    (r'^(?P<model_name>[A-Za-z]+)/add', 'preset.preset_model_add')
 )
