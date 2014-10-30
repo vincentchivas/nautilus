@@ -74,5 +74,9 @@ urlpatterns = patterns(
     (r'^changepwd', 'user.change_password'),
     (r'^provision-service/provision_analysis', stat_report.report_locale),
     (r'^provision-service/detail_analysis', stat_report.get_detail_data),
-    (r'^(?P<model_name>[A-Za-z]+)/add', 'preset.preset_model_add')
+    (r'^(?P<model_name>[A-Za-z]+)/add', 'preset.preset_model_add'),
+    (r'^(?P<model_name>[A-Za-z]+)/delete', 'preset.preset_model_delete'),
+    (r'^(?P<model_name>[A-Za-z]+)/list', 'preset.preset_model_list'),
+    (r'^(?P<model_name>[A-Za-z]+)/(?P<item_id>[0-9A-Za-z]*)',
+        'preset.detail_modify_model')
 )

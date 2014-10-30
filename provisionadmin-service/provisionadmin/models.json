@@ -1,9 +1,0 @@
-{
-    "bookmark":{
-    "db":"i18n",
-    "collection":"bookmark",
-    "required":["name", "url"],
-    "optional":[["time","1234"]],
-    "unique":[["name"]]
-    }
-}

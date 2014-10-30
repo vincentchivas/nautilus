@@ -8,7 +8,9 @@
 from provisionadmin.db.config import config
 import i18ndb
 import userdb
+import presetdb
 
 print 'init app db'
 config(i18ndb)
 config(userdb)
+config(presetdb)

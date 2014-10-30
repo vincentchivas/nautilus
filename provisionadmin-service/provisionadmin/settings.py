@@ -329,7 +329,7 @@ def _load_service_config(cp):
             v['filename'] = os.path.join(
                 LOGS_DIR, os.path.basename(v['filename']))
 global MODELS
-f = file(os.path.join(SITE_ROOT, "models.json"))
+f = file(os.path.join(SITE_ROOT, "models.cfg"))
 MODELS = json.load(f)
 
 cp = ConfigParser()
