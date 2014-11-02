@@ -2,6 +2,7 @@
 import simplejson
 import time
 from provisionadmin.utils.json import json_response_error, json_response_ok
+from provisionadmin.utils.validate import MetaValidate
 from provisionadmin.model.preset import config
 from provisionadmin.settings import MODELS
 from provisionadmin.utils.respcode import PARAM_ERROR, METHOD_ERROR, \
@@ -20,10 +21,19 @@ def preset_model_add(req, model_name):
                 if not temp_dict.get(required_para):
                     return json_response_error(
                         PARAM_REQUIRED,
+                        msg="parameter %s request" % required_para)
+            check_dict = Model_Name.type_check
+            for check_para in check_dict.keys():
+                value = temp_dict.get(check_para)
+                check_type = check_dict[check_para].get("type")
+                if not MetaValidate.check_validate(check_type, value):
+                # 检查类型的同时还可检查长度之类的
+                    return json_response_error(
+                        PARAM_REQUIRED,
                         msg="parameter %s invalid" % required_para)
-            value = Model_Name.insert(temp_dict)
+            Model_Name.insert(temp_dict)
             return json_response_ok(
-                {"value": value}, msg="add %s success" % model_name)
+                {}, msg="add %s success" % model_name)
         else:
             return json_response_error(
                 PARAM_ERROR, msg="model name %s is not exist" % model_name)
