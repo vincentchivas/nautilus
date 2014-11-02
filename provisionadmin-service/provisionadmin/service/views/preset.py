@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import simplejson
+import time
 from provisionadmin.utils.json import json_response_error, json_response_ok
 from provisionadmin.model.preset import config
 from provisionadmin.settings import MODELS
@@ -20,8 +21,9 @@ def preset_model_add(req, model_name):
                     return json_response_error(
                         PARAM_REQUIRED,
                         msg="parameter %s invalid" % required_para)
-            Model_Name.insert(temp_dict)
-            return json_response_ok({}, msg="add %s success" % model_name)
+            value = Model_Name.insert(temp_dict)
+            return json_response_ok(
+                {"value": value}, msg="add %s success" % model_name)
         else:
             return json_response_error(
                 PARAM_ERROR, msg="model name %s is not exist" % model_name)
@@ -35,10 +37,34 @@ def preset_model_list(req, model_name):
         if MODELS.get(model_name):
             model_list = []
             Model_Name = config(str(model_name))
+            cond = {}
             list_api = Model_Name.list_api
             fields = list_api["fields"]
             filters = list_api["filters"]
-            results = Model_Name.find({}, fields=fields, toarray=True)
+            search_fields = list_api["search_fields"]
+            for key in search_fields.keys():
+                value = req.GET.get(key)
+                if value:
+                    value_type = search_fields.get(key)["type"]
+                    if value_type == "int":
+                        value = int(value)
+                    if search_fields.get(key)["front"] == "dropdownlist":
+                        cond[key] = value
+                    elif search_fields.get(key)["front"] == "textbox":
+                        cond[key] = {"$regex": value}
+                else:
+                    if search_fields.get(key) == "date":
+                        one_day = 86400.0
+                        start_time = req.GET.get("start")
+                        if not start_time:
+                            continue
+                        start = time.mktime(
+                            time.strptime(start_time, '%Y-%m-%d'))
+                        end_time = req.GET.get("end")
+                        end = time.mktime(
+                            time.strptime(end_time, '%Y-%m-%d')) + one_day
+                        cond[key] = {"$gte": start, "$lte": end}
+            results = Model_Name.find(cond, fields=fields, toarray=True)
             for result in results:
                 result["id"] = str(result.get("_id"))
                 result.pop("_id")

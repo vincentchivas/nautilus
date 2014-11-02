@@ -8,6 +8,8 @@
 import logging
 from provisionadmin import db
 from provisionadmin.db.config import DBS
+from provisionadmin.utils.common import now_timestamp
+
 
 logger = logging.getLogger("model")
 
@@ -101,6 +103,8 @@ class ModelBase(dict):
                     o_dv = o[1]
                     if callable(o_dv):
                         ret_data[o_key] = o_dv()
+                    elif o_dv == "now_timestamp":
+                        ret_data[o_key] = now_timestamp()
                     else:
                         ret_data[o_key] = o_dv
         return ret_data
