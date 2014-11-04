@@ -148,7 +148,7 @@ class ModelBase(dict):
         else:
             if not cls.check_unique(data, extract=False):
                 logger.warning("check unique fails for data: %s", data)
-                return
+                return "unique_failed"
         return db.base_insert(DBS[cls.db], cls.collection, data)
         # return generated _id
 

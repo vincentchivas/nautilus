@@ -1,79 +1,181 @@
 # -*- coding: utf-8 -*-
 import simplejson
 import time
+import logging
 from provisionadmin.utils.json import json_response_error, json_response_ok
+from provisionadmin.decorator import exception_handler
 from provisionadmin.utils.validate import MetaValidate
-from provisionadmin.model.preset import config
-from provisionadmin.settings import MODELS
+from provisionadmin.model.preset import classing_model
 from provisionadmin.utils.respcode import PARAM_ERROR, METHOD_ERROR, \
     PARAM_REQUIRED
 from bson import ObjectId
 
+_LOGGER = logging.getLogger("view")
+_ONE_DAY = 86400.0
 
+
+def _preset_model_add_get(child_name, parent_model):
+    '''
+     notice: when call add model api, if the model has children models,it
+     will return children model data list
+    '''
+    model_list = []
+    Model_Child = classing_model(str(child_name))
+    if Model_Child:
+        relation = Model_Child.relation
+        parents = relation["parent"]
+        parent_dict = parents.get(parent_model)
+        fields = parent_dict.get("fields")
+        display_field = parent_dict.get("display_value")
+        results = Model_Child.find({}, fields, toarray=True)
+        for result in results:
+            model_dict = {}
+            model_dict["value"] = str(result.get("_id"))
+            model_dict["display_value"] = result.get(display_field)
+            model_list.append(model_dict)
+    return model_list
+
+
+@exception_handler()
 def preset_model_add(req, model_name):
-    if req.method == "POST":
-        temp_strs = req.raw_post_data
-        temp_dict = simplejson.loads(temp_strs)
-        if MODELS.get(model_name):
-            Model_Name = config(str(model_name))
+    '''
+    notice: when get request, if the model had children model, it will return
+    a child model data list
+    when post request, it will return add successfully or failed
+    Request URL: /admin/P<model_name>/add
+    HTTP Method: GET/POST
+    when get:
+    Parameters: None
+    Return:{
+        "child_model":[
+        {"value":child_id,
+          "display_value":child_field
+        }
+        ]
+        }
+    when post:
+    Parameters: {"field1":value1, "field2":value2,...}
+    Return:{
+         "status":0,
+         "msg":"add successfully"
+        }
+    '''
+    Model_Name = classing_model(str(model_name))
+    if Model_Name:
+        if req.method == "POST":
+            temp_strs = req.raw_post_data
+            try:
+                temp_dict = simplejson.loads(temp_strs)
+            except ValueError as expt:
+                _LOGGER.info("model add api para except:%s", expt)
+                return json_response_error(
+                    PARAM_ERROR,
+                    msg="json loads error,check parameters format")
             required_list = Model_Name.required
             for required_para in required_list:
-                if not temp_dict.get(required_para):
+                if temp_dict.get(required_para) is None:
                     return json_response_error(
                         PARAM_REQUIRED,
                         msg="parameter %s request" % required_para)
             check_dict = Model_Name.type_check
-            for check_para in check_dict.keys():
-                value = temp_dict.get(check_para)
-                check_type = check_dict[check_para].get("type")
+            for key in check_dict:
+                value = temp_dict.get(key)
+                check_type = check_dict[key].get("type")
                 if not MetaValidate.check_validate(check_type, value):
-                # 检查类型的同时还可检查长度之类的
                     return json_response_error(
                         PARAM_REQUIRED,
                         msg="parameter %s invalid" % required_para)
-            Model_Name.insert(temp_dict)
+            result = Model_Name.insert(temp_dict)
+            if result == "unique_failed":
+                return json_response_error(
+                    PARAM_ERROR,
+                    msg="unque check failed")
             return json_response_ok(
                 {}, msg="add %s success" % model_name)
+        elif req.method == "GET":
+            data = {}
+            if Model_Name.relation:
+                children = Model_Name.relation.get("children")
+                if children:
+                    for key in children:
+                        model_list = _preset_model_add_get(key, model_name)
+                        data[key] = model_list
+                    return json_response_ok(data, msg="get %s list" % key)
+                else:
+                    return json_response_ok({}, msg="no child model")
+            else:
+                return json_response_ok({}, msg="no relation model")
         else:
             return json_response_error(
-                PARAM_ERROR, msg="model name %s is not exist" % model_name)
+                METHOD_ERROR, msg="http method error")
     else:
         return json_response_error(
-            METHOD_ERROR, msg="http method error")
+            PARAM_ERROR, msg="model name %s is not exist" % model_name)
 
 
+def _search_cond(request, search_fields):
+    '''
+    notice:when a request comes,combination of the search_fields and the
+    request parameter values, return a condition query to mongodb
+    '''
+    cond = {}
+    for key in search_fields.keys():
+        value = request.GET.get(key)
+        if value:
+            value_type = search_fields.get(key)["type"]
+            if value_type == "int":
+                value = int(value)
+            if search_fields.get(key)["front"] == "dropdownlist":
+                cond[key] = value
+            elif search_fields.get(key)["front"] == "textbox":
+                cond[key] = {"$regex": value}
+        else:
+            if search_fields.get(key) == "date":
+                start_time = request.GET.get("start")
+                if not start_time:
+                    continue
+                start = time.mktime(
+                    time.strptime(start_time, '%Y-%m-%d'))
+                end_time = request.GET.get("end")
+                end = time.mktime(
+                    time.strptime(end_time, '%Y-%m-%d')) + _ONE_DAY
+                cond[key] = {"$gte": start, "$lte": end}
+    return cond
+
+
+@exception_handler()
 def preset_model_list(req, model_name):
-    if req.method == "GET":
-        if MODELS.get(model_name):
+    '''
+    Request URL: /admin/preset_{P<model>}_list
+    HTTP Method: GET
+    Parameters: None
+    Return:
+        {
+            "status":0,
+            "data":{
+                "items":[
+                {"field1":value1},
+                {"field2":value2}
+                ]
+                }
+            }
+
+    '''
+    Model_Name = classing_model(str(model_name))
+    if Model_Name:
+        if req.method == "GET":
             model_list = []
-            Model_Name = config(str(model_name))
             cond = {}
-            list_api = Model_Name.list_api
+            try:
+                list_api = Model_Name.list_api
+            except:
+                return json_response_error(
+                    PARAM_ERROR, msg="list_api is not configed")
             fields = list_api["fields"]
             filters = list_api["filters"]
-            search_fields = list_api["search_fields"]
-            for key in search_fields.keys():
-                value = req.GET.get(key)
-                if value:
-                    value_type = search_fields.get(key)["type"]
-                    if value_type == "int":
-                        value = int(value)
-                    if search_fields.get(key)["front"] == "dropdownlist":
-                        cond[key] = value
-                    elif search_fields.get(key)["front"] == "textbox":
-                        cond[key] = {"$regex": value}
-                else:
-                    if search_fields.get(key) == "date":
-                        one_day = 86400.0
-                        start_time = req.GET.get("start")
-                        if not start_time:
-                            continue
-                        start = time.mktime(
-                            time.strptime(start_time, '%Y-%m-%d'))
-                        end_time = req.GET.get("end")
-                        end = time.mktime(
-                            time.strptime(end_time, '%Y-%m-%d')) + one_day
-                        cond[key] = {"$gte": start, "$lte": end}
+            if list_api.get("search_fields"):
+                search_fields = list_api["search_fields"]
+                cond = _search_cond(req, search_fields)
             results = Model_Name.find(cond, fields=fields, toarray=True)
             for result in results:
                 result["id"] = str(result.get("_id"))
@@ -85,42 +187,73 @@ def preset_model_list(req, model_name):
             return json_response_ok(data, msg="get list")
         else:
             return json_response_error(
-                PARAM_ERROR, msg="model name %s is not exist" % model_name)
+                METHOD_ERROR, msg="http method error")
     else:
         return json_response_error(
-            METHOD_ERROR, msg="http method error")
+            PARAM_ERROR, msg="model name %s is not exist" % model_name)
 
 
+@exception_handler()
 def detail_modify_model(req, model_name, item_id):
+    '''
+    notice:when a get request comes, it will return one model detail data;
+    when a post request comes, it will return update success or not
+    Request URL:/admin/P<model_name>/P<int>
+    HTTP Method: GET/POST
+    when get:
+    parameter: None
+    return:{
+         "item":{
+            "field1":value1,
+            "field2":value2
+            }
+        }
+    when post:
+    parameter:{"field1":value1, "field2:value2"}
+    return:{
+           "status":0,
+           "msg":"save successfully"
+        }
+    '''
     if not isinstance(item_id, ObjectId):
         item_id = ObjectId(item_id)
-    if req.method == "GET":
-        if MODELS.get(model_name):
-            Model_Name = config(str(model_name))
+    Model_Name = classing_model(str(model_name))
+    if Model_Name:
+        if req.method == "GET":
             list_api = Model_Name.list_api
             cond = {"_id": item_id}
             fields = list_api["fields"]
-            detail_item = Model_Name.find(cond, fields, toarray=True)
+            detail_item = Model_Name.find(cond, fields, one=True, toarray=True)
             if detail_item:
                 data = {}
-                model_one = detail_item[0]
-                model_one["id"] = str(model_one["_id"])
-                model_one.pop("_id")
-                data["item"] = model_one
-                return json_response_ok(
-                    data, msg="get one  detail")
+                detail_item["id"] = str(detail_item.pop("_id", None))
+                data["item"] = detail_item
+                if Model_Name.relation:
+                    children = Model_Name.relation.get("children")
+                    if children:
+                        for key in children:
+                            model_list = _preset_model_add_get(
+                                key, model_name)
+                            data[key] = model_list
+                        return json_response_ok(
+                            data, msg="edit api get %s list" % key)
+                    else:
+                        return json_response_ok(data, msg="no child model")
+                else:
+                    return json_response_ok(data, msg="no relation model")
             else:
                 return json_response_error(
                     PARAM_ERROR, msg="the id is not exist")
-        else:
-            return json_response_error(
-                PARAM_ERROR, msg="model name %s is not exist" % model_name)
-    elif req.method == "POST":
-        if MODELS.get(model_name):
-            Model_Name = config(str(model_name))
+        elif req.method == "POST":
             required_list = Model_Name.required
             temp_strs = req.raw_post_data
-            temp_dict = simplejson.loads(temp_strs)
+            try:
+                temp_dict = simplejson.loads(temp_strs)
+            except ValueError as expt:
+                _LOGGER.info("model edit api para except:%s", expt)
+                return json_response_error(
+                    PARAM_ERROR,
+                    msg="json loads error,check parameters format")
             for required_para in required_list:
                 if not temp_dict.get(required_para):
                     return json_response_error(
@@ -136,18 +269,35 @@ def detail_modify_model(req, model_name, item_id):
                     PARAM_ERROR, msg="the id is not exist")
         else:
             return json_response_error(
-                PARAM_ERROR, msg="model name %s is not exist" % model_name)
+                METHOD_ERROR, msg="http method error")
     else:
         return json_response_error(
-            METHOD_ERROR, msg="http method error")
+            PARAM_ERROR, msg="model name %s is not exist" % model_name)
 
 
+@exception_handler()
 def preset_model_delete(req, model_name):
-    if req.method == "POST":
-        if MODELS.get(model_name):
-            Model_Name = config(str(model_name))
+    '''
+    Request URL: /admin/P<model_name>/delete
+    HTTP Method: POST
+    Parameters: {"item_ids": ["123","124"]}
+    Return:{
+        "status":0,
+        "msg":"delete successfully"
+
+        }
+    '''
+    Model_Name = classing_model(str(model_name))
+    if Model_Name:
+        if req.method == "POST":
             temp_strs = req.raw_post_data
-            temp_dict = simplejson.loads(temp_strs)
+            try:
+                temp_dict = simplejson.loads(temp_strs)
+            except ValueError as expt:
+                _LOGGER.info("model delete api para except:%s", expt)
+                return json_response_error(
+                    PARAM_ERROR,
+                    msg="json loads error,check parameters format")
             item_ids = temp_dict.get("item_ids")
             if not item_ids:
                 return json_response_error(PARAM_ERROR, msg="item_id is empty")
@@ -159,7 +309,7 @@ def preset_model_delete(req, model_name):
             return json_response_ok({}, msg="delete successfully")
         else:
             return json_response_error(
-                PARAM_ERROR, msg="model name %s is not exist" % model_name)
+                METHOD_ERROR, msg="http method error")
     else:
         return json_response_error(
-            METHOD_ERROR, msg="http method error")
+            PARAM_ERROR, msg="model name %s is not exist" % model_name)
