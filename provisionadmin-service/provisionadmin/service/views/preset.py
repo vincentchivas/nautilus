@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger("view")
 _ONE_DAY = 86400.0
 
 
-def _preset_model_add_get(child_name, parent_model):
+def _get_children_model(child_name, parent_model, api_type="add", item_ids=[]):
     '''
      notice: when call add model api, if the model has children models,it
      will return children model data list
@@ -30,8 +30,13 @@ def _preset_model_add_get(child_name, parent_model):
         results = Model_Child.find({}, fields, toarray=True)
         for result in results:
             model_dict = {}
-            model_dict["value"] = str(result.get("_id"))
+            model_id = str(result.get("_id"))
+            model_dict["value"] = model_id
             model_dict["display_value"] = result.get(display_field)
+            if api_type == "edit" and model_id in item_ids:
+                model_dict["selected"] = True
+            else:
+                model_dict["selected"] = False
             model_list.append(model_dict)
     return model_list
 
@@ -98,7 +103,7 @@ def preset_model_add(req, model_name):
                 children = Model_Name.relation.get("children")
                 if children:
                     for key in children:
-                        model_list = _preset_model_add_get(key, model_name)
+                        model_list = _get_children_model(key, model_name)
                         data[key] = model_list
                     return json_response_ok(data, msg="get %s list" % key)
                 else:
@@ -232,8 +237,10 @@ def detail_modify_model(req, model_name, item_id):
                     children = Model_Name.relation.get("children")
                     if children:
                         for key in children:
-                            model_list = _preset_model_add_get(
-                                key, model_name)
+                            item_ids = detail_item.get(key)
+                            model_list = _get_children_model(
+                                key, model_name,
+                                api_type="edit", item_ids=item_ids)
                             data[key] = model_list
                         return json_response_ok(
                             data, msg="edit api get %s list" % key)
@@ -259,6 +266,14 @@ def detail_modify_model(req, model_name, item_id):
                     return json_response_error(
                         PARAM_REQUIRED,
                         msg="parameter %s invalid" % required_para)
+            check_dict = Model_Name.type_check
+            for key in check_dict:
+                value = temp_dict.get(key)
+                check_type = check_dict[key].get("type")
+                if not MetaValidate.check_validate(check_type, value):
+                    return json_response_error(
+                        PARAM_REQUIRED,
+                        msg="parameter %s invalid" % required_para)
             cond = {"_id": item_id}
             if Model_Name.find(cond):
                 Model_Name.update(cond, temp_dict)
@@ -273,6 +288,38 @@ def detail_modify_model(req, model_name, item_id):
     else:
         return json_response_error(
             PARAM_ERROR, msg="model name %s is not exist" % model_name)
+
+
+def _del_model_with_relations(model_name, item_ids):
+    Model_Name = classing_model(str(model_name))
+    relation = Model_Name.relation
+    parent_dict = {}
+    if relation.get("parent"):
+        parent_dict = relation.get("parent")
+    for item_id in item_ids:
+        model = Model_Name.find(
+            cond={"_id": ObjectId(item_id)}, one=True, toarray=True)
+        if model:
+            Model_Name.remove({"_id": ObjectId(item_id)})
+            if parent_dict:
+                for key in parent_dict:
+                    Parent_Model = classing_model(str(key))
+                    fields_in_parent = model_name
+                    model_list = Parent_Model.find(
+                        {fields_in_parent: str(item_id)}, toarray=True)
+                    for model in model_list:
+                        child_list = model.get(fields_in_parent)
+                        child_list.remove(str(item_id))
+                        Parent_Model.update(
+                            {"_id": model["_id"]},
+                            {fields_in_parent: child_list})
+            else:
+                _LOGGER.info("%s has no parent model" % model_name)
+            item_ids.remove(str(item_id))
+        else:
+            _LOGGER.info(
+                "model %s itemid %s is not exist" % (model_name, item_id))
+    return item_ids
 
 
 @exception_handler()
@@ -302,11 +349,12 @@ def preset_model_delete(req, model_name):
             if not item_ids:
                 return json_response_error(PARAM_ERROR, msg="item_id is empty")
             else:
-                cond = {}
-                for item_id in item_ids:
-                    cond["_id"] = ObjectId(item_id)
-                    Model_Name.remove(cond)
-            return json_response_ok({}, msg="delete successfully")
+                ids = _del_model_with_relations(str(model_name), item_ids)
+                if not ids:
+                    return json_response_ok({}, msg="delete successfully")
+                else:
+                    return json_response_error(
+                        PARAM_ERROR, msg="ids:%s invalid" % ids)
         else:
             return json_response_error(
                 METHOD_ERROR, msg="http method error")
