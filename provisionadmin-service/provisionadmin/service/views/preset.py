@@ -99,6 +99,16 @@ def preset_model_add(req, model_name):
                 {}, msg="add %s success" % model_name)
         elif req.method == "GET":
             data = {}
+            print Model_Name
+            if Model_Name.resources:
+                for key in Model_Name.resources:
+                    res = Model_Name.resources[key]
+                    _LOGGER.info(res)
+                    func_name = res.get("func_name")
+                    _LOGGER.info(func_name)
+                    if hasattr(Model_Name, func_name):
+                        val = getattr(Model_Name, func_name)
+                        data[func_name] = val
             if Model_Name.relation:
                 children = Model_Name.relation.get("children")
                 if children:

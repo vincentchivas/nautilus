@@ -44,11 +44,20 @@ def login(req):
                     respcode.AUTH_ERROR, {},
                     msg='Look like that is not right. Give it another try?')
             else:
-                req.session["uid"] = user_check['_id']
-                uid = int(user_check['_id'])
-                permissions = Permission.init_menu(uid)
-                return json_response_ok(
-                    data=permissions, msg='get left navi menu')
+                if user_check.get("is_active"):
+                    req.session["uid"] = user_check['_id']
+                    uid = int(user_check['_id'])
+                    upt_dict = {
+                        "last_login": now_timestamp(),
+                        "total_login": user_check.get("total_login") + 1}
+                    User.update_user({"_id": uid}, upt_dict)
+                    permissions = Permission.init_menu(uid)
+                    return json_response_ok(
+                        data=permissions, msg='get left navi menu')
+                else:
+                    return json_response_error(
+                        respcode.AUTH_ERROR, {},
+                        msg='This account is not actived.')
         else:
             return json_response_error(
                 respcode.PARAM_REQUIRED,
@@ -74,9 +83,8 @@ def change_password(req):
         uid = req.session["uid"]
         usr = User.find_one_user({'_id': uid})
         if usr:
-            if usr.password == old_pwd:
-                usr.password = new_pwd
-                User.save_user(usr)
+            if usr.get("password") == old_pwd:
+                User.update_user({"_id": uid}, {"password": new_pwd})
                 return json_response_ok(data={}, msg='password changed')
             else:
                 return json_response_error(
@@ -194,6 +202,7 @@ def _get_user_list(cond={}):
         user.pop("_id")
         user["role"] = _get_group_name_list(user.get("group_id"))
         user.pop("group_id")
+        user.pop("department")
         users.append(user)
     return users
 
@@ -239,7 +248,7 @@ def detail_modify_group(req, group_id):
         if groups:
             data = {}
             users = _get_user_list(cond={"group_id": group_id})
-            data.setdefault("item", users)
+            data.setdefault("items", users)
             return json_response_ok(
                 data, msg="get group one group detail")
         else:
@@ -377,8 +386,12 @@ def list_user(req):
         users = _get_user_list()
         data = {}
         data.setdefault("items", users)
-        filters = User.get_filters()
-        data.setdefault("filters", filters)
+        # filters = User.get_filters()
+        groups_roles = User.get_groups_roles(filters=True)
+        items_dict = {}
+        items_dict["groups"] = groups_roles[0]
+        items_dict["roles"] = groups_roles[1]
+        data["filters"] = items_dict
         return json_response_ok(data, "get user list")
     else:
         return json_response_error(
@@ -418,6 +431,10 @@ def create_user(req):
                     respcode.PARAM_REQUIRED,
                     msg="parameter %s invalid" % required_para)
         user_name = temp_dict.get('user_name')
+        if User.find_one_user({"user_name": user_name}):
+            return json_response_error(
+                respcode.PARAM_REQUIRED,
+                msg="the email has been used!")
         group_names = temp_dict.get('roles')
         password = User.calc_password_hash("123456")
         group_id = _get_group_ids(group_names)
@@ -431,7 +448,10 @@ def create_user(req):
         return json_response_ok({"info": user_instance})
     elif req.method == 'GET':
         data = {}
-        data["departments"] = User.get_departments()
+        groups_roles = User.get_groups_roles()
+        data["groups"] = groups_roles[0]
+        data["roles"] = groups_roles[1]
+        # data["departments"] = User.get_departments()
         return json_response_ok(data, "get departments")
     else:
         return json_response_error(
@@ -489,8 +509,12 @@ def detail_modify_user(req, user_id):
             data = {}
             group_id_list = user.get("group_id")
             user.pop("group_id")
-            data["departments"] = User.get_departments(
+            groups_roles = User.get_groups_roles(
                 user.get("department"), group_id_list)
+            data["groups"] = groups_roles[0]
+            data["roles"] = groups_roles[1]
+            # data["departments"] = User.get_departments(
+            #     user.get("department"), group_id_list)
             data.setdefault("user", user)
             return json_response_ok(
                 data, msg="get  one user detail")
@@ -509,7 +533,7 @@ def detail_modify_user(req, user_id):
         user_name = temp_dict.get('user_name')
         group_names = temp_dict.get('roles')
         group_id = _get_group_ids(group_names)
-        department = temp_dict.get('department')
+        department = temp_dict.get('groups')
         mark = temp_dict.get('mark')
         cond = {"_id": user_id}
         upt_dict = {"user_name": user_name,
@@ -607,7 +631,7 @@ def user_active(req):
         temp_strs = req.raw_post_data
         temp_dict = simplejson.loads(temp_strs)
         uid = temp_dict.get("id")
-        status = temp_dict.get("status")
+        status = temp_dict.get("is_active")
         User.update_user(
             {"_id": uid}, {"is_active": status})
         return json_response_ok({}, msg="update active success")
@@ -619,8 +643,7 @@ def user_active(req):
 def group_perm_list(req):
     if req.method == "GET":
         grant_id = req.GET.get("roleid")
-        # uid = req.session["uid"]
-        uid = 3
+        uid = req.session["uid"]
         models = Permission.user_perm_list(uid, group_id=int(grant_id))
         features = Permission.user_perm_feature(uid, group_id=int(grant_id))
         data = {}
@@ -646,8 +669,7 @@ def group_perm_list(req):
 def user_perm_list(req):
     if req.method == "GET":
         grant_id = req.GET.get("userid")
-        # uid = req.session["uid"]
-        uid = 3
+        uid = req.session["uid"]
         models = Permission.user_perm_list(uid, grant_id=int(grant_id))
         features = Permission.user_perm_feature(uid, grant_id=int(grant_id))
         data = {}
@@ -671,29 +693,37 @@ def user_perm_list(req):
 
 
 def action_log_list(req):
-    if req.method == "POST":
-        temp_strs = req.raw_post_data
-        temp_dict = simplejson.loads(temp_strs)
-        department = temp_dict.get("department")
-        group_name = temp_dict.get("role")
-        if department and group_name:
-            print "search"
-            group = Group.find_group({"group_name": group_name})[0]
-            group_id = group.get("_id")
-            user_name = temp_dict.get("user_name")
-            start_time = temp_dict.get("start")
-            start = time.mktime(time.strptime(start_time, '%Y-%m-%d'))
-            end_time = temp_dict.get("end")
-            end = time.mktime(time.strptime(end_time, '%Y-%m-%d'))
-            cond = {"modified": {"$gte": start, "$lte": end}}
-            raw_results = UserLog.search_log_info(cond)
+    if req.method == "GET":
+        department = req.GET.get("group")
+        group_name = req.GET.get("role")
+        start_time = req.GET.get("start")
+        start = time.mktime(time.strptime(start_time, '%Y-%m-%d'))
+        one_day = 86400.0
+        end_time = req.GET.get("end")
+        end = time.mktime(time.strptime(end_time, '%Y-%m-%d')) + one_day
+        cond = {"modified": {"$gte": start, "$lte": end}}
+        # when the department is empty and group_name is empty
+        if department is not None and group_name is not None:
+            user_name = req.GET.get("user_name")
+            find_list = UserLog.search_log_info(cond)
+            raw_results = find_list.sort('modified', -1)
+            cond_for_users = {}
             logs = []
-            cond_for_users = {"department": department, "group_id": group_id}
             if user_name:
                 cond_for_users["user_name"] = {"$regex": user_name}
-            user_list = User.find_users(cond, {"user_name": 1, "_id": 0})
+            if group_name != "":
+                group = Group.find_group({"group_name": group_name})[0]
+                group_id = group.get("_id")
+                cond_for_users["group_id"] = group_id
+            if department != "":
+                cond_for_users["department"] = department
+            user_list = []
+            raw_user_list = User.find_users(
+                cond_for_users, {"user_name": 1, "_id": 0})
+            for user in raw_user_list:
+                user_list.append(user.get("user_name"))
             for result in raw_results:
-                if result.get("uid") in user_list:
+                if result.get("user_name") in user_list:
                     log_dict = {}
                     log_dict["time"] = unixto_string(result.get("modified"))
                     log_dict["id"] = result.get("_id")
@@ -705,8 +735,8 @@ def action_log_list(req):
             data["items"] = logs
             return json_response_ok(data, "filter user log")
         else:
-            print "list"
-            raw_results = UserLog.search_log_info()
+            find_list = UserLog.search_log_info(cond)
+            raw_results = find_list.sort('modified', -1)
             logs = []
             for result in raw_results:
                 log_dict = {}
@@ -717,7 +747,11 @@ def action_log_list(req):
                 logs.append(log_dict)
             data = {}
             data["items"] = logs
-            data["filters"] = User.get_filters()
+            groups_roles = User.get_groups_roles(filters=True)
+            items_dict = {}
+            items_dict["groups"] = groups_roles[0]
+            items_dict["roles"] = groups_roles[1]
+            data["filters"] = items_dict
             return json_response_ok(data, "get user log")
     else:
         return json_response_error(
