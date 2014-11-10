@@ -6,8 +6,18 @@ from sqlalchemy import create_engine
 
 
 @classmethod
-def get_rules():
-    return "get"
+def get_rules(cls, conn):
+    item = {}
+    engine = create_engine(conn)
+    Session = sessionmaker(bind=engine)
+    sess = Session()
+    # sess.execute("create database abc")
+    # sess.execute("show databases")
+    print sess.execute("select * from persons where uid=1").first()
+    person = sess.execute(
+        ("select * from persons where uid=:id", {"id": 1}).first()
+    # return a tuple (1, "anel")
+    print person
 
 
 def classing_model(model_name):
