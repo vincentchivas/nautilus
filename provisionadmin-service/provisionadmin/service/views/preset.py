@@ -9,6 +9,7 @@ from provisionadmin.model.preset import classing_model
 from provisionadmin.utils.respcode import PARAM_ERROR, METHOD_ERROR, \
     PARAM_REQUIRED
 from bson import ObjectId
+from provisionadmin.utils.common import unixto_string
 
 _LOGGER = logging.getLogger("view")
 _ONE_DAY = 86400.0
@@ -99,16 +100,19 @@ def preset_model_add(req, model_name):
                 {}, msg="add %s success" % model_name)
         elif req.method == "GET":
             data = {}
-            if Model_Name.resources:
+            if hasattr(Model_Name, "resources"):
                 for key in Model_Name.resources:
                     res = Model_Name.resources[key]
                     _LOGGER.info(res)
                     func_name = res.get("func_name")
+                    conn_str = res.get("conn_string")
                     _LOGGER.info(func_name)
                     if hasattr(Model_Name, func_name):
                         func = getattr(Model_Name, func_name)
                         if callable(func):
-                            data[func_name] = func()
+                            data[func_name] = func(conn_str)
+                        else:
+                            data[func_name] = func
             if Model_Name.relation:
                 children = Model_Name.relation.get("children")
                 if children:
@@ -195,6 +199,8 @@ def preset_model_list(req, model_name):
             for result in results:
                 result["id"] = str(result.get("_id"))
                 result.pop("_id")
+                if result.get("modified"):
+                    result["time"] = unixto_string(result.get("modified"))
                 model_list.append(result)
             data = {}
             data["items"] = model_list
@@ -209,7 +215,7 @@ def preset_model_list(req, model_name):
 
 
 @exception_handler()
-def detail_modify_model(req, model_name, item_id):
+def detail_modify_model(req, model_name):
     '''
     notice:when a get request comes, it will return one model detail data;
     when a post request comes, it will return update success or not
@@ -230,11 +236,15 @@ def detail_modify_model(req, model_name, item_id):
            "msg":"save successfully"
         }
     '''
-    if not isinstance(item_id, ObjectId):
-        item_id = ObjectId(item_id)
     Model_Name = classing_model(str(model_name))
     if Model_Name:
         if req.method == "GET":
+            item_id = req.GET.get("id")
+            if not item_id:
+                return json_response_error(
+                    PARAM_ERROR, msg="the id is required")
+            if not isinstance(item_id, ObjectId):
+                item_id = ObjectId(item_id)
             list_api = Model_Name.list_api
             cond = {"_id": item_id}
             fields = list_api["fields"]
@@ -253,7 +263,7 @@ def detail_modify_model(req, model_name, item_id):
                                 api_type="edit", item_ids=item_ids)
                             data[key] = model_list
                         return json_response_ok(
-                            data, msg="edit api get %s list" % key)
+                            data, msg="edit api:children model %s list" % key)
                     else:
                         return json_response_ok(data, msg="no child model")
                 else:
@@ -262,6 +272,7 @@ def detail_modify_model(req, model_name, item_id):
                 return json_response_error(
                     PARAM_ERROR, msg="the id is not exist")
         elif req.method == "POST":
+            item_id = req.POST.get("id")
             required_list = Model_Name.required
             temp_strs = req.raw_post_data
             try:

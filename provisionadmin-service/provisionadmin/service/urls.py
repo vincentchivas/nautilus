@@ -77,6 +77,5 @@ urlpatterns = patterns(
     (r'^(?P<model_name>[A-Za-z]+)/add', 'preset.preset_model_add'),
     (r'^(?P<model_name>[A-Za-z]+)/delete', 'preset.preset_model_delete'),
     (r'^(?P<model_name>[A-Za-z]+)/list', 'preset.preset_model_list'),
-    (r'^(?P<model_name>[A-Za-z]+)/(?P<item_id>[0-9A-Za-z]*)',
-        'preset.detail_modify_model')
+    (r'^(?P<model_name>[A-Za-z]+)/edit', 'preset.detail_modify_model'),
 )
