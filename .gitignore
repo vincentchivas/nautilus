@@ -1,2 +1,2 @@
-cometd-exam/client-hello/overlays/
-cometd-exam/client-hello/target/
+cometd-exam/*/overlays/
+cometd-exam/*/target/
