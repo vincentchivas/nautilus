@@ -21,9 +21,10 @@ def online(appname, modelname, item_ids, server):
         return json_response_error(PARAM_ERROR, msg="no item find")
     results = online_data(appname, modelname, server, items)
     status = results[0]
+    out_msg = results[1]
     data = {}
-    data["success"] = results[1]
-    data["failed"] = results[2]
+    data["success"] = results[2]
+    data["failed"] = results[3]
     data['userlog'] = [common_filter(i) for i in data.get('success')]
     data['memo'] = 'online to %s' % server
     if status == -1:
@@ -31,7 +32,7 @@ def online(appname, modelname, item_ids, server):
     elif status == 0:
         return json_response_ok(data, msg="upload successfully")
     else:
-        return json_response_error(status, data, msg="upload error")
+        return json_response_error(status, data, msg=out_msg)
 
 
 def offline(appname, modelname, item_ids, server):

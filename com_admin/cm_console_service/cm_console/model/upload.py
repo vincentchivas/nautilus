@@ -52,51 +52,63 @@ class ios_console(UploadBase):
             fields={'_id': 0}, toarray=True)
         if not theme_infos:
             return theme_list
-        for theme_info in theme_infos:
-            icon_url = fetch_icon_url(
-                self.appname, theme_info.get('icon'), server)
-            banner_url = fetch_icon_url(
-                self.appname, theme_info.get('logo'), server)
-            locale_titles = theme_info.get('themelocale')
-            theme_dict = {
-                'type': 'theme',
-                'themeId': theme_info.get('id'),
-                'name': theme_info.get('title'),
-                'titles': self.localize_titles(locale_titles),
-                'downloadUrl': banner_url,
-                'thumbnailUrl': icon_url,
-                'price': theme_info.get('prize', ''),
-                'productId': theme_info.get('paidID', '')}
-            theme_list.append(theme_dict)
+        for theme_id in theme_ids:
+            for theme_info in theme_infos:
+                if theme_id == theme_info.get('id'):
+                    icon_url = fetch_icon_url(
+                        self.appname, theme_info.get('icon'), server)
+                    banner_url = fetch_icon_url(
+                        self.appname, theme_info.get('logo'), server)
+                    locale_titles = theme_info.get('themelocale')
+                    theme_dict = {
+                        'type': 'theme',
+                        'themeId': theme_id,
+                        'name': theme_info.get('name'),
+                        'titles': self.localize_titles(locale_titles),
+                        'downloadUrl': banner_url,
+                        'thumbnailUrl': icon_url,
+                        'price': theme_info.get('prize', ''),
+                        'productId': theme_info.get('paidID', '')}
+                    theme_list.append(theme_dict)
         return theme_list
 
     def get_themefolder(self, folder_ids, server, isfree, size=Image.Iph4_5s):
-        ThemeFolder = classing_model('themefolder')
         folder_list = []
+        if not folder_ids:
+            return folder_list
+        ThemeFolder = classing_model('themefolder')
         folders = ThemeFolder.find(
             self.appname,
             cond={'id': {'$in': folder_ids}, 'isfree': isfree, 'size': size},
             fields={'_id': 0}, toarray=True)
         if not folders:
             return folder_list
-        for folder in folders:
-            themes = sorted(folder.get('theme'), key=lambda x: x['order'])
-            theme_ids = [t.get('id') for t in themes]
-            theme_infos = self.get_theme(
-                theme_ids, server=server, isfree=isfree)
-            icon_url = fetch_icon_url(self.appname, folder.get('icon'), server)
-            locale_titles = folder.get('themelocale')
-            folder_dict = {
-                'type': 'folder',
-                'folderId': folder.get('id'),
-                'name': folder.get('name'),
-                'titles': self.localize_titles(locale_titles),
-                'thumbnailUrl': icon_url,
-                'themes': theme_infos}
-            folder_list.append(folder_dict)
+        for folder_id in folder_ids:
+            for folder in folders:
+                if folder_id == folder.get('id'):
+                    themes = sorted(
+                        folder.get('theme'), key=lambda x: x['order'])
+                    theme_ids = [t.get('id') for t in themes]
+                    theme_infos = self.get_theme(
+                        theme_ids, server=server, isfree=isfree, size=size)
+                    icon_url = fetch_icon_url(
+                        self.appname, folder.get('icon'), server)
+                    locale_titles = folder.get('themelocale')
+                    folder_dict = {
+                        'type': 'folder',
+                        'folderId': folder.get('id'),
+                        'name': folder.get('name'),
+                        'titles': self.localize_titles(locale_titles),
+                        'thumbnailUrl': icon_url,
+                        'themes': theme_infos}
+                    folder_list.append(folder_dict)
         return folder_list
 
     def themepush_msg(self, modelname, item, server):
+        if not item.get('theme'):
+            self.check_success = False
+            self.msg = "no theme data found"
+            return self.check_success, self.msg, self.res_dict, self.pack_type
         theme_ids = sorted(item.get('theme'), key=lambda x: x['order'])
         theme_ids = [t.get('id') for t in theme_ids]
         folder_ids = []

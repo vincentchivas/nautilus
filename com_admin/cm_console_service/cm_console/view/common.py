@@ -3,6 +3,7 @@ import logging
 
 from cm_console.model.common import classing_model
 from cm_console.view.common_base import CommonBase
+from cm_console.view.check_data import check_save_dict
 
 from cm_console.utils.validate_params import get_valid_params
 from cm_console.utils.status import UploadStatus
@@ -76,7 +77,13 @@ def common_create(appname, modelname, temp_dict):
         except ParamError as e:
             return json_response_error(PARAM_ERROR, msg=e.msg)
     temp_dict['first_created'] = temp_dict['last_modified'] = now_timestamp()
+
+    #this is a factory function, to check some save data before insert if need
+    (check_success, msg) = check_save_dict(appname, modelname, temp_dict)
+    if not check_success:
+        return json_response_error(PARAM_ERROR, msg=msg)
     insert_id = Model_Name.insert(appname, temp_dict)
+
     temp_dict['id'] = insert_id
     # if the model has ref icon and rule, increase the reference
     inc_icon(appname, modelname, temp_dict)
@@ -125,6 +132,13 @@ def common_update(appname, modelname, temp_dict, item_id):
         temp_dict['release'] = UploadStatus.UNUPLOAD_LOCAL
     # find the old item before update, aim to track icon and rule
     old_item = Model_Name.find_one(appname, {'id': item_id}, {'_id': 0})
+
+    #this is a factory function, to check some save data before save if need
+    (check_success, msg) = check_save_dict(
+        appname, modelname, temp_dict, item_id)
+    if not check_success:
+        return json_response_error(PARAM_ERROR, msg=msg)
+
     Model_Name.update(appname, cond, temp_dict)
     temp_dict['id'] = item_id
     # if model has refered icon and rule

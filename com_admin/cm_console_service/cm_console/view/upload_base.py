@@ -140,6 +140,7 @@ def _del_data_ec2(appname, modelname, items):
 
 def _upload_local(appname, modelname, items):
     status = 0
+    out_msg = 'upload to local successfully'
     upload_success = []
     upload_failed = []
     for item in items:
@@ -148,12 +149,15 @@ def _upload_local(appname, modelname, items):
         if save_info[0]:
             upload_success.append(item_upload)
         else:
+            status = PACKAGE_DATA_ERROR
+            out_msg = save_info[1]
             upload_failed.append(item_upload)
-    return status, upload_success, upload_failed
+    return status, out_msg, upload_success, upload_failed
 
 
 def _upload_ec2(appname, modelname, items):
     status = 0
+    out_msg = 'upload to ec2 successfully'
     upload_success = []
     upload_failed = []
     for item in items:
@@ -169,8 +173,9 @@ def _upload_ec2(appname, modelname, items):
                 upload_success.append(item_upload)
             else:
                 status = PACKAGE_DATA_ERROR
+                out_msg = save_info[1]
                 upload_failed.append(item_upload)
-    return status, upload_success, upload_failed
+    return status, out_msg, upload_success, upload_failed
 
 
 def pack_save_data(req_dict):
