@@ -6,6 +6,7 @@ from cm_console.api import app
 # from cm_console.middleware import TestMiddleware
 import cm_console.api.commonAPI
 import cm_console.api.uploadAPI
+from cm_console.webfront.web_api import test
 
 
 if __name__ == "__main__":

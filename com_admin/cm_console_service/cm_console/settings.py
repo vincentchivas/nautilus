@@ -111,3 +111,4 @@ MODELS = json.load(f)
 
 # other configs
 MEDIA_ROOT = '/var/app/data/cm_console'
+TMPL_FOLDER = '/var/app/enabled/cm_console_service/cm_console/webfront/templates'

@@ -1,2 +1,8 @@
 global-include *.cfg *.xml *.jar
 graft scripts
+graft cm_console/webfront/templates
+graft cm_console/webfront/static/js
+graft cm_console/webfront/static/images
+graft cm_console/webfront/static/css
+graft cm_console/webfront/web_api
+graft cm_console/webfront/web_view

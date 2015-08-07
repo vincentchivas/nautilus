@@ -25,7 +25,7 @@ def check_url_params(func):
                 PARAM_ERROR, msg="appname error, check url")
 
         # check modelName args
-        modelName = kwargs.get("modelName")
+        modelName = kwargs.get("modelname")
         if modelName:
             if modelName not in MODELS:
                 return json_response_error(

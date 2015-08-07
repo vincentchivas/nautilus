@@ -1,2 +1,6 @@
 cometd-exam/*/overlays/
 cometd-exam/*/target/
+com_admin/conf/dev/dev.cfg
+com_admin/conf/deploy_settings.pyc
+com_admin/.ropeproject/*
+com_admin/*.pyc
