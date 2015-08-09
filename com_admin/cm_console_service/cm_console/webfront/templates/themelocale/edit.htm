@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<title>Example Page</title>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				//json data
+                $.ajax({
+                        url : '/console/themelocale/edit/' + {{model_id}},
+                        type : 'GET',
+                        dataType : 'json',
+                        contentType : 'application/json',
+                        success : function(data){
+                            if (data)
+                            {
+                                var status = data['status'];
+                                var msg = data['msg'];
+                                var content = data['data']
+                                if (status != 0)
+                                {
+                                alert(msg);
+                                }
+                                else{
+                                  $('#txt_name').val(content['name']);
+                                  $('#txt_locale').val(content['locale']);
+                                }
+                            }
+                            else
+                            {
+                                alert('post error');
+                            }
+                        },
+                        Error : function(error){
+                            alert(exception.toSring());
+                        }
+                    });
+                    
+			});
+
+		</script>
+		<!--
+		<script type="text/javascript">
+			$("#submit123").click(function() {
+				 //验证
+				 alert('??')
+            	if ($("#txt_name").val()=='' || $("#txt_locale").val()=='')
+            	{
+                	alert('请输入要计算的值');
+                	return false;
+            	}
+				$.post(
+					//api url
+					'console/themelocale/add',
+					//json data
+					{
+					"name":$('#txt_name').val(),
+					"locale":$('#txt_locale').val()
+					},
+					//call back function
+					function(theback)
+						{
+							alert(theback);
+						},
+					// callback type
+					"json"
+				);
+			});
+
+		</script>
+		-->
+		
+	</head>
+	<body>
+		<div id="form-data">
+			Name: <input type="text" id="txt_name" />
+			Locale: <input type="text" id="txt_locale" />
+		</div>
+
+	</body>
+</html>
+
+
