@@ -64,6 +64,9 @@ def common_model_add(appname, modelname):
      "data":{}}
     '''
     try:
+        print dir(request)
+        print request
+        print request.data
         req_dict = ArmoryJson.decode(request.data)
     except:
         return json_response_error(PARAM_ERROR, msg="json format error")

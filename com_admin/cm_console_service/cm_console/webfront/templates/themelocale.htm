@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script src="{{ url_for('static', filename='js/json2.js')}}"></script>
+		<title>Example Page</title>
+		<script type="text/javascript">
+			function sendjson(){
+				//验证
+            	if ($("#txt_name").val()=='' || $("#txt_locale").val()=='')
+            	{
+                	alert('name and locale required');
+                	return false;
+            	}
+				//json data
+				var  json_dict =  {
+					"name":$('#txt_name').val(),
+                    "locale":$('#txt_locale').val()};
+                var jsonStr = JSON.stringify(json_dict);
+                $.ajax({
+                        url : '/console/themelocale/add',
+                        type : 'POST',
+                        data : jsonStr,
+                        dataType : 'json',
+                        contentType : 'application/json',
+                        success : function(data){
+                            if (data)
+                            {
+                                var status = data['status'];
+                                var msg = data['msg'];
+                                if (status != 0)
+                                {
+                                alert(msg);
+                                } 
+                            }
+                            else
+                            {
+                                alert('post error');
+                            }
+                        },
+                        Error : function(error){
+                            alert(exception.toSring());
+                        }
+                    });
+                    
+			}
+
+		</script>
+		<!--
+		<script type="text/javascript">
+			$("#submit123").click(function() {
+				 //验证
+				 alert('??')
+            	if ($("#txt_name").val()=='' || $("#txt_locale").val()=='')
+            	{
+                	alert('请输入要计算的值');
+                	return false;
+            	}
+				$.post(
+					//api url
+					'console/themelocale/add',
+					//json data
+					{
+					"name":$('#txt_name').val(),
+					"locale":$('#txt_locale').val()
+					},
+					//call back function
+					function(theback)
+						{
+							alert(theback);
+						},
+					// callback type
+					"json"
+				);
+			});
+
+		</script>
+		-->
+		
+	</head>
+	<body>
+		<div id="form-data">
+			Name: <input type="text" id="txt_name" />
+			Locale: <input type="text" id="txt_locale" />
+    		 <button id="submit123" onclick="sendjson()">Send</button>  
+		</div>
+
+	</body>
+</html>
+
+
